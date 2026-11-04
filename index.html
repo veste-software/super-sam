@@ -1,4 +1,4 @@
-<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Super Sam</title><meta name="description" content="Super Sam: a cyberpunk ASCII run-and-gun platformer. Fly, grapple and blast through four sectors."><meta name="robots" content="noindex,nofollow"><link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'%3E%3Crect width='16' height='16' fill='%2302030a'/%3E%3Cpath d='M9 1 3 9h4l-1 6 7-9H9z' fill='%23ffd83d'/%3E%3C/svg%3E"><link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin><link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@700&display=swap" rel="stylesheet"><style>
+<!doctype html><html lang="de"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Super Sam</title><meta name="description" content="Super Sam: ein Cyberpunk-ASCII-Jump-and-Run mit Ballerei. Flieg, schwing am Enterhaken und kämpf dich durch vier Sektoren."><meta name="robots" content="noindex,nofollow"><link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'%3E%3Crect width='16' height='16' fill='%2302030a'/%3E%3Cpath d='M9 1 3 9h4l-1 6 7-9H9z' fill='%23ffd83d'/%3E%3C/svg%3E"><link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin><link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@700&display=swap" rel="stylesheet"><style>
 /* Layout: one full-viewport canvas with CSS scanline + vignette overlays. A deliberate single-theme neon-dark page. */
 :root{--bg:#02030a;--ink:#eaf6ff;--scan:rgba(0,0,0,.16);--vig:rgba(0,0,6,.55);color-scheme:dark}
 html,body{height:100%;margin:0;background:var(--bg);color:var(--ink);overflow:hidden}
@@ -343,7 +343,7 @@ class Level {
     this.sty = new Uint8Array(n); this.bid = new Uint8Array(n);
     this.ents = []; this.pks = []; this.cps = []; this.zones = []; this.movers = []; this.doors = []; this.decor = []; this.arenas = [];
     this.start = { x: 8, y: 20 }; this.exit = null; this.deathY = H + 6; this.nb = 1;
-    this.camBox = null; this.intro = { title: 'STAGE', sub: '', lines: [] };
+    this.camBox = null; this.intro = { title: 'SEKTOR', sub: '', lines: [] };
     this.wet = null; this.wind = 0; this.lasers = []; this.blades = []; this.camRef = 50;
   }
   idx(x, y) { return y * this.W + x; }
@@ -389,7 +389,7 @@ class Level {
   /* entities */
   en(k, x, y, o) { this.ents.push(Object.assign({ k, x, y }, o || {})); }
   pk(k, x, y) { this.pks.push({ k, x, y }); }
-  cp(x, y, label) { this.cps.push({ x, y, label: label || 'CHECKPOINT', on: false }); }
+  cp(x, y, label) { this.cps.push({ x, y, label: label || 'KONTROLLPUNKT', on: false }); }
   zone(x, y, w, h, o) { this.zones.push(Object.assign({ x, y, w, h, done: false }, o)); }
   dec(k, x, y, o) { const d = Object.assign({ k, x, y }, o || {}); this.decor.push(d); return d; }
   door(x, y, h, o) { const d = Object.assign({ x, y, h, w: 2, open: 0, target: 0, id: this.doors.length }, o || {}); this.doors.push(d); doorTiles(this, d); return d; }
@@ -841,8 +841,8 @@ function updPlayer(dt) {
 }
 
 const WEAPONS = [
-  { name: 'PULSE', cd: .1, spd: 88, life: .85, col: 'cyan' },
-  { name: 'SCATTER', cd: .6, spd: 74, life: .32, col: 'amber' },
+  { name: 'PULS', cd: .1, spd: 88, life: .85, col: 'cyan' },
+  { name: 'STREU', cd: .6, spd: 74, life: .32, col: 'amber' },
   { name: 'RAIL', cd: .95, spd: 0, life: 0, col: 'mag' },
 ];
 function shootWeapon() {
@@ -1012,7 +1012,7 @@ function spawnBoss(x, y, arena) {
 function aiBoss(e, dt, dxp, dyp, dist) {
   const B = e.bounds, p = S.P; e.rot += dt;
   const frac = e.hp / e.maxhp; const ph = frac > .66 ? 1 : frac > .33 ? 2 : 3;
-  if (ph !== e.ph) { e.ph = ph; e.fire = 2.5; e.tele = 0; e.laser = null; banner('ARCHON // PHASE ' + ph, ph === 2 ? 'LASER ARRAY ONLINE' : 'CORE EXPOSED. OVERCLOCKING.', C.red); shake(1.2); ring(e.x, e.y - 5, 30, 1, PAL[C.red]); sfx('bigboom', .8); glitchAmt = 1.2; S.flash = .4; S.flashCol = '#ff3b4d'; if (ph === 3) { S.phase3 = true; } }
+  if (ph !== e.ph) { e.ph = ph; e.fire = 2.5; e.tele = 0; e.laser = null; banner('ARCHON // PHASE ' + ph, ph === 2 ? 'LASERFELD AKTIV' : 'KERN FREIGELEGT. ÜBERTAKTUNG.', C.red); shake(1.2); ring(e.x, e.y - 5, 30, 1, PAL[C.red]); sfx('bigboom', .8); glitchAmt = 1.2; S.flash = .4; S.flashCol = '#ff3b4d'; if (ph === 3) { S.phase3 = true; } }
   if (e.intro > 0) { e.intro -= dt; e.noHit = true; e.y = lerp(e.y, e.cy, Math.min(1, 2 * dt)); if (e.intro <= 0) e.noHit = false; return; }
   // hover path
   const spd = ph === 1 ? .55 : ph === 2 ? .75 : 1.0;
@@ -1110,14 +1110,14 @@ function updPickups(dt) {
     if (d < 2.2) {
       if (k.k === 'hp') { if (p.hp >= 100) continue; p.hp = Math.min(100, p.hp + EASY.heal); sfx('heal'); ring(p.x, p.y - 1.5, 6, .5, PAL[C.mint]); for (let i = 0; i < 10; i++) pt(p.x + rr(-1, 1), p.y - rr(0, 3), 0, rr(-14, -4), rr(.4, .9), ['+'], PAL[C.mint], {}); k.got = true; }
       else if (k.k === 'chip') { S.chips++; S.score += 25; sfx('chip'); k.got = true; sparks(k.x, k.y, 4, 0, -1, PAL[C.yel], 20); }
-      else if (k.k === 'w_scatter') { p.wpns[1] = true; p.wpn = 1; sfx('pick'); k.got = true; banner('SCATTER-9 ACQUIRED', 'KEY 2  //  SHORT RANGE, HEAVY IMPACT', C.amber); say('ECHO', 'Scatter rounds. Close range, wide spread. The recoil will launch you. Use that.'); ring(p.x, p.y - 1.5, 12, .7, PAL[C.amber]); }
-      else if (k.k === 'w_rail') { p.wpns[2] = true; p.wpn = 2; sfx('pick'); k.got = true; banner('RAILCASTER ACQUIRED', 'KEY 3  //  PIERCES EVERYTHING IN LINE', C.mag); say('ECHO', 'Railcaster. One shot, straight through armor and anything behind it.'); ring(p.x, p.y - 1.5, 12, .7, PAL[C.mag]); }
+      else if (k.k === 'w_scatter') { p.wpns[1] = true; p.wpn = 1; sfx('pick'); k.got = true; banner('SCATTER-9 ERHALTEN', 'TASTE 2  //  KURZE REICHWEITE, HARTER AUFPRALL', C.amber); say('ECHO', 'Streumunition. Kurze Reichweite, breite Streuung. Der Rückstoß schleudert dich weg. Nutz das.'); ring(p.x, p.y - 1.5, 12, .7, PAL[C.amber]); }
+      else if (k.k === 'w_rail') { p.wpns[2] = true; p.wpn = 2; sfx('pick'); k.got = true; banner('RAILCASTER ERHALTEN', 'TASTE 3  //  DURCHSCHLÄGT ALLES IN DER LINIE', C.mag); say('ECHO', 'Railcaster. Ein Schuss, mitten durch Panzerung und alles dahinter.'); ring(p.x, p.y - 1.5, 12, .7, PAL[C.mag]); }
     }
   }
   S.pks = S.pks.filter(k => !k.got);
   for (const c of S.L.cps) {
     if (!c.on && !p.dead && Math.abs(p.x - c.x) < 3 && Math.abs(p.y - c.y) < 5) {
-      c.on = true; S.respawn = { x: c.x, y: c.y }; p.hp = 100; sfx('cp'); banner(c.label, 'SIGNAL SYNCED // INTEGRITY RESTORED', C.mint); ring(c.x, c.y - 1, 14, .9, PAL[C.mint]); ring(c.x, c.y - 1, 8, .6, PAL[C.white]);
+      c.on = true; S.respawn = { x: c.x, y: c.y }; p.hp = 100; sfx('cp'); banner(c.label, 'SIGNAL SYNCHRON // INTEGRITÄT RESTAURIERT', C.mint); ring(c.x, c.y - 1, 14, .9, PAL[C.mint]); ring(c.x, c.y - 1, 8, .6, PAL[C.white]);
       for (let i = 0; i < 24; i++) pt(c.x + rr(-2, 2), c.y - rr(0, 3), rr(-4, 4), rr(-20, -6), rr(.6, 1.4), ['0', '1', '+'], PAL[C.mint], { g: -4 });
     }
   }
@@ -1180,9 +1180,9 @@ function updZones(dt) {
   }
   // arenas
   for (const a of L.arenas) {
-    if (a.state === 0 && p.x > a.x + 3 && p.x < a.x + a.w - 3 && p.y > a.y && p.y < a.y + a.h + 1) { a.state = 1; a.wave = 0; a.t = .8; a.alive = 0; a.doors.forEach(id => L.doors[id].target = 0); banner(a.title || 'LOCKDOWN', 'ELIMINATE ALL HOSTILES', C.red); sfx('warn'); sfx('warn'); MUS.inten = 1; shake(.4); }
+    if (a.state === 0 && p.x > a.x + 3 && p.x < a.x + a.w - 3 && p.y > a.y && p.y < a.y + a.h + 1) { a.state = 1; a.wave = 0; a.t = .8; a.alive = 0; a.doors.forEach(id => L.doors[id].target = 0); banner(a.title || 'ABRIEGELUNG', 'ALLE FEINDE ELIMINIEREN', C.red); sfx('warn'); sfx('warn'); MUS.inten = 1; shake(.4); }
     else if (a.state === 1) {
-      if (a.alive <= 0) { a.t -= dt; if (a.t <= 0) { if (a.wave >= a.waves.length) { a.state = 2; a.doors.forEach(id => L.doors[id].target = 1); banner('AREA SECURED', 'DOORS UNLOCKED', C.mint); MUS.inten = 0; S.pks.push({ k: 'hp', x: a.x + a.w / 2, y: a.y + a.h - 3, t: 0 }); sfx('heal'); } else { const w = a.waves[a.wave++]; a.t = 99; for (const sp of w) { const e = spawnEnemy(Object.assign({}, sp[3] || {}, { k: sp[0], x: sp[1], y: sp[2], arena: a, range: 90 })); if (e) { a.alive++; ring(e.x, e.y - e.h / 2, 6, .5, PAL[C.mag]); for (let i = 0; i < 10; i++) pt(e.x + rr(-1, 1), e.y - rr(0, e.h), rr(-6, 6), rr(-16, -2), rr(.4, .8), ['0', '1', '#'], PAL[C.mag], {}); } } sfx('boot', .6); glitchAmt = .6; } } }
+      if (a.alive <= 0) { a.t -= dt; if (a.t <= 0) { if (a.wave >= a.waves.length) { a.state = 2; a.doors.forEach(id => L.doors[id].target = 1); banner('BEREICH GESICHERT', 'TÜREN ENTRIEGELT', C.mint); MUS.inten = 0; S.pks.push({ k: 'hp', x: a.x + a.w / 2, y: a.y + a.h - 3, t: 0 }); sfx('heal'); } else { const w = a.waves[a.wave++]; a.t = 99; for (const sp of w) { const e = spawnEnemy(Object.assign({}, sp[3] || {}, { k: sp[0], x: sp[1], y: sp[2], arena: a, range: 90 })); if (e) { a.alive++; ring(e.x, e.y - e.h / 2, 6, .5, PAL[C.mag]); for (let i = 0; i < 10; i++) pt(e.x + rr(-1, 1), e.y - rr(0, e.h), rr(-6, 6), rr(-16, -2), rr(.4, .8), ['0', '1', '#'], PAL[C.mag], {}); } } sfx('boot', .6); glitchAmt = .6; } } }
       else a.t = .9;
     }
   }
@@ -1246,7 +1246,7 @@ function makeBolt() {
    sky, parallax skylines, weather, big font
    ========================================================================= */
 const SKY = { th: null, stars: [], moon: null, layers: [], clouds: [], grad: null, camRef: 50, kana: false, signs: [] };
-const SIGNS_ASCII = ['NEON', 'BAR', '24H', 'RAMEN', 'CYBER', 'HOTEL', 'DATA', 'PHARMA', 'NOODLE', 'ARCADE', 'KAIJU', 'CHROME', 'SAKE', 'VOID'];
+const SIGNS_ASCII = ['NEON', 'BAR', '24H', 'RAMEN', 'CYBER', 'HOTEL', 'DATEN', 'PHARMA', 'NUDEL', 'ARCADE', 'KAIJU', 'CHROM', 'SAKE', 'VOID'];
 const SIGNS_KANA = ['ネオン', '電脳', '酒場', '夜市', '麺屋', '薬局', '危険', '未来', 'ラーメン', '龍', '刀', '夢'];
 function isWide(c) { return c.charCodeAt(0) >= 0x2E80; }
 /* draw mixed ascii / full-width text at device px; returns advance in cells */
@@ -1357,7 +1357,7 @@ function makeLayer(d, th) {
 function hexA(h, a) { const c = hex2rgb(h); return `rgba(${c[0]},${c[1]},${c[2]},${a})`; }
 
 const BLIMP = ['        ▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄        ', '    ▄▟██▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀██▙▄    ', '  ▟█▀                                  ▀█▙  ', ' ▐█▌                                    ▐█▌ ', '  ▜█▄                                  ▄█▛  ', '    ▀▜██▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄██▛▀    ', '        ▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀        ', '              ▀▀▌▐▀▀▀▀▀▀▀▀▌▐▀▀              '];
-const AD_TEXT = '   MERIDIAN :: TOMORROW, SECURED   ///   NEURAL LACE 40% OFF   ///   STAY IN YOUR LANE, CITIZEN   ///   ';
+const AD_TEXT = '   MERIDIAN :: MORGEN, GESICHERT   ///   NEURAL LACE 40% RABATT   ///   BLEIB IN DEINER SPUR, BÜRGER   ///   ';
 function drawBlimp(t, camX, camY) {
   const wI = BLIMP[0].length, x0 = (((t * 2.4 - camX * .09) % (COLS + wI + 40)) + (COLS + wI + 40)) % (COLS + wI + 40) - wI - 20, y0 = ROWS * .13 - (camY - SKY.camRef) * .05;
   const a = .85;
@@ -1941,26 +1941,26 @@ function drawHud(t) {
   const hpf = clamp(p.hp / 100, 0, 1), hcol = hpf > .55 ? '#5dffb0' : hpf > .28 ? '#ffb347' : '#ff3b4d';
   panel(2, 1, 41, 6, '#19f0ff', 'SUPER SAM');
   { const bu = Math.max(2, Math.floor(CH * .25)); drawSamBadge(Math.round(3.4 * CW), Math.round(2 * CH + (4 * CH - 12 * bu) / 2), bu, S.t); }
-  txtPx('HP', Math.round(11 * CW), Math.round(2 * CH), '#8a96c4'); const bw = 20, fill = Math.round(bw * hpf);
+  txtPx('LP', Math.round(11 * CW), Math.round(2 * CH), '#8a96c4'); const bw = 20, fill = Math.round(bw * hpf);
   for (let i = 0; i < bw; i++) gl(i < fill ? '█' : '░', Math.round((14 + i) * CW), Math.round(2 * CH), i < fill ? hcol : '#3d4676');
   txtPx(String(Math.max(0, Math.round(p.hp))).padStart(3, ' '), Math.round(35 * CW), Math.round(2 * CH), hcol);
   txtPx('DASH', Math.round(11 * CW), Math.round(3 * CH), '#8a96c4'); const dk = p.dashCd > 0 ? 1 - p.dashCd / EASY.dashCd : 1; for (let i = 0; i < 6; i++) gl('▰', Math.round((16 + i) * CW), Math.round(3 * CH), i < dk * 6 ? '#19f0ff' : '#2a3470');
-  txtPx('◊ ' + String(S.chips).padStart(3, '0'), Math.round(25 * CW), Math.round(3 * CH), '#ffe45e'); txtPx('KILLS ' + String(S.kills).padStart(2, '0'), Math.round(33 * CW), Math.round(3 * CH), '#8a96c4');
+  txtPx('◊ ' + String(S.chips).padStart(3, '0'), Math.round(24 * CW), Math.round(3 * CH), '#ffe45e'); txtPx('GEGNER ' + String(S.kills).padStart(2, '0'), Math.round(31 * CW), Math.round(3 * CH), '#8a96c4');
   let wx = 11; for (let i = 0; i < 3; i++) { if (!p.wpns[i]) continue; const on = p.wpn === i, c = on ? ['#19f0ff', '#ffb347', '#ff2fb9'][i] : '#3d4676', lab = (i + 1) + ':' + WEAPONS[i].name; txtPx((on ? '[' : ' ') + lab + (on ? ']' : ' '), Math.round(wx * CW), Math.round(4 * CH), c); wx += lab.length + 3; }
   { // flight fuel
-    const low = p.fuel < .2, blink = low && Math.floor(S.t * 6) % 2, col = p.fly ? '#ffe45e' : low ? '#ff3b4d' : '#19f0ff', n = 16, on = Math.round(n * p.fuel);
-    txtPx('FLY', Math.round(11 * CW), Math.round(5 * CH), p.fly ? '#ffe45e' : '#8a96c4');
-    for (let i = 0; i < n; i++) gl(i < on ? '▰' : '▱', Math.round((15 + i) * CW), Math.round(5 * CH), i < on ? (blink ? '#ffffff' : col) : '#2a3470');
-    txtPx(p.fly ? '[F] LAND' : p.fuel > .06 ? '[F] FLY' : 'REFUEL', Math.round(32 * CW), Math.round(5 * CH), p.fly ? '#ffe45e' : p.fuel > .06 ? '#5dffb0' : '#ff3b4d');
-    if (p.flyHint > 0) txtC('FUEL EMPTY  -  LAND TO REFUEL', COLS / 2, 9, '#ff3b4d', Math.min(1, p.flyHint));
+    const low = p.fuel < .2, blink = low && Math.floor(S.t * 6) % 2, col = p.fly ? '#ffe45e' : low ? '#ff3b4d' : '#19f0ff', n = 14, on = Math.round(n * p.fuel);
+    txtPx('FLUG', Math.round(11 * CW), Math.round(5 * CH), p.fly ? '#ffe45e' : '#8a96c4');
+    for (let i = 0; i < n; i++) gl(i < on ? '▰' : '▱', Math.round((16 + i) * CW), Math.round(5 * CH), i < on ? (blink ? '#ffffff' : col) : '#2a3470');
+    txtPx(p.fly ? '[F] LANDEN' : p.fuel > .06 ? '[F] FLIEGEN' : 'TANKEN', Math.round(31 * CW), Math.round(5 * CH), p.fly ? '#ffe45e' : p.fuel > .06 ? '#5dffb0' : '#ff3b4d');
+    if (p.flyHint > 0) txtC('TANK LEER  -  ZUM AUFTANKEN LANDEN', COLS / 2, 9, '#ff3b4d', Math.min(1, p.flyHint));
   }
   // top right
-  const sc = 'SCORE ' + String(S.score).padStart(6, '0'); panel(COLS - 26, 1, 24, 4, '#ff2fb9', L.intro.title);
-  txtPx(sc, Math.round((COLS - 24) * CW), Math.round(2 * CH), '#eaf6ff'); const tm = S.stageT | 0; txtPx('TIME  ' + String(tm / 60 | 0).padStart(2, '0') + ':' + String(tm % 60).padStart(2, '0'), Math.round((COLS - 24) * CW), Math.round(3 * CH), '#8a96c4');
+  const sc = 'PUNKTE ' + String(S.score).padStart(6, '0'); panel(COLS - 26, 1, 24, 4, '#ff2fb9', L.intro.title);
+  txtPx(sc, Math.round((COLS - 24) * CW), Math.round(2 * CH), '#eaf6ff'); const tm = S.stageT | 0; txtPx('ZEIT   ' + String(tm / 60 | 0).padStart(2, '0') + ':' + String(tm % 60).padStart(2, '0'), Math.round((COLS - 24) * CW), Math.round(3 * CH), '#8a96c4');
   // boss bar: top centre, between the two panels (drops under them on narrow screens)
   if (S.boss && S.boss.intro <= 0.5) {
     const b = S.boss, free = COLS - 90, wide = free >= 20, bw2 = wide ? Math.min(60, free) : Math.min(60, COLS - 8), by = wide ? 2.6 : 6.8, f = Math.round(bw2 * clamp(b.hp / b.maxhp, 0, 1)), x0 = Math.round((COLS - bw2) / 2);
-    txtC(wide && bw2 < 54 ? 'A R C H O N' : 'A R C H O N   //   W A R D E N   O F   T H E   S P I R E', COLS / 2, by - 1.3, '#ff3b4d');
+    txtC(wide && bw2 < 54 ? 'A R C H O N' : 'A R C H O N   //   W Ä C H T E R   D E R   S P I T Z E', COLS / 2, by - 1.3, '#ff3b4d');
     for (let i = 0; i < bw2; i++) gl(i < f ? '█' : '░', Math.round((x0 + i) * CW), Math.round(by * CH), i < f ? (b.ph === 3 ? '#ff5a2d' : '#ff3b4d') : '#3a1a30');
     gl('▐', Math.round((x0 - 1) * CW), Math.round(by * CH), '#ff3b4d'); gl('▌', Math.round((x0 + bw2) * CW), Math.round(by * CH), '#ff3b4d');
   }
@@ -1968,7 +1968,7 @@ function drawHud(t) {
   if (S.comms.length) {
     const c = S.comms[0], bwid = Math.min(78, COLS - 8), lines = wrapText(c.text, bwid - 10), shown = Math.floor(c.t * 62), x0 = Math.round((COLS - bwid) / 2), y0 = ROWS - 4 - lines.length - 1;
     const slide = Math.min(1, c.t * 5, (c.dur - c.t) * 5); g.globalAlpha = Math.max(0, slide);
-    panel(x0, y0, bwid, lines.length + 3, '#5dffb0', c.who + ' // SECURE LINE', .82);
+    panel(x0, y0, bwid, lines.length + 3, '#5dffb0', c.who + ' // SICHERE LEITUNG', .82);
     // portrait
     const blink = Math.floor(c.t * 3) % 7 === 0; const face = [' ▄▄▄ ', '▐' + (blink ? '─ ─' : '◙ ◙') + '▌', ' ▀▀▀ ']; for (let j = 0; j < 3; j++) txtPx(face[j], Math.round((x0 + 2) * CW), Math.round((y0 + 1 + j) * CH), '#5dffb0');
     let rem = shown; for (let j = 0; j < lines.length; j++) { const ln = lines[j].slice(0, Math.max(0, rem)); rem -= lines[j].length + 1; txtPx(ln, Math.round((x0 + 9) * CW), Math.round((y0 + 1 + j) * CH), '#eaf6ff'); }
@@ -2255,7 +2255,7 @@ function drawSamBadge(px, py, u, t) {
 /* =========================================================================
    shared level builders + STAGE 1 :: RAINLINE
    ========================================================================= */
-const SIGNPOOL = ['NEURAL LACE', 'KAIJU-COLA', 'OMNI-NOODLE', 'HOTEL 9', 'MERIDIAN', 'SAKE BAR', 'CHROME 24H', 'VOID CLUB', 'SYNTH-MEAT', 'GHOST SHELL'];
+const SIGNPOOL = ['NEURAL LACE', 'KAIJU-COLA', 'OMNI-NOODLE', 'HOTEL 9', 'MERIDIAN', 'SAKE-BAR', 'CHROM 24H', 'VOID CLUB', 'SYNTH-FLEISCH', 'GHOST SHELL'];
 const SIGNKANA = ['ネオン街', '電脳', '酒場', '夜市', '麺屋', '薬局', '危険', '未来都市'];
 function signText(R) { const k = hasGlyph('ネ') && hasGlyph('電'); return k && R() < .45 ? R.pick(SIGNKANA) : R.pick(SIGNPOOL); }
 const NEON = ['#19f0ff', '#ff2fb9', '#ffb347', '#9d5cff', '#5dffb0'];
@@ -2313,7 +2313,7 @@ function rack(L, x, y, h) { const rows = ['┌──┐']; for (let i = 0; i < h
    ========================================================================= */
 function buildStage1() {
   const th = THEMES.rain, R = RNG(101), Hh = 126, L = new Level(1, 1060, Hh, th); L.deathY = 114; L.camRef = 54;
-  L.intro = { title: 'RAINLINE', sub: 'SPRAWL DISTRICT 7 // 02:47 AM // RAIN 94%', lines: ['ECHO: Meridian pays for the whole skyline, Sam. Take it back one rooftop at a time.', 'ECHO: And you can FLY, Super Sam! Press F to take off, steer with A D W S. The tank refills when you land.'] };
+  L.intro = { title: 'RAINLINE', sub: 'SPRAWL-BEZIRK 7 // 02:47 UHR // REGEN 94%', lines: ['ECHO: Meridian bezahlt die ganze Skyline, Sam. Hol sie dir zurück, Dach für Dach.', 'ECHO: Und du kannst FLIEGEN, Super Sam! Drück F zum Abheben, lenke mit A D W S. Der Tank füllt sich, wenn du landest.'] };
   let X = 0; const roof = (w, top, sty) => { const x0 = X; L.mass(x0, top, w, sty || ST.ROOF); X += w; return { x0, x1: x0 + w, top, w }; }, gap = g => { X += g; };
   const link = (a, b, sag) => { if (b.x0 - a.x1 <= 16) cable(L, a.x1 - 2, a.top - 7, b.x0 + 2, b.top - 7, sag === undefined ? 3 : sag); };
   const arrows = (r) => L.dec('sign', r.x1 - 8, r.top - 5, { text: '>>>', col: '#ffb347', flick: false });
@@ -2322,42 +2322,42 @@ function buildStage1() {
   const A = roof(60, 70); L.start = { x: 10, y: 70 };
   decorRoof(L, R, A.x0, A.w, A.top, { skip: [[0, 18]], dens: .9 });
   L.dec('sign', 22, 58, { text: 'RAINLINE', col: '#19f0ff', frame: true, flick: false });
-  L.hint(A.x0 + 3, 8, 62, 10, 'ECHO', 'Sam, you are live over the sprawl. A and D to run, SPACE to jump. Hold it for height.');
-  L.hint(A.x0 + 32, 8, 62, 10, 'ECHO', 'Mouse aims. Left click fires. Right click throws the grapple wire. Hold it to stay hooked.');
-  L.hint(A.x0 + 50, 6, 62, 10, 'ECHO', 'Gap ahead. Run and jump. Do not look down.');
+  L.hint(A.x0 + 3, 8, 62, 10, 'ECHO', 'Sam, du bist live über dem Sprawl. A und D zum Laufen, LEERTASTE zum Springen. Halt sie gedrückt für mehr Höhe.');
+  L.hint(A.x0 + 32, 8, 62, 10, 'ECHO', 'Die Maus zielt. Linksklick feuert. Rechtsklick wirft das Greifseil. Halte die Taste, um dich festzuhalten.');
+  L.hint(A.x0 + 50, 6, 62, 10, 'ECHO', 'Lücke voraus. Anlauf und Sprung. Schau nicht nach unten.');
   arrows(A);
   gap(8); const B = roof(30, 70); link(A, B);
   L.en('drone', B.x0 + 20, 57); decorRoof(L, R, B.x0, B.w, B.top, { dens: .6 });
-  L.hint(B.x0, 8, 62, 10, 'ECHO', 'Corp drone ahead. Aim with the mouse, left click to shoot it down.');
+  L.hint(B.x0, 8, 62, 10, 'ECHO', 'Konzerndrohne voraus. Ziel mit der Maus, Linksklick schießt sie ab.');
   chips(L, A.x1 - 3, 66, B.x0 + 4, 66, 6, 6);
   gap(10); const C1 = roof(26, 66); link(B, C1);
   L.en('grunt', C1.x0 + 16, 66); L.pk('hp', C1.x0 + 8, 64); decorRoof(L, R, C1.x0, C1.w, C1.top, { dens: .5, padL: 10 });
-  L.hint(C1.x0, 6, 58, 10, 'ECHO', 'Armed patrol. They shoot back. Keep moving, strafe and shoot.');
+  L.hint(C1.x0, 6, 58, 10, 'ECHO', 'Bewaffnete Patrouille. Die schießen zurück. Bleib in Bewegung, weich aus und schieß.');
   chips(L, B.x1 - 3, 66, C1.x0 + 4, 62, 5, 6);
-  gap(22); const D = roof(32, 70); L.cp(D.x0 + 5, 70, 'CHECKPOINT 01');
-  L.hint(C1.x1 - 14, 12, 58, 12, 'ECHO', 'Too wide to jump clean. Jump, then tap SHIFT in the air to dash across.');
+  gap(22); const D = roof(32, 70); L.cp(D.x0 + 5, 70, 'KONTROLLPUNKT 01');
+  L.hint(C1.x1 - 14, 12, 58, 12, 'ECHO', 'Zu breit für einen sauberen Sprung. Spring und drück in der Luft SHIFT, um hinüberzudashen.');
   chips(L, C1.x1 - 2, 62, D.x0 + 3, 66, 7, 5); arrows(C1);
   L.en('drone', D.x0 - 10, 56, { home: { x: D.x0 - 10, y: 56 } });
   decorRoof(L, R, D.x0, D.w, D.top, { dens: .7, padL: 12 });
   /* gantry gap */
   gap(38); const E = roof(36, 68);
   gantry(L, D.x1 - 5, E.x0 + 5, D.top - 17, [D.x1 - 9, E.x0 + 8], D.top);
-  L.hint(D.x1 - 22, 16, 60, 12, 'ECHO', 'Overhead rail. Aim at the girder, hold right click to throw the wire, then swing. Jump to release with a boost.');
+  L.hint(D.x1 - 22, 16, 60, 12, 'ECHO', 'Schiene über dir. Ziel auf den Träger, halte Rechtsklick für das Seil und schwing. Mit einem Sprung lässt du mit Schwung los.');
   chips(L, D.x1 + 1, D.top - 8, E.x0 + 3, E.top - 10, 8, 8);
   decorRoof(L, R, E.x0, E.w, E.top, { dens: .6, padL: 10 }); L.en('grunt', E.x0 + 22, 68);
   /* tower shaft */
   const T1 = { x0: X, w: 16 }; L.mass(X, 33, 16, ST.GLASS); L.clear(X, 62, 16, 6); L.bfill(X, 62, 16, 6, 0, 0, C.blk);
   for (let i = 0; i < 16; i++) L.bset(X + i, 62, i % 4 === 0 ? '▀' : '▄', C.cyanDD, C.blk); L.bset(X + 1, 62, '▛', C.cyanD, C.blk);
   for (let j = 62; j < 68; j++) { L.bset(X + 8, j, '░', C.cyanDD, C.blk); }
-  L.dec('sign', X + 3, 60, { text: 'STAIRS 1F', col: '#ffb347', flick: true, front: true });
+  L.dec('sign', X + 3, 60, { text: 'TREPPE 1. OG', col: '#ffb347', flick: true, front: true });
   X += 16; const sx = X; L.mass(sx, 68, 8, ST.METAL);
   const T2 = { x0: sx + 8, w: 26 }; L.mass(T2.x0, 33, 26, ST.GLASS);
   for (const y of [63, 53, 43]) { L.plat(sx + 5, y, 3, '▔', C.cyan); for (let i = 0; i < 3; i++) L.set(sx + 5 + i, y + 1, undefined, '▀', C.cyanDD); }
   for (const y of [58, 48, 38]) { L.plat(sx, y, 3, '▔', C.mag); for (let i = 0; i < 3; i++) L.set(sx + i, y + 1, undefined, '▀', C.magDD); }
   L.dec('lamp', sx + 4, 34, { w: 7, len: 34, col: '#19f0ff' }); L.dec('steam', sx + 4, 67, { rate: 6 });
-  L.hint(sx - 14, 10, 60, 12, 'ECHO', 'Tower shaft. Climb the ledges, or kick off the walls: press jump while sliding.');
+  L.hint(sx - 14, 10, 60, 12, 'ECHO', 'Turmschacht. Klettere über die Absätze oder spring von den Wänden ab: Sprung drücken, während du rutschst.');
   L.en('drone', sx + 4, 50, { home: { x: sx + 4, y: 50 } });
-  X = T2.x0 + 26; const T2r = { x0: T2.x0, x1: X, top: 33, w: 26 }; L.cp(T2.x0 + 8, 33, 'CHECKPOINT 02'); L.en('turret', T2.x0 + 20, 33);
+  X = T2.x0 + 26; const T2r = { x0: T2.x0, x1: X, top: 33, w: 26 }; L.cp(T2.x0 + 8, 33, 'KONTROLLPUNKT 02'); L.en('turret', T2.x0 + 20, 33);
   PROPS.antenna(L, T2.x0 + 3, 33); PROPS.billboard(L, T2.x0 + 12, 33, R); L.pk('hp', T2.x0 + 14, 31);
   /* descent */
   gap(10); const R1 = roof(24, 40); link(T2r, R1); decorRoof(L, R, R1.x0, R1.w, 40, { dens: .6 }); L.en('drone', R1.x0 + 12, 28);
@@ -2365,7 +2365,7 @@ function buildStage1() {
   chips(L, R1.x1 - 2, 38, R2.x0 + 3, 46, 5, 4);
   gap(11); const R3 = roof(26, 56); link(R2, R3); decorRoof(L, R, R3.x0, R3.w, 56, { dens: .6 }); L.en('turret', R3.x0 + 16, 56); L.en('grunt', R3.x0 + 8, 56);
   chips(L, R2.x1 - 2, 46, R3.x0 + 3, 54, 5, 4);
-  gap(12); const R4 = roof(34, 62); link(R3, R4); L.cp(R4.x0 + 6, 62, 'CHECKPOINT 03'); L.pk('hp', R4.x0 + 12, 60); decorRoof(L, R, R4.x0, R4.w - 14, 62, { dens: .5, padR: 4 });
+  gap(12); const R4 = roof(34, 62); link(R3, R4); L.cp(R4.x0 + 6, 62, 'KONTROLLPUNKT 03'); L.pk('hp', R4.x0 + 12, 60); decorRoof(L, R, R4.x0, R4.w - 14, 62, { dens: .5, padR: 4 });
   chips(L, R3.x1 - 2, 54, R4.x0 + 3, 60, 5, 4);
   /* train */
   const tx0 = R4.x1, tx1 = tx0 + 90; const J = { x0: tx1, x1: tx1 + 36, top: 60, w: 36 };
@@ -2378,31 +2378,31 @@ function buildStage1() {
   L.dec('holo', tx0 + 27, 24, { kind: 'donut', w: 36, h: 18, col: '#ff2fb9', col2: '#ffb347', label: 'GLAZED(TM) NEURAL FUEL' });
   L.dec('beacon', R4.x1 - 2, 61, { col: '#ffb347' }); L.dec('beacon', tx1 + 2, 59, { col: '#ffb347' });
   L.en('drone', tx0 + 30, 49, { home: { x: tx0 + 30, y: 49 } }); L.en('drone', tx0 + 74, 47, { home: { x: tx0 + 74, y: 47 }, elite: true });
-  L.hint(R4.x1 - 22, 14, 54, 12, 'ECHO', 'Maglev freight. It runs on a loop. Drop onto a car, ride it across, and mind the gaps between cars.');
+  L.hint(R4.x1 - 22, 14, 54, 12, 'ECHO', 'Maglev-Fracht. Sie fährt im Kreis. Lass dich auf einen Wagen fallen, fahr hinüber und achte auf die Lücken zwischen den Wagen.');
   chips(L, tx0 + 4, 61, tx1 - 4, 61, 10, 0);
-  L.cp(J.x0 + 22, 60, 'CHECKPOINT 04'); L.en('turret', J.x0 + 30, 60); decorRoof(L, R, J.x0 + 14, 22, 60, { dens: .4, padL: 3, padR: 2 });
+  L.cp(J.x0 + 22, 60, 'KONTROLLPUNKT 04'); L.en('turret', J.x0 + 30, 60); decorRoof(L, R, J.x0 + 14, 22, 60, { dens: .4, padL: 3, padR: 2 });
   /* sign chain */
   const jEnd = J.x1; const centers = [13, 35, 57, 79]; const cap = jEnd + 92;
   centers.forEach((c, i) => hangSign(L, jEnd + c, 47, 10, ['VOID', 'NEURO', 'HOTEL', '夢'][i] && hasGlyph('夢') ? ['VOID', 'NEURO', 'HOTEL', '夢'][i] : ['VOID', 'NEURO', 'HOTEL', 'KAIJU'][i], NEON[i % NEON.length], 10));
   L.dec('holo', jEnd + 30, 6, { kind: 'globe', w: 30, h: 15, col: '#19f0ff', col2: '#5dffb0', label: 'MERIDIAN GLOBAL' });
-  L.hint(jEnd - 18, 14, 52, 10, 'ECHO', 'Hanging signs. Hook one, swing, release with a jump, hook the next. Keep your speed.');
+  L.hint(jEnd - 18, 14, 52, 10, 'ECHO', 'Hängende Schilder. Häng dich an eins, schwing, lass mit einem Sprung los, greif das nächste. Behalte dein Tempo.');
   L.en('drone', jEnd + 46, 40, { home: { x: jEnd + 46, y: 40 }, elite: true });
   for (let i = 0; i < centers.length - 1; i++) chips(L, jEnd + centers[i] + 4, 56, jEnd + centers[i + 1] - 4, 54, 3, 6);
   X = cap; const Lr = roof(40, 58); decorRoof(L, R, Lr.x0, Lr.w, 58, { dens: .6, padL: 8, padR: 12 }); L.en('grunt', Lr.x0 + 14, 58); L.en('grunt', Lr.x0 + 24, 58);
   /* vent climb */
-  const M1 = roof(30, 40); L.vent(Lr.x1 - 7, 34, 4, 24); L.dec('sign', Lr.x1 - 9, 52, { text: 'UPDRAFT', col: '#5dffb0', flick: true, front: true });
-  L.hint(Lr.x1 - 30, 12, 50, 10, 'ECHO', 'Exhaust updraft. Step in, ride it up, and steer onto the roof.');
+  const M1 = roof(30, 40); L.vent(Lr.x1 - 7, 34, 4, 24); L.dec('sign', Lr.x1 - 9, 52, { text: 'AUFWIND', col: '#5dffb0', flick: true, front: true });
+  L.hint(Lr.x1 - 30, 12, 50, 10, 'ECHO', 'Abgas-Aufwind. Tritt hinein, lass dich hochtragen und steuere aufs Dach.');
   for (let i = 0; i < 4; i++) L.set(Lr.x1 - 7 + i, 58, undefined, '▒', C.greyD);
   decorRoof(L, R, M1.x0, M1.w, 40, { dens: .4, padL: 8 }); L.en('turret', M1.x0 + 16, 40); L.en('drone', M1.x0 + 22, 28);
   gap(12); const M2 = roof(26, 44); link(M1, M2); decorRoof(L, R, M2.x0, M2.w, 44, { dens: .5 }); L.en('grunt', M2.x0 + 12, 44); L.en('grunt', M2.x0 + 18, 44); L.en('drone', M2.x0 + 12, 30, { elite: true });
   chips(L, M1.x1 - 2, 38, M2.x0 + 3, 42, 5, 5);
-  gap(10); const M3 = roof(24, 40); link(M2, M3); L.cp(M3.x0 + 8, 40, 'CHECKPOINT 05'); L.pk('hp', M3.x0 + 14, 38);
+  gap(10); const M3 = roof(24, 40); link(M2, M3); L.cp(M3.x0 + 8, 40, 'KONTROLLPUNKT 05'); L.pk('hp', M3.x0 + 14, 38);
   chips(L, M2.x1 - 2, 42, M3.x0 + 3, 38, 5, 5);
   /* skybridge: glass tube */
   const bx0 = X, bl = 44; L.mass(bx0, 40, bl, ST.GLASS, 43); L.mass(bx0, 31, bl, ST.GLASS, 33); X += bl;
   for (let x = bx0; x < bx0 + bl; x += 6) for (let y = 33; y < 40; y++) L.bset(x, y, '│', C.cyanDD);
   L.en('turret', bx0 + 14, 35, { dir: 'down' }); L.en('turret', bx0 + 30, 35, { dir: 'down' }); L.en('drone', bx0 + 22, 38);
-  L.hint(bx0 - 4, 8, 32, 10, 'ECHO', 'Skybridge to the Spire annex. Their lobby is a kill box. Clear it room by room.');
+  L.hint(bx0 - 4, 8, 32, 10, 'ECHO', 'Skybridge zum Anbau der Spitze. Die Lobby ist eine Todesfalle. Räum sie Raum für Raum leer.');
   /* annex w/ arena */
   const ex0 = X; L.mass(ex0, 22, 84, ST.HULL);
   L.clear(ex0, 34, 2, 6); L.clear(ex0 + 2, 29, 66, 11); L.clear(ex0 + 68, 34, 2, 6); L.clear(ex0 + 70, 34, 10, 6);
@@ -2411,13 +2411,13 @@ function buildStage1() {
   for (let xx = ex0; xx < ex0 + 2; xx++) for (let yy = 34; yy < 40; yy++) L.bset(xx, yy, 0, 0, C.i1);
   const d1 = L.door(ex0, 34, 6, { mode: 'arena', open: 1, target: 1 }); doorTiles(L, d1); const d2 = L.door(ex0 + 68, 34, 6, { mode: 'arena', open: 0, target: 0 });
   for (let x = ex0 + 8; x < ex0 + 62; x += 14) L.dec('lamp', x, 29, { w: 9, len: 11, col: '#ff3b4d' });
-  L.dec('sign', ex0 + 28, 31, { text: 'MERIDIAN  //  RESTRICTED', col: '#ff3b4d', flick: false });
+  L.dec('sign', ex0 + 28, 31, { text: 'MERIDIAN  //  SPERRBEREICH', col: '#ff3b4d', flick: false });
   arena(L, ex0 + 2, 29, 66, 11, [d1, d2], [
     [['grunt', ex0 + 10, 40], ['grunt', ex0 + 56, 40], ['drone', ex0 + 34, 33]],
     [['warden', ex0 + 52, 40]],
     [['drone', ex0 + 14, 32, { elite: true }], ['drone', ex0 + 54, 32, { elite: true }], ['grunt', ex0 + 8, 40], ['grunt', ex0 + 58, 40]],
-  ], 'LOCKDOWN');
-  L.dec('sign', ex0 + 72, 36, { text: 'ELEVATOR', col: '#19f0ff', flick: true, front: true });
+  ], 'ABRIEGELUNG');
+  L.dec('sign', ex0 + 72, 36, { text: 'AUFZUG', col: '#19f0ff', flick: true, front: true });
   L.zone(ex0 + 76, 30, 4, 12, { exit: true });
   L.camBox = { x0: 0, x1: ex0 + 82, y0: 0, y1: Hh };
   L.endX = ex0 + 80;
@@ -2460,13 +2460,13 @@ function walkers(L, R, x0, x1, n, y) { for (let i = 0; i < n; i++) L.dec('npc', 
 
 function buildStage2() {
   const th = THEMES.bazaar, R = RNG(202), Hh = 112, S0 = 84, L = new Level(2, 760, Hh, th); L.deathY = Hh + 12; L.camRef = 64;
-  L.intro = { title: 'NEON BAZAAR', sub: 'KOWLOON STACKS // LOWER MARKET // 03:31 AM', lines: [] };
+  L.intro = { title: 'NEON BASAR', sub: 'KOWLOON-TÜRME // UNTERER MARKT // 03:31 UHR', lines: [] };
   L.mass(0, S0, 300, ST.ASPH); L.mass(524, S0, 236, ST.ASPH);
   L.wet = { y: S0, x0: 0, x1: 300, h: 13, a: .34 };
   facades(L, R, 0, 300, S0, 30, 40); facades(L, R, 524, 760, S0, 28, 40);
   L.start = { x: 8, y: S0 };
   /* --- street --- */
-  L.hint(2, 10, 76, 10, 'ECHO', 'Lower market. Cheap noodles, cheaper loyalty. Gang crews run these stalls, and the cables overhead are live.');
+  L.hint(2, 10, 76, 10, 'ECHO', 'Unterer Markt. Billige Nudeln, noch billigere Treue. Gangs betreiben diese Stände, und die Kabel über dir stehen unter Strom.');
   solid(L, 28, S0 - 3, ['▄▄▄▄', '█▒▒█', '█◙◙█'], C.mintD, { c: { '◙': C.amber } }); L.dec('steam', 29.5, S0 - 3, { rate: 8 }); L.dec('steam', 31, S0 - 3, { rate: 6 });
   solid(L, 46, S0 - 4, ['▛▀▜', '█◙█', '█▒█', '▙▄▟'], C.greyD, { c: { '◙': C.cyan, '▒': C.cyanDD }, a: { '◙': AN.PULSE } });
   solid(L, 68, S0 - 2, ['▛▀▀▀▀▜', '█▒▒▒▒█'], C.mintD); solid(L, 90, S0 - 3, ['▛▀▀▀▜', '█▒▒▒█', '█▒▒▒█'], C.rust);
@@ -2474,8 +2474,8 @@ function buildStage2() {
   L.en('grunt', 62, S0); L.en('grunt', 82, S0); L.en('drone', 40, 68); L.pk('hp', 54, S0 - 2);
   chips(L, 100, S0 - 2, 112, S0 - 2, 5, 0);
   cable(L, 2, 56, 40, 60, 3); cable(L, 40, 60, 78, 55, 3); cable(L, 78, 55, 120, 61, 3.5); cable(L, 120, 61, 160, 56, 3); cable(L, 160, 56, 210, 60, 4); cable(L, 210, 60, 258, 56, 3.5);
-  L.dec('holo', 118, 36, { kind: 'ad', w: 40, h: 3, col: '#ff2fb9', col2: '#ffe45e', text: '   KAIJU-COLA  ///  TASTE THE VOLTAGE  ///  NOODLES 3 CREDITS  ///  ' });
-  L.cp(104, S0, 'CHECKPOINT 01');
+  L.dec('holo', 118, 36, { kind: 'ad', w: 40, h: 3, col: '#ff2fb9', col2: '#ffe45e', text: '   KAIJU-COLA  ///  KOSTE DIE SPANNUNG  ///  NUDELN 3 CREDITS  ///  ' });
+  L.cp(104, S0, 'KONTROLLPUNKT 01');
   /* --- market --- */
   L.haz(124, S0 - 1, 11); L.dec('spark', 129, S0 - 2, { rate: 1.3 }); awning(L, 124, S0 - 5, 13, C.mag); awning(L, 140, S0 - 10, 12, C.cyan);
   solid(L, 150, S0 - 2, ['▛▀▀▀▀▜', '█▒▒▒▒█'], C.rust); solid(L, 162, S0 - 4, ['▛▀▀▀▀▜', '█◙▒▒◙█', '█▒▒▒▒█', '▙▄▄▄▄▟'], C.greyD, { c: { '◙': C.amber } });
@@ -2485,10 +2485,10 @@ function buildStage2() {
   L.en('grunt', 118, S0); L.en('grunt', 156, S0); L.en('grunt', 170, S0); L.en('drone', 146, 66); L.en('drone', 200, 62, { elite: true }); L.en('grunt', 236, S0);
   walkers(L, R, 106, 226, 7, S0);
   chips(L, 124, S0 - 7, 137, S0 - 7, 5, 2); chips(L, 140, S0 - 12, 152, S0 - 12, 4, 2); chips(L, 175, S0 - 7, 195, S0 - 12, 6, 3);
-  L.hint(120, 8, 74, 12, 'ECHO', 'Those puddles are live wire. Jump them, or take the awnings.');
-  L.cp(240, S0, 'CHECKPOINT 02');
+  L.hint(120, 8, 74, 12, 'ECHO', 'Diese Pfützen sind stromführende Leitungen. Spring drüber oder nimm die Markisen.');
+  L.cp(240, S0, 'KONTROLLPUNKT 02');
   /* --- fire escape --- */
-  L.mass(300, 45, 44, ST.BRICK); L.dec('sign', 304, 70, { text: 'EXIT  >>>  ROOF', col: '#ffb347', flick: true, front: true });
+  L.mass(300, 45, 44, ST.BRICK); L.dec('sign', 304, 70, { text: 'AUSGANG  >>>  DACH', col: '#ffb347', flick: true, front: true });
   const ys = [79, 74, 69, 64, 59, 54, 49];
   ys.forEach((y, i) => {
     const right = i % 2 === 0, x = right ? 287 : 268, w = right ? 13 : 14;
@@ -2496,37 +2496,37 @@ function buildStage2() {
     if (i < ys.length - 1) for (let k = 1; k <= 4; k++) L.set(right ? 284 : 284, y - k + 1, undefined, '╪', C.amberD);
   });
   for (const y of [73, 63, 53]) for (let x = 262; x < 300; x++) if (x % 4 === 0) L.set(x, y, undefined, '│', C.greyDD);
-  L.hint(262, 8, 74, 12, 'ECHO', 'Dead end. The fire escape goes up, the shanties start at the roof.');
+  L.hint(262, 8, 74, 12, 'ECHO', 'Sackgasse. Die Feuertreppe führt nach oben, die Blechhütten beginnen auf dem Dach.');
   L.en('drone', 276, 72); L.en('turret', 276, 64); L.en('grunt', 292, 69); L.en('grunt', 291, 59); L.en('drone', 280, 50, { elite: true });
-  L.cp(312, 45, 'CHECKPOINT 03'); L.pk('hp', 292, 77); L.pk('hp', 324, 43);
+  L.cp(312, 45, 'KONTROLLPUNKT 03'); L.pk('hp', 292, 77); L.pk('hp', 324, 43);
   PROPS.antenna(L, 340, 45); PROPS.ac(L, 318, 45); PROPS.billboard(L, 326, 45, R);
   /* --- shanty slabs --- */
   let X = 353;
   const S1 = { x0: X, w: 28, top: 47 }; slab(L, S1.x0, 47, 28); cable(L, 342, 38, 356, 40, 2); X += 28;
   solid(L, S1.x0 + 8, 47 - 3, ['▛▀▀▀▀▀▀▀▀▜', '█ RIPPER █', '▙▄▄▄▄▄▄▄▄▟'], C.magD, { c: { 'R': C.mag, 'I': C.mag, 'P': C.mag, 'E': C.mag, ' ': C.mag } });
   L.pk('w_scatter', S1.x0 + 13, 47 - 4.5); L.dec('sign', S1.x0 + 5, 47 - 8, { text: 'RIPPER-DOC 24H', col: '#ff2fb9', frame: true, flick: true }); L.pk('hp', S1.x0 + 22, 45);
-  L.hint(S1.x0 - 6, 8, 38, 12, 'ECHO', 'That stall is a black-market ripperdoc. Something heavy on the counter. Take it.');
+  L.hint(S1.x0 - 6, 8, 38, 12, 'ECHO', 'Der Stand da ist ein Ripperdoc vom Schwarzmarkt. Etwas Schweres liegt auf dem Tresen. Nimm es.');
   X += 10; const S2 = { x0: X, w: 24, top: 44 }; slab(L, X, 44, 24); X += 24; decorRoof(L, R, S2.x0, 24, 44, { dens: .5 }); L.en('grunt', S2.x0 + 14, 44); L.en('grunt', S2.x0 + 8, 44); L.en('drone', S2.x0 + 16, 30);
   cable(L, S1.x0 + 26, 40, S2.x0 + 2, 37, 2);
   chips(L, S1.x0 + 26, 44, S2.x0 + 3, 41, 5, 4);
-  const cx0 = X; const chain = [14, 32, 50]; chain.forEach((c, i) => hangSign(L, cx0 + c, 32, 6, hasGlyph('灯') ? '灯' : 'LAMP', NEON[(i + 1) % 5], 8));
-  L.hint(cx0 - 12, 10, 36, 10, 'ECHO', 'Paper lanterns. They hold. Hook, swing, release, repeat.');
+  const cx0 = X; const chain = [14, 32, 50]; chain.forEach((c, i) => hangSign(L, cx0 + c, 32, 6, hasGlyph('灯') ? '灯' : 'LAMPE', NEON[(i + 1) % 5], 8));
+  L.hint(cx0 - 12, 10, 36, 10, 'ECHO', 'Papierlaternen. Die halten. Einhaken, schwingen, loslassen, wiederholen.');
   for (let i = 0; i < 2; i++) chips(L, cx0 + chain[i] + 4, 42, cx0 + chain[i + 1] - 4, 42, 3, 5);
   L.en('drone', cx0 + 24, 28, { elite: true });
-  X = cx0 + 62; const S3 = { x0: X, w: 34, top: 46 }; slab(L, X, 46, 34); X += 34; decorRoof(L, R, S3.x0, 34, 46, { dens: .5 }); L.cp(S3.x0 + 4, 46, 'CHECKPOINT 04');
+  X = cx0 + 62; const S3 = { x0: X, w: 34, top: 46 }; slab(L, X, 46, 34); X += 34; decorRoof(L, R, S3.x0, 34, 46, { dens: .5 }); L.cp(S3.x0 + 4, 46, 'KONTROLLPUNKT 04');
   L.en('turret', S3.x0 + 22, 46); L.en('grunt', S3.x0 + 14, 46); L.pk('hp', S3.x0 + 28, 44);
-  L.hint(S3.x0 + 20, 10, 38, 12, 'ECHO', 'Jump off the end and drop into the underpass. Aim for the street, not the gap.');
+  L.hint(S3.x0 + 20, 10, 38, 12, 'ECHO', 'Spring vom Ende und lass dich in die Unterführung fallen. Ziel auf die Straße, nicht auf die Lücke.');
   /* --- underpass --- */
   const U0 = 548, U1 = 660;
-  L.mass(U0, 36, U1 - U0, ST.METAL, 71); L.dec('sign', U0 + 2, 32, { text: 'DRAIN 9 // MAINTENANCE', col: '#ffb347', frame: true, flick: true });
+  L.mass(U0, 36, U1 - U0, ST.METAL, 71); L.dec('sign', U0 + 2, 32, { text: 'KANAL 9 // WARTUNG', col: '#ffb347', frame: true, flick: true });
   for (let y = 71; y < S0; y++) for (let x = U0; x < U1; x++) L.bset(x, y, 0, 0, C.i0);
   for (let x = U0; x < U1; x++) { L.bset(x, 72, '═', C.greyD, C.i0); L.bset(x, 74, '═', C.greyDD, C.i0); if (x % 12 === 0) { for (let y = 72; y < 76; y++) L.bset(x, y, '║', C.greyD, C.i0); L.bset(x, 72, '╬', C.grey, C.i0); } }
   for (let x = U0 + 5; x < U1; x += 16) for (let y = 76; y < S0; y++) L.bset(x, y, y % 4 === 0 ? '┼' : '│', C.greyDD, C.i0);
   for (let x = U0 + 8; x < U1 - 8; x += 18) L.dec('lamp', x, 71, { w: 11, len: 13, col: x % 36 < 18 ? '#ffb347' : '#19f0ff' });
-  L.hint(U0 - 6, 8, 76, 10, 'ECHO', 'Drain nine. Sentries on the ceiling, live water on the floor. There is a security pit at the far end.');
+  L.hint(U0 - 6, 8, 76, 10, 'ECHO', 'Kanal neun. Wachposten an der Decke, stromführendes Wasser am Boden. Am anderen Ende gibt es eine Sicherheitsgrube.');
   for (const [px, pw] of [[556, 13], [578, 12], [600, 11]]) { L.haz(px, S0 - 1, pw); L.dec('spark', px + pw / 2, S0 - 2, { rate: 1.4 }); L.plat(px - 1, S0 - 7, pw + 2, '▔', C.cyan); chips(L, px, S0 - 8, px + pw, S0 - 8, 4, 2); }
   L.en('turret', 566, 73, { dir: 'down' }); L.en('turret', 588, 73, { dir: 'down' }); L.en('turret', 610, 73, { dir: 'down' });
-  L.en('grunt', 574, S0); L.en('drone', 596, 76); L.dec('steam', 585, S0 - 1, { rate: 10 }); L.dec('steam', 570, S0 - 1, { rate: 7 }); L.cp(552, S0, 'CHECKPOINT 05');
+  L.en('grunt', 574, S0); L.en('drone', 596, 76); L.dec('steam', 585, S0 - 1, { rate: 10 }); L.dec('steam', 570, S0 - 1, { rate: 7 }); L.cp(552, S0, 'KONTROLLPUNKT 05');
   L.pk('hp', 618, S0 - 2);
   const D1 = L.door(622, 71, 13, { mode: 'arena', open: 1, target: 1 }), D2 = L.door(U1 - 2, 71, 13, { mode: 'arena', open: 0, target: 0 });
   for (let x = 626; x < U1 - 4; x += 12) L.dec('lamp', x, 71, { w: 9, len: 13, col: '#ff3b4d' });
@@ -2534,8 +2534,8 @@ function buildStage2() {
     [['grunt', 640, S0], ['grunt', 650, S0], ['drone', 640, 76], ['drone', 650, 74]],
     [['turret', 634, S0], ['grunt', 648, S0], ['drone', 640, 74, { elite: true }]],
     [['warden', 648, S0], ['grunt', 634, S0]],
-  ], 'THE PIT');
-  L.dec('sign', 690, S0 - 12, { text: 'FREIGHT  ELEVATOR', col: '#19f0ff', flick: false, frame: true });
+  ], 'DIE GRUBE');
+  L.dec('sign', 690, S0 - 12, { text: 'LASTENAUFZUG', col: '#19f0ff', flick: false, frame: true });
   L.zone(716, S0 - 8, 8, 12, { exit: true }); solid(L, 732, S0 - 12, ['▛▀▀▀▀▀▀▀▀▀▀▀▀▜', '█            █', '█            █', '█            █', '█            █', '█            █', '█            █', '█            █', '█            █', '█            █', '█            █', '▙▄▄▄▄▄▄▄▄▄▄▄▄▟'], C.greyD);
   L.camBox = { x0: 0, x1: 744, y0: 0, y1: Hh };
   finalizeLevel(L);
@@ -2551,13 +2551,13 @@ function windowBand(L, x0, x1, y0, y1, step) {
 function pillar(L, x, y0, y1) { for (let y = y0; y <= y1; y++) { L.bset(x, y, '▐', C.greyDD, C.i2); L.bset(x + 1, y, '█', C.greyDD, C.i2); L.bset(x + 2, y, '▌', C.greyDD, C.i2); } }
 function buildStage3() {
   const th = THEMES.tower, R = RNG(303), Hh = 152, L = new Level(3, 800, Hh, th); L.deathY = Hh - 4; L.camRef = 84;
-  L.intro = { title: 'MERIDIAN TOWER', sub: 'CORPORATE SPINE // LEVELS 01-88 // SECURITY: MAXIMUM', lines: [] };
+  L.intro = { title: 'MERIDIAN TURM', sub: 'KONZERNKERN // EBENEN 01-88 // SICHERHEIT: MAXIMUM', lines: [] };
   const Y1 = 118, Y2 = 50;
   L.mass(0, 0, 800, ST.INT);
   /* ---- lobby ---- */
   carveRoom(L, 4, 92, 108, 26, 3); windowBand(L, 10, 106, 94, 108, 9);
   L.start = { x: 10, y: Y1 };
-  L.hint(4, 10, 108, 12, 'ECHO', 'You are inside Meridian Tower. Lobby first. Turrets in the ceiling, no friends on the desk.');
+  L.hint(4, 10, 108, 12, 'ECHO', 'Du bist im Meridian-Turm. Zuerst die Lobby. Geschütztürme in der Decke, keine Freunde am Empfang.');
   for (const x of [26, 62, 98]) pillar(L, x, 93, 117);
   solid(L, 44, Y1 - 2, ['▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀', '█▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒█'], C.greyD);
   L.dec('holo', 46, 102, { kind: 'globe', w: 14, h: 7, col: '#19f0ff', col2: '#5dffb0', label: 'MERIDIAN' });
@@ -2566,9 +2566,9 @@ function buildStage3() {
   L.en('turret', 32, 94, { dir: 'down' }); L.en('turret', 76, 94, { dir: 'down' });
   L.en('grunt', 40, Y1); L.en('grunt', 70, Y1); L.en('drone', 56, 99); L.pk('hp', 38, Y1 - 3);
   L.laser(94, 93, Y1, 3.6, 1.2, 0); L.laser(101, 93, Y1, 3.6, 1.2, 1.8);
-  L.hint(82, 10, 108, 12, 'ECHO', 'Laser grid ahead. Wait for the beams to drop, then dash through. They telegraph before they fire.');
+  L.hint(82, 10, 108, 12, 'ECHO', 'Laserraster voraus. Warte, bis die Strahlen ausgehen, dann dash hindurch. Sie kündigen sich vor dem Schuss an.');
   chips(L, 14, 105, 24, 105, 4, 0);
-  L.clear(112, 108, 2, 10); const dLob = L.door(112, 108, 10, { mode: 'auto' }); L.cp(108, Y1, 'CHECKPOINT 01');
+  L.clear(112, 108, 2, 10); const dLob = L.door(112, 108, 10, { mode: 'auto' }); L.cp(108, Y1, 'KONTROLLPUNKT 01');
   /* ---- server farm ---- */
   carveRoom(L, 114, 96, 148, 22, 5);
   for (let x = 118; x < 260; x += 6) { if (x > 144 && x < 196) continue; rack(L, x, 108, 7); }
@@ -2576,12 +2576,12 @@ function buildStage3() {
   L.clear(150, Y1, 42, 34); for (let y = Y1; y < Hh; y++) for (let x = 150; x < 192; x++) { const deep = y > 138; L.bset(x, y, deep && (x + y) % 3 === 0 ? '≈' : 0, C.cyan, deep ? C.g1 : C.i0, deep ? AN.FLICK : 0); }
   L.mv({ kind: 'pad', x: 154, y: Y1, cx: 163, cy: Y1, w: 9, h: 1, amp: 8, f: .95, off: 0, dx: 0, dy: 0 });
   L.mv({ kind: 'pad', x: 170, y: Y1 - 4, cx: 179, cy: Y1 - 4, w: 9, h: 1, amp: 8, f: .95, off: PI, dx: 0, dy: 0 });
-  L.hint(136, 10, 108, 12, 'ECHO', 'Coolant pit. Ride the hover pads, or hook the ceiling and swing over.');
+  L.hint(136, 10, 108, 12, 'ECHO', 'Kühlmittelgrube. Nimm die Schwebeplattformen oder häng dich an die Decke und schwing hinüber.');
   L.plat(124, 108, 14, '▔', C.cyan); L.plat(200, 108, 16, '▔', C.cyan); L.plat(232, 108, 14, '▔', C.cyan);
   L.laser(210, Y1 - 2, 226, 3.4, 1.2, 0, { h: true }); L.laser(236, Y1 - 2, 252, 3.4, 1.2, 1.7, { h: true }); L.laser(130, 97, Y1, 3.8, 1.2, 1);
   L.en('grunt', 128, Y1); L.en('grunt', 204, Y1); L.en('grunt', 244, Y1); L.en('turret', 140, 98, { dir: 'down' }); L.en('turret', 206, 98, { dir: 'down' }); L.en('turret', 240, 98, { dir: 'down' });
   L.en('drone', 170, 100, { elite: true }); L.en('drone', 222, 102); L.pk('hp', 228, Y1 - 2); L.pk('hp', 126, 106);
-  L.cp(120, Y1, 'CHECKPOINT 02'); L.cp(238, Y1, 'CHECKPOINT 03');
+  L.cp(120, Y1, 'KONTROLLPUNKT 02'); L.cp(238, Y1, 'KONTROLLPUNKT 03');
   chips(L, 150, 112, 192, 112, 9, 4);
   /* ---- security hub (arena) ---- */
   carveRoom(L, 264, 90, 82, 28, 7); L.clear(262, 108, 2, 10); L.clear(346, 108, 2, 10);
@@ -2589,12 +2589,12 @@ function buildStage3() {
   L.plat(272, 108, 12, '▔', C.mag); L.plat(326, 108, 12, '▔', C.mag); L.plat(298, 100, 16, '▔', C.mag);
   L.dec('holo', 292, 92, { kind: 'eye', w: 24, h: 9, col: '#ff3b4d' });
   for (let x = 274; x < 340; x += 22) L.dec('lamp', x, 90, { w: 11, len: 28, col: '#ff3b4d' });
-  L.dec('sign', 286, 112, { text: 'SECURITY HUB 04', col: '#ff3b4d', flick: true, front: true });
+  L.dec('sign', 286, 112, { text: 'SICHERHEITSZENTRALE 04', col: '#ff3b4d', flick: true, front: true });
   arena(L, 264, 90, 82, 28, [dA, dB], [
     [['grunt', 276, Y1], ['grunt', 332, Y1], ['turret', 300, Y1], ['drone', 296, 98]],
     [['drone', 280, 96, { elite: true }], ['drone', 330, 96, { elite: true }], ['grunt', 290, Y1], ['grunt', 322, Y1]],
     [['warden', 322, Y1], ['grunt', 280, Y1], ['drone', 300, 96]],
-  ], 'SECURITY HUB');
+  ], 'SICHERHEITSZENTRALE');
   /* ---- elevator shaft ---- */
   L.clear(348, 46, 32, 72);
   for (let y = 46; y < 118; y++) for (let x = 348; x < 380; x++) L.bset(x, y, 0, 0, (x + (y >> 3)) % 7 === 0 ? C.i1 : C.i0);
@@ -2606,23 +2606,23 @@ function buildStage3() {
   L.mass(348, 66, 12, ST.METAL, 68); L.mass(368, 96, 12, ST.METAL, 98);
   L.plat(348, 104, 4, '▔', C.cyan); L.plat(376, 90, 4, '▔', C.cyan); L.plat(348, 76, 4, '▔', C.cyan);
   L.laser(349, 100, 378, 4.6, 1.3, 0, { h: true }); L.laser(368, 70, 378, 5, 1.2, 2.2, { h: true });
-  L.dec('sign', 350, 112, { text: 'LIFT B', col: '#ffb347', flick: true, front: true });
-  L.hint(344, 8, 108, 12, 'ECHO', 'Service lift. Two cars, one shaft. Ride the first, hop across to the second, and watch the cross beams.');
+  L.dec('sign', 350, 112, { text: 'AUFZUG B', col: '#ffb347', flick: true, front: true });
+  L.hint(344, 8, 108, 12, 'ECHO', 'Serviceaufzug. Zwei Kabinen, ein Schacht. Fahr mit der ersten, spring zur zweiten und achte auf die Querstrahlen.');
   L.en('drone', 360, 96, { elite: true }); L.en('drone', 358, 70, { elite: true }); L.en('drone', 372, 58);
-  L.cp(348, Y1, 'CHECKPOINT 04'); L.pk('hp', 376, Y1 + 2);
+  L.cp(348, Y1, 'KONTROLLPUNKT 04'); L.pk('hp', 376, Y1 + 2);
   /* ---- executive floor ---- */
   L.clear(380, 42, 2, 8); carveRoom(L, 382, 24, 396, 26, 9); windowBand(L, 390, 630, 26, 46, 12); windowBand(L, 690, 770, 26, 46, 12);
   for (let y = 26; y < 47; y++) for (let x = 560; x < 600; x++) L.bset(x, y, ((x - 560) % 10 === 0) ? '│' : 0, C.greyDD, C.i1);
   L.dec('holo', 563, 28, { kind: 'eye', w: 34, h: 16, col: '#ff2fb9' });
-  L.dec('sign', 568, 46, { text: 'ARCHON  SEES  ALL', col: '#ff2fb9', flick: true, front: true });
+  L.dec('sign', 568, 46, { text: 'ARCHON  SIEHT  ALLES', col: '#ff2fb9', flick: true, front: true });
   for (const x of [420, 470, 520]) { solid(L, x, Y2 - 2, ['▀▀▀▀▀▀▀▀▀▀', '█▒▒▒▒▒▒▒▒█'], C.greyD); }
   for (let x = 400; x < 770; x += 40) L.dec('lamp', x, 24, { w: 13, len: 26, col: '#bff6ff' });
-  L.hint(386, 10, 42, 10, 'ECHO', 'Executive floor. Archon runs the whole grid from here. The core is at the end of this hall, up through the Spire.');
+  L.hint(386, 10, 42, 10, 'ECHO', 'Chefetage. Archon steuert von hier das ganze Netz. Der Kern liegt am Ende dieser Halle, hinauf durch die Spitze.');
   L.en('turret', 430, 26, { dir: 'down' }); L.en('turret', 482, 26, { dir: 'down' }); L.en('turret', 540, 26, { dir: 'down' });
   L.en('grunt', 436, Y2); L.en('grunt', 474, Y2); L.en('grunt', 524, Y2); L.en('drone', 452, 36, { elite: true }); L.en('drone', 500, 34); L.pk('hp', 410, Y2 - 2); L.pk('hp', 540, Y2 - 2);
   L.laser(590, 27, Y2, 3.2, 1.3, 0); L.laser(612, 27, Y2, 3.2, 1.3, 1.6); L.pk('w_rail', 601, Y2 - 1.5);
-  L.hint(572, 10, 42, 10, 'ECHO', 'Something is sitting between those beams. Dash through. It is worth it.');
-  L.cp(392, Y2, 'CHECKPOINT 05'); L.cp(626, Y2, 'CHECKPOINT 06');
+  L.hint(572, 10, 42, 10, 'ECHO', 'Zwischen diesen Strahlen liegt etwas. Dash hindurch. Es lohnt sich.');
+  L.cp(392, Y2, 'KONTROLLPUNKT 05'); L.cp(626, Y2, 'KONTROLLPUNKT 06');
   L.mass(636, 24, 2, ST.INT, 40); L.mass(722, 24, 2, ST.INT, 40);
   const dC = L.door(636, 40, 10, { mode: 'arena', open: 1, target: 1 }), dD = L.door(722, 40, 10, { mode: 'arena', open: 0, target: 0 });
   for (let x = 644; x < 716; x += 20) L.dec('lamp', x, 24, { w: 10, len: 26, col: '#ff3b4d' });
@@ -2631,8 +2631,8 @@ function buildStage3() {
     [['grunt', 650, Y2], ['grunt', 708, Y2], ['grunt', 680, Y2], ['drone', 660, 34, { elite: true }], ['drone', 700, 34, { elite: true }]],
     [['seeker', 660, 40], ['seeker', 680, 38], ['seeker', 700, 40], ['turret', 646, Y2], ['turret', 714, Y2]],
     [['warden', 700, Y2], ['drone', 664, 34, { elite: true }], ['seeker', 680, 38]],
-  ], 'EXECUTIVE LOUNGE');
-  L.dec('sign', 740, 44, { text: 'CORE  ACCESS', col: '#ff3b4d', flick: false, frame: true, front: true });
+  ], 'CHEFLOUNGE');
+  L.dec('sign', 740, 44, { text: 'KERN  ZUGANG', col: '#ff3b4d', flick: false, frame: true, front: true });
   L.zone(764, 40, 8, 12, { exit: true });
   L.camBox = { x0: 0, x1: 780, y0: 0, y1: Hh };
   finalizeLevel(L);
@@ -2644,15 +2644,15 @@ function buildStage3() {
    ========================================================================= */
 function buildStage4() {
   const th = THEMES.spire, R = RNG(404), Hh = 280, L = new Level(4, 250, Hh, th); L.deathY = Hh + 8; L.camRef = 198; L.wind = -9;
-  L.intro = { title: 'THE SPIRE', sub: 'MERIDIAN APEX // ALTITUDE 2.4 KM // STORM FRONT 3', lines: [] };
+  L.intro = { title: 'DIE SPITZE', sub: 'MERIDIAN-GIPFEL // HÖHE 2,4 KM // STURMFRONT 3', lines: [] };
   const hull = (x, y, w, t) => L.mass(x, y, w, ST.HULL, y + (t || 2));
   const strut = (x, y, h) => { for (let yy = y; yy < y + h; yy++) { L.bset(x, yy, yy % 4 === 0 ? '╫' : '║', C.greyDD); L.bset(x + 1, yy, yy % 4 === 0 ? '╫' : '║', C.greyDD); } };
   const stage = (x, y, w, t) => { hull(x, y, w, t || 2); strut(x + 2, y + (t || 2), 6); strut(x + w - 4, y + (t || 2), 6); L.dec('beacon', x + .5, y - .5, { col: '#ff3b4d' }); };
   /* launch deck */
   hull(70, 252, 80, 4); strut(76, 256, 24); strut(142, 256, 24); L.start = { x: 90, y: 252 };
-  L.cp(96, 252, 'CHECKPOINT 01');
-  L.hint(72, 10, 244, 10, 'ECHO', 'This is the Spire. Archon lives at the crown. Everything between here and there wants you to fall.');
-  L.hint(120, 10, 244, 10, 'ECHO', 'Wind is pushing you west. Use it. Dash through the blades; you cannot be hit mid-dash.');
+  L.cp(96, 252, 'KONTROLLPUNKT 01');
+  L.hint(72, 10, 244, 10, 'ECHO', 'Das ist die Spitze. Archon wohnt an der Krone. Alles dazwischen will, dass du fällst.');
+  L.hint(120, 10, 244, 10, 'ECHO', 'Der Wind drückt dich nach Westen. Nutz ihn. Dash durch die Klingen; im Dash kannst du nicht getroffen werden.');
   /* A : switchbacks */
   const ay = []; for (let i = 0; i < 8; i++) ay.push(247 - 4.5 * i | 0);
   ay.forEach((y, i) => { const x = i % 2 ? 108 : 92; stage(x, y, 12); });
@@ -2664,26 +2664,26 @@ function buildStage4() {
   L.mass(96, 168, 6, ST.HULL, 210); L.mass(110, 168, 6, ST.HULL, 214);
   L.dec('lamp', 106, 168, { w: 8, len: 46, col: '#ff3b4d' });
   [[206, 1], [198, 0], [190, 1], [182, 0], [174, 1]].forEach(([y, r]) => { L.plat(r ? 106 : 102, y, 4, '▔', r ? C.cyan : C.mag); for (let i = 0; i < 4; i++) L.set((r ? 106 : 102) + i, y + 1, undefined, '▀', r ? C.cyanDD : C.magDD); });
-  L.hint(80, 10, 206, 8, 'ECHO', 'Narrow shaft. Kick off the walls, or take the ledges. Something is hunting in there.');
+  L.hint(80, 10, 206, 8, 'ECHO', 'Enger Schacht. Spring von den Wänden ab oder nimm die Absätze. Da drin jagt etwas.');
   L.en('seeker', 106, 196); L.en('seeker', 106, 180);
-  hull(110, 168, 24, 2); L.cp(124, 168, 'CHECKPOINT 02');
+  hull(110, 168, 24, 2); L.cp(124, 168, 'KONTROLLPUNKT 02');
   /* C : gondolas */
   const gy = [[164, 'p', 0], [159, 'R'], [154, 'p', PI], [149, 'L'], [144, 'p', 0], [139, 'R'], [134, 'p', PI], [129, 'L']];
   gy.forEach(([y, k, off]) => {
     if (k === 'p') L.mv({ kind: 'pad', x: 142, y, cx: 151, cy: y, w: 9, h: 1, amp: 9, f: .85, off: off, dx: 0, dy: 0 });
     else if (k === 'R') stage(166, y, 14, 2); else stage(118, y, 14, 2);
   });
-  L.cp(172, 139, 'CHECKPOINT 03'); L.en('drone', 150, 150, { elite: true }); L.en('drone', 150, 130); L.en('seeker', 150, 140);
-  L.hint(112, 12, 158, 12, 'ECHO', 'Maintenance gondolas. They keep moving. So should you.');
+  L.cp(172, 139, 'KONTROLLPUNKT 03'); L.en('drone', 150, 150, { elite: true }); L.en('drone', 150, 130); L.en('seeker', 150, 140);
+  L.hint(112, 12, 158, 12, 'ECHO', 'Wartungsgondeln. Sie bewegen sich ständig. Du auch.');
   for (let y of [147, 137]) L.pk('chip', 151, y);
   hangSign(L, 151, 118, 6, hasGlyph('光') ? '光' : 'LUX', '#ff3b4d', 100);
   /* D : storm scaffold */
   const pl = [[108, 124], [91, 119], [74, 114], [57, 109], [74, 104], [91, 99], [108, 94], [125, 89], [108, 84], [91, 79], [74, 74], [62, 69]];
   pl.forEach(([cx, y], i) => stage(cx - 5, y, 10, 2));
-  L.cp(57 - 2, 109, 'CHECKPOINT 04'); L.pk('hp', 62, 107); L.pk('hp', 80, 72);
+  L.cp(57 - 2, 109, 'KONTROLLPUNKT 04'); L.pk('hp', 62, 107); L.pk('hp', 80, 72);
   L.en('turret', 91, 119); L.en('turret', 125, 89); L.en('grunt', 76, 104); L.en('drone', 70, 98, { elite: true }); L.en('drone', 100, 78, { elite: true }); L.en('seeker', 90, 90); L.en('seeker', 70, 80);
   L.blade(100, 97, 14, 0, 1.9, 0, 2.3); L.blade(84, 77, 12, 0, 2.1, 2, 2.3);
-  L.hint(50, 12, 100, 10, 'ECHO', 'Almost there. The crown door is above you. Archon knows you are coming, so expect a welcome.');
+  L.hint(50, 12, 100, 10, 'ECHO', 'Fast da. Die Kronentür ist über dir. Archon weiß, dass du kommst, also rechne mit einem Empfang.');
   stage(67, 64, 10, 2);
   /* boss arena */
   hull(82, 59, 130, 6); strut(100, 65, 40); strut(190, 65, 40);
@@ -2696,8 +2696,8 @@ function buildStage4() {
   L.zone(96, 30, 6, 30, {
     once: true, fn() {
       door.target = 0; S.cam.lock = { x: 152, y: 46.5, x0: 92, x1: 212 }; L.camBox = null; S.respawn = { x: 102, y: 59 }; MUS.inten_t = 1; musPlay('boss');
-      setTimeout(() => { if (S.L === L && !S.boss) { spawnBoss(152, 44, { x0: 94, w: 116, floor: 59 }); banner('ARCHON', 'WARDEN OF THE SPIRE', C.red); sfx('bigboom', .7); shake(1); glitchAmt = 1; } }, 900);
-      say('ECHO', 'That is the core. All of it. Break the eye, Sam. Hook it if you can, hurt it if you cannot.');
+      setTimeout(() => { if (S.L === L && !S.boss) { spawnBoss(152, 44, { x0: 94, w: 116, floor: 59 }); banner('ARCHON', 'WÄCHTER DER SPITZE', C.red); sfx('bigboom', .7); shake(1); glitchAmt = 1; } }, 900);
+      say('ECHO', 'Das ist der Kern. Alles davon. Zerschlag das Auge, Sam. Häng dich dran, wenn du kannst, verletz es, wenn nicht.');
     }
   });
   L.camBox = { x0: 0, x1: 250, y0: 0, y1: Hh };
@@ -2712,10 +2712,10 @@ function buildStage4() {
                                       play -> (boss dies) -> ending -> title
    ========================================================================= */
 const STAGES = [
-  { build: buildStage1, name: 'RAINLINE', sub: 'ROOFTOP RUN // SPRAWL DISTRICT 7', par: 230 },
-  { build: buildStage2, name: 'NEON BAZAAR', sub: 'STREET LEVEL // KOWLOON STACKS', par: 230 },
-  { build: buildStage3, name: 'MERIDIAN TOWER', sub: 'CORPORATE INTERIOR // LEVELS 01-88', par: 300 },
-  { build: buildStage4, name: 'THE SPIRE', sub: 'APEX CLIMB // ARCHON', par: 240 },
+  { build: buildStage1, name: 'RAINLINE', sub: 'DACHLAUF // SPRAWL-BEZIRK 7', par: 230 },
+  { build: buildStage2, name: 'NEON BASAR', sub: 'STRASSENEBENE // KOWLOON-TÜRME', par: 230 },
+  { build: buildStage3, name: 'MERIDIAN TURM', sub: 'KONZERNINNERES // EBENEN 01-88', par: 300 },
+  { build: buildStage4, name: 'DIE SPITZE', sub: 'GIPFELAUFSTIEG // ARCHON', par: 240 },
 ];
 const G = { scene: 'boot', t: 0, sel: 0, stage: 0, introT: 0, clearT: 0, endT: 0, pauseSel: 0, base: null, stats: null, fade: 1, started: false, titleL: null, camGY: 40 };
 const STEP = 1 / 60;
@@ -2742,7 +2742,7 @@ function loadStage(i, wpns) {
 function stageClear() {
   if (G.scene !== 'play') return;
   G.scene = 'clearing'; G.clearT = 0;
-  banner('STAGE CLEAR', STAGES[G.stage].name + ' // SIGNAL SECURED', C.mint); sfx('cp'); sfx('pick'); ring(S.P.x, S.P.y - 1.5, 20, 1, PAL[C.mint]); MUS.inten_t = 0;
+  banner('SEKTOR GESCHAFFT', STAGES[G.stage].name + ' // SIGNAL GESICHERT', C.mint); sfx('cp'); sfx('pick'); ring(S.P.x, S.P.y - 1.5, 20, 1, PAL[C.mint]); MUS.inten_t = 0;
 }
 function rankFor(t, d, par) { return d === 0 && t < par ? 'S' : d <= 1 && t < par * 1.5 ? 'A' : d <= 4 ? 'B' : 'C'; }
 function computeStats() {
@@ -2773,7 +2773,7 @@ function bossDieStep(dt) {
     sfx('bigboom'); sfx('bigboom', .6); musStop();
   } else if (bd > 3.4 && S.mode === 'bossdie') {
     S.mode = 'play'; S.cam.lock = null; S.L.doors.forEach(d => { if (d.mode === 'arena') d.target = 1; }); MUS.inten_t = 0;
-    banner('ARCHON OFFLINE', 'THE SPIRE IS DARK', C.mint); S.pks.push({ k: 'hp', x: b.x, y: S.L.bossArena.floor - 2, t: 0 }); sfx('cp');
+    banner('ARCHON OFFLINE', 'DIE SPITZE IST DUNKEL', C.mint); S.pks.push({ k: 'hp', x: b.x, y: S.L.bossArena.floor - 2, t: 0 }); sfx('cp');
     S.endTimer = 0;
   }
 }
@@ -2826,23 +2826,24 @@ function drawTitle(t) {
   // underline scan
   const ly = top + 12, lw = Math.max(lw0, 40);
   for (let i = 0; i < lw; i++) { const k = (i / lw), on = Math.sin(t * 3 - i * .2) * .5 + .5; gl(i % 4 === 0 ? '◆' : '═', Math.round((tcx - lw / 2 + i) * CW), Math.round(ly * CH), k < .5 ? '#19f0ff' : '#ff2fb9', .35 + on * .5); }
-  txtC('S T A R R I N G   S A M U E L   A U M A N N', tcx, ly + 1.5, '#ffe45e', Math.min(1, G.t * .6));
-  txtC('N E O N   ·   R A I N   ·   S T E E L', tcx, ly + 2.9, '#8a96c4', Math.min(1, G.t * .6));
+  txtC('M I T   S A M U E L   A U M A N N', tcx, ly + 1.5, '#ffe45e', Math.min(1, G.t * .6));
+  txtC('N E O N   ·   R E G E N   ·   S T A H L', tcx, ly + 2.9, '#8a96c4', Math.min(1, G.t * .6));
   // stage select
   const sy = Math.max(top + 17, ROWS - 12), st = STAGES[G.sel], bw = 54;
-  panel(Math.round((COLS - bw) / 2), sy - 1, bw, 6, '#19f0ff', 'SELECT SECTOR', .66);
+  panel(Math.round((COLS - bw) / 2), sy - 1, bw, 6, '#19f0ff', 'SEKTOR WÄHLEN', .66);
   const wob = Math.floor(t * 2.5) % 2;
   txtC('◄', COLS / 2 - bw / 2 + 4 - wob * .4, sy + 1.3, '#19f0ff'); txtC('►', COLS / 2 + bw / 2 - 4 + wob * .4, sy + 1.3, '#19f0ff');
-  txtC('S E C T O R   0' + (G.sel + 1), COLS / 2, sy + .2, '#8a96c4');
+  txtC('S E K T O R   0' + (G.sel + 1), COLS / 2, sy + .2, '#8a96c4');
   txtC(st.name.split('').join(' '), COLS / 2, sy + 1.3, '#eaf6ff'); txtC(st.sub, COLS / 2, sy + 2.4, '#ff2fb9');
   for (let i = 0; i < STAGES.length; i++) gl(i === G.sel ? '◆' : '◇', Math.round((COLS / 2 - STAGES.length * 1.5 + i * 3 + .5) * CW), Math.round((sy + 3.6) * CH), i === G.sel ? '#ffe45e' : '#3d4676');
   const bl = Math.floor(t * 1.8) % 2 === 0;
-  if (bl) txtC('[ PRESS ENTER OR CLICK TO JACK IN ]', COLS / 2, sy + 6.2, '#5dffb0');
+  if (bl) txtC('[ ENTER DRÜCKEN ODER KLICKEN ZUM EINSTEIGEN ]', COLS / 2, sy + 6.2, '#5dffb0');
   // controls
-  const cy = ROWS - 3;
-  txtC('A D  MOVE   SPACE  JUMP   F  FLY   SHIFT  DASH   MOUSE  AIM   LMB  SHOOT   RMB  GRAPPLE   1 2 3  GUN', COLS / 2, cy, '#7384c8');
-  txtC('M  MUTE    P  PAUSE    R  RESPAWN        hook onto anything. swing. let go. fly.', COLS / 2, cy + 1.3, '#4d5a96');
-  if (MOUSE.touch) txtC('KEYBOARD + MOUSE REQUIRED', COLS / 2, 1, '#ff3b4d');
+  const cy = ROWS - 4.1;
+  txtC('A D  LAUFEN     LEERTASTE  SPRINGEN     F  FLIEGEN     SHIFT  DASH', COLS / 2, cy, '#7384c8');
+  txtC('MAUS  ZIELEN     LINKSKLICK  SCHIESSEN     RECHTSKLICK  ENTERHAKEN     1 2 3  WAFFE', COLS / 2, cy + 1.3, '#7384c8');
+  txtC('M  TON     P  PAUSE     R  NEUSTART          häng dich an alles. schwing. lass los. flieg.', COLS / 2, cy + 2.6, '#4d5a96');
+  if (MOUSE.touch) txtC('TASTATUR + MAUS ERFORDERLICH', COLS / 2, 1, '#ff3b4d');
 }
 
 /* ---------------- intro / clear / ending / pause ---------------- */
@@ -2851,7 +2852,7 @@ function drawIntro(t) {
   drawWorld(t); drawHud(t);
   const k = G.introT, a = clamp(Math.min(k * 3, (3.6 - k) * 3), 0, 1), L = S.L, st = STAGES[G.stage], cy = Math.round(ROWS * .3);
   g.globalAlpha = a; drawBand(cy - 2, 12, .78);
-  txtC('S E C T O R   0' + (G.stage + 1), COLS / 2, cy - .5, '#ff2fb9');
+  txtC('S E K T O R   0' + (G.stage + 1), COLS / 2, cy - .5, '#ff2fb9');
   const sx = bigFit(L.intro.title, 3, COLS - 10), x = Math.round((COLS - bigWidth(L.intro.title, sx)) / 2);
   bigText(L.intro.title, x, cy + 1, sx, TITLE_GRADS[G.stage % 2 ? 1 : 0], '#1a0838', a, k < .5 ? 1 - k * 2 : 0);
   txtC(L.intro.sub, COLS / 2, cy + 7.2, '#8a96c4');
@@ -2861,25 +2862,25 @@ function drawIntro(t) {
 function drawClear(t) {
   drawWorld(t); drawBand(0, ROWS, .62);
   const s = G.stats, k = G.clearT, x = Math.round((COLS - 56) / 2), y = Math.max(1, Math.round(ROWS * .1));
-  panel(x, y, 56, 23, '#5dffb0', 'SECTOR CLEARED', .85);
+  panel(x, y, 56, 23, '#5dffb0', 'SEKTOR GESCHAFFT', .85);
   txtC((STAGES[G.stage].name).split('').join(' '), COLS / 2, y + 2, '#eaf6ff'); txtC(STAGES[G.stage].sub, COLS / 2, y + 3, '#8a96c4');
-  const rows = [['TIME', String(s.t / 60 | 0).padStart(2, '0') + ':' + String(Math.floor(s.t % 60)).padStart(2, '0') + '   (PAR ' + String(STAGES[G.stage].par / 60 | 0) + ':' + String(STAGES[G.stage].par % 60).padStart(2, '0') + ')'], ['HOSTILES', String(s.k)], ['DATA CHIPS', '◊ ' + String(s.c)], ['DEATHS', String(s.d)], ['BONUS', '+' + s.bonus], ['TOTAL SCORE', String(s.score).padStart(6, '0')]];
+  const rows = [['ZEIT', String(s.t / 60 | 0).padStart(2, '0') + ':' + String(Math.floor(s.t % 60)).padStart(2, '0') + '   (SOLL ' + String(STAGES[G.stage].par / 60 | 0) + ':' + String(STAGES[G.stage].par % 60).padStart(2, '0') + ')'], ['GEGNER', String(s.k)], ['DATENCHIPS', '◊ ' + String(s.c)], ['TODE', String(s.d)], ['BONUS', '+' + s.bonus], ['GESAMTPUNKTE', String(s.score).padStart(6, '0')]];
   rows.forEach((r, i) => { const on = clamp((k - .3 - i * .28) * 4, 0, 1); if (on <= 0) return; g.globalAlpha = on; txtPx(r[0], Math.round((x + 8) * CW), Math.round((y + 5 + i * 1.5) * CH), '#8a96c4'); txtPx(r[1], Math.round((x + 30) * CW), Math.round((y + 5 + i * 1.5) * CH), i === 5 ? '#ffe45e' : '#eaf6ff'); g.globalAlpha = 1; });
-  const rk = clamp((k - 2.2) * 3, 0, 1); if (rk > 0) { g.globalAlpha = rk; const col = { S: '#ffe45e', A: '#5dffb0', B: '#19f0ff', C: '#8a96c4' }[s.rank]; txtC('R A N K', COLS / 2, y + 15.2, '#8a96c4'); const gx = Math.round(COLS / 2 - 3); bigText(s.rank, gx, y + 16.4, 1, [col, col, col, col, col], '#0a0a20', rk, 0); g.globalAlpha = 1; }
-  if (k > 3 && Math.floor(k * 1.8) % 2 === 0) txtC(G.stage < STAGES.length - 1 ? '[ ENTER :: NEXT SECTOR ]' : '[ ENTER ]', COLS / 2, y + 24.2, '#5dffb0');
+  const rk = clamp((k - 2.2) * 3, 0, 1); if (rk > 0) { g.globalAlpha = rk; const col = { S: '#ffe45e', A: '#5dffb0', B: '#19f0ff', C: '#8a96c4' }[s.rank]; txtC('R A N G', COLS / 2, y + 15.2, '#8a96c4'); const gx = Math.round(COLS / 2 - 3); bigText(s.rank, gx, y + 16.4, 1, [col, col, col, col, col], '#0a0a20', rk, 0); g.globalAlpha = 1; }
+  if (k > 3 && Math.floor(k * 1.8) % 2 === 0) txtC(G.stage < STAGES.length - 1 ? '[ ENTER :: NÄCHSTER SEKTOR ]' : '[ ENTER ]', COLS / 2, y + 24.2, '#5dffb0');
 }
 const END_LINES = [
-  ['ECHO', 'Archon is down. The whole grid just exhaled.'],
-  ['ECHO', 'Every screen in Meridian is blinking. Nobody is giving orders anymore.'],
-  ['ECHO', 'Look at that skyline, Sam. For once, it belongs to the people living under it.'],
-  ['ECHO', 'Well done, Samuel Aumann. The city has a new hero: Super Sam.'],
+  ['ECHO', 'Archon ist erledigt. Das ganze Netz hat gerade ausgeatmet.'],
+  ['ECHO', 'Auf jedem Bildschirm in Meridian blinkt es. Niemand gibt mehr Befehle.'],
+  ['ECHO', 'Sieh dir die Skyline an, Sam. Zum ersten Mal gehört sie denen, die darunter leben.'],
+  ['ECHO', 'Gut gemacht, Samuel Aumann. Die Stadt hat einen neuen Helden: Super Sam.'],
 ];
 function drawEnding(t) {
   drawWorld(t); const k = G.endT; drawBand(0, ROWS, clamp(k * .3, 0, .78));
   const a = clamp((k - .6) * 1.2, 0, 1), top = Math.round(ROWS * .12), LO = logoLayout(), sx = LO.sx;
   g.globalAlpha = a; bigText('SUPER', LO.lx0, top, sx, TITLE_GRADS[0], '#1a0838', a, 0); bigText('SAM', LO.samX, top + 6, sx, TITLE_GRADS[1], '#1a0838', a, 0);
   if (LO.withBust) drawSamBust(LO.bx * CW, (top - .9) * CH, LO.bu, t, a);
-  txtC('S A M U E L   A U M A N N   ::   S I G N A L   F R E E', COLS / 2, top + 12.5, '#5dffb0', a); g.globalAlpha = 1;
+  txtC('S A M U E L   A U M A N N   ::   S I G N A L   F R E I', COLS / 2, top + 12.5, '#5dffb0', a); g.globalAlpha = 1;
   const ly = top + 15;
   END_LINES.forEach((l, i) => {
     const st = 2 + i * 3.4, sh = Math.floor((k - st) * 42); if (sh <= 0) return;
@@ -2889,17 +2890,17 @@ function drawEnding(t) {
   });
   const st = G.stats, sy = ly + 7.6; if (k > 11) {
     const aa = clamp((k - 11) * 2, 0, 1); g.globalAlpha = aa;
-    const t0 = S.stageT | 0; txtC('TOTAL SCORE ' + String(st.score).padStart(6, '0') + '     DEATHS ' + S.deaths + '     CHIPS ◊ ' + S.chips + '     HOSTILES ' + S.kills, COLS / 2, sy, '#ffe45e');
-    if (Math.floor(k * 1.8) % 2 === 0) txtC('[ ENTER :: RETURN TO TITLE ]', COLS / 2, sy + 2.4, '#5dffb0'); g.globalAlpha = 1;
+    const t0 = S.stageT | 0; txtC('PUNKTE ' + String(st.score).padStart(6, '0') + '     TODE ' + S.deaths + '     CHIPS ◊ ' + S.chips + '     GEGNER ' + S.kills, COLS / 2, sy, '#ffe45e');
+    if (Math.floor(k * 1.8) % 2 === 0) txtC('[ ENTER :: ZUM TITEL ]', COLS / 2, sy + 2.4, '#5dffb0'); g.globalAlpha = 1;
   }
 }
 function drawPause(t) {
   drawWorld(t); drawBand(0, ROWS, .82);
   const pw = 66, x = Math.round((COLS - pw) / 2), y = Math.max(1, Math.round(ROWS * .12));
-  panel(x, y, pw, 22, '#19f0ff', 'PAUSED', .92);
-  const items = ['RESUME', 'RESTART SECTOR', 'RETURN TO TITLE', AU.muted ? 'SOUND: OFF' : 'SOUND: ON'];
+  panel(x, y, pw, 22, '#19f0ff', 'PAUSE', .92);
+  const items = ['WEITER', 'SEKTOR NEU STARTEN', 'ZUM TITEL', AU.muted ? 'TON: AUS' : 'TON: AN'];
   items.forEach((s, i) => { const on = i === G.pauseSel; txtC((on ? '► ' : '  ') + s + (on ? ' ◄' : '  '), COLS / 2, y + 2.5 + i * 1.5, on ? '#5dffb0' : '#8a96c4'); });
-  const cs = [['A D  /  ← →', 'MOVE'], ['SPACE  /  W', 'JUMP  (slide on walls, jump off them)'], ['SHIFT', 'DASH  (you cannot be hit mid-dash)'], ['F', 'FLY  (toggle; WASD steers; refuels on the ground)'], ['MOUSE', 'AIM'], ['LEFT CLICK', 'SHOOT'], ['RIGHT CLICK / E / K', 'GRAPPLE: hold to swing, release to let go'], ['SPACE (while hooked)', 'LET GO WITH A BOOST'], ['1 2 3  /  Q  /  WHEEL', 'SWITCH WEAPON'], ['S  /  ↓', 'DROP THROUGH THIN PLATFORMS'], ['R', 'RESPAWN AT LAST CHECKPOINT'], ['M  /  P  or  ESC', 'MUTE  /  PAUSE']];
+  const cs = [['A D  /  ← →', 'LAUFEN'], ['LEERTASTE  /  W', 'SPRINGEN  (an Wänden abspringen)'], ['SHIFT', 'DASH  (dabei unverwundbar)'], ['F', 'FLIEGEN  (WASD lenkt, Boden tankt)'], ['MAUS', 'ZIELEN'], ['LINKSKLICK', 'SCHIESSEN'], ['RECHTSKLICK / E / K', 'HAKEN: halten = schwingen'], ['LEERTASTE (am Haken)', 'MIT SCHWUNG LOSLASSEN'], ['1 2 3  /  Q  /  RAD', 'WAFFE WECHSELN'], ['S  /  ↓', 'DURCH DÜNNE PLATTFORMEN'], ['R', 'NEUSTART AM KONTROLLPUNKT'], ['M  /  P  oder  ESC', 'TON  /  PAUSE']];
   cs.forEach((r, i) => { txtPx(r[0], Math.round((x + 4) * CW), Math.round((y + 9.2 + i) * CH), '#7f8fd8'); txtPx(r[1], Math.round((x + 28) * CW), Math.round((y + 9.2 + i) * CH), '#5a6aa8'); });
 }
 
