@@ -9,16 +9,16 @@ a grapple wire, and a hero who can fly like Superman.
 
 | Key | Action |
 | --- | --- |
-| `A` `D` | move |
-| `Space` / `W` | jump (slide on walls, jump off them) |
-| `F` | fly (toggle). `A` `D` `W` `S` steer. The fuel bar refills when you land |
-| `Shift` | dash (you cannot be hit mid-dash) |
+| `A` `D` / arrows | move |
+| `Space` / `W` | jump (slide down walls, jump off them) |
+| `F` | fly (toggle). `A` `D` `W` `S` steer. The fuel bar refills quickly on the ground |
+| `Shift` / `L` | dash (you cannot be hit mid-dash) |
 | Mouse | aim |
 | Left click | shoot |
-| Right click / `E` / `K` | grapple: hold to swing, release to let go |
+| Right click / `E` / `K` | grapple: hold to swing, release to let go. `W` / `S` reel the wire in and out |
 | `1` `2` `3` / `Q` / wheel | switch weapon |
-| `S` / down | drop through thin platforms |
-| `R` | respawn at the last checkpoint |
+| `S` + jump | drop through thin platforms |
+| `R` | give up and restart from the last checkpoint |
 | `P` / `Esc` | pause. `M` mutes |
 
 Keyboard and mouse are required.
