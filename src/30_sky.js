@@ -2,7 +2,7 @@
    sky, parallax skylines, weather, big font
    ========================================================================= */
 const SKY = { th: null, stars: [], moon: null, layers: [], clouds: [], grad: null, camRef: 50, kana: false, signs: [] };
-const SIGNS_ASCII = ['NEON', 'BAR', '24H', 'RAMEN', 'CYBER', 'HOTEL', 'DATA', 'PHARMA', 'NOODLE', 'ARCADE', 'KAIJU', 'CHROME', 'SAKE', 'VOID'];
+const SIGNS_ASCII = ['NEON', 'BAR', '24H', 'RAMEN', 'CYBER', 'HOTEL', 'DATEN', 'PHARMA', 'NUDEL', 'ARCADE', 'KAIJU', 'CHROM', 'SAKE', 'VOID'];
 const SIGNS_KANA = ['ネオン', '電脳', '酒場', '夜市', '麺屋', '薬局', '危険', '未来', 'ラーメン', '龍', '刀', '夢'];
 function isWide(c) { return c.charCodeAt(0) >= 0x2E80; }
 /* draw mixed ascii / full-width text at device px; returns advance in cells */
@@ -113,7 +113,7 @@ function makeLayer(d, th) {
 function hexA(h, a) { const c = hex2rgb(h); return `rgba(${c[0]},${c[1]},${c[2]},${a})`; }
 
 const BLIMP = ['        ▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄        ', '    ▄▟██▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀██▙▄    ', '  ▟█▀                                  ▀█▙  ', ' ▐█▌                                    ▐█▌ ', '  ▜█▄                                  ▄█▛  ', '    ▀▜██▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄██▛▀    ', '        ▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀        ', '              ▀▀▌▐▀▀▀▀▀▀▀▀▌▐▀▀              '];
-const AD_TEXT = '   MERIDIAN :: TOMORROW, SECURED   ///   NEURAL LACE 40% OFF   ///   STAY IN YOUR LANE, CITIZEN   ///   ';
+const AD_TEXT = '   MERIDIAN :: MORGEN, GESICHERT   ///   NEURAL LACE 40% RABATT   ///   BLEIB IN DEINER SPUR, BÜRGER   ///   ';
 function drawBlimp(t, camX, camY) {
   const wI = BLIMP[0].length, x0 = (((t * 2.4 - camX * .09) % (COLS + wI + 40)) + (COLS + wI + 40)) % (COLS + wI + 40) - wI - 20, y0 = ROWS * .13 - (camY - SKY.camRef) * .05;
   const a = .85;

@@ -305,8 +305,8 @@ function updPlayer(dt) {
 }
 
 const WEAPONS = [
-  { name: 'PULSE', cd: .1, spd: 88, life: .85, col: 'cyan' },
-  { name: 'SCATTER', cd: .6, spd: 74, life: .32, col: 'amber' },
+  { name: 'PULS', cd: .1, spd: 88, life: .85, col: 'cyan' },
+  { name: 'STREU', cd: .6, spd: 74, life: .32, col: 'amber' },
   { name: 'RAIL', cd: .95, spd: 0, life: 0, col: 'mag' },
 ];
 function shootWeapon() {
@@ -476,7 +476,7 @@ function spawnBoss(x, y, arena) {
 function aiBoss(e, dt, dxp, dyp, dist) {
   const B = e.bounds, p = S.P; e.rot += dt;
   const frac = e.hp / e.maxhp; const ph = frac > .66 ? 1 : frac > .33 ? 2 : 3;
-  if (ph !== e.ph) { e.ph = ph; e.fire = 2.5; e.tele = 0; e.laser = null; banner('ARCHON // PHASE ' + ph, ph === 2 ? 'LASER ARRAY ONLINE' : 'CORE EXPOSED. OVERCLOCKING.', C.red); shake(1.2); ring(e.x, e.y - 5, 30, 1, PAL[C.red]); sfx('bigboom', .8); glitchAmt = 1.2; S.flash = .4; S.flashCol = '#ff3b4d'; if (ph === 3) { S.phase3 = true; } }
+  if (ph !== e.ph) { e.ph = ph; e.fire = 2.5; e.tele = 0; e.laser = null; banner('ARCHON // PHASE ' + ph, ph === 2 ? 'LASERFELD AKTIV' : 'KERN FREIGELEGT. ÜBERTAKTUNG.', C.red); shake(1.2); ring(e.x, e.y - 5, 30, 1, PAL[C.red]); sfx('bigboom', .8); glitchAmt = 1.2; S.flash = .4; S.flashCol = '#ff3b4d'; if (ph === 3) { S.phase3 = true; } }
   if (e.intro > 0) { e.intro -= dt; e.noHit = true; e.y = lerp(e.y, e.cy, Math.min(1, 2 * dt)); if (e.intro <= 0) e.noHit = false; return; }
   // hover path
   const spd = ph === 1 ? .55 : ph === 2 ? .75 : 1.0;
@@ -574,14 +574,14 @@ function updPickups(dt) {
     if (d < 2.2) {
       if (k.k === 'hp') { if (p.hp >= 100) continue; p.hp = Math.min(100, p.hp + EASY.heal); sfx('heal'); ring(p.x, p.y - 1.5, 6, .5, PAL[C.mint]); for (let i = 0; i < 10; i++) pt(p.x + rr(-1, 1), p.y - rr(0, 3), 0, rr(-14, -4), rr(.4, .9), ['+'], PAL[C.mint], {}); k.got = true; }
       else if (k.k === 'chip') { S.chips++; S.score += 25; sfx('chip'); k.got = true; sparks(k.x, k.y, 4, 0, -1, PAL[C.yel], 20); }
-      else if (k.k === 'w_scatter') { p.wpns[1] = true; p.wpn = 1; sfx('pick'); k.got = true; banner('SCATTER-9 ACQUIRED', 'KEY 2  //  SHORT RANGE, HEAVY IMPACT', C.amber); say('ECHO', 'Scatter rounds. Close range, wide spread. The recoil will launch you. Use that.'); ring(p.x, p.y - 1.5, 12, .7, PAL[C.amber]); }
-      else if (k.k === 'w_rail') { p.wpns[2] = true; p.wpn = 2; sfx('pick'); k.got = true; banner('RAILCASTER ACQUIRED', 'KEY 3  //  PIERCES EVERYTHING IN LINE', C.mag); say('ECHO', 'Railcaster. One shot, straight through armor and anything behind it.'); ring(p.x, p.y - 1.5, 12, .7, PAL[C.mag]); }
+      else if (k.k === 'w_scatter') { p.wpns[1] = true; p.wpn = 1; sfx('pick'); k.got = true; banner('SCATTER-9 ERHALTEN', 'TASTE 2  //  KURZE REICHWEITE, HARTER AUFPRALL', C.amber); say('ECHO', 'Streumunition. Kurze Reichweite, breite Streuung. Der Rückstoß schleudert dich weg. Nutz das.'); ring(p.x, p.y - 1.5, 12, .7, PAL[C.amber]); }
+      else if (k.k === 'w_rail') { p.wpns[2] = true; p.wpn = 2; sfx('pick'); k.got = true; banner('RAILCASTER ERHALTEN', 'TASTE 3  //  DURCHSCHLÄGT ALLES IN DER LINIE', C.mag); say('ECHO', 'Railcaster. Ein Schuss, mitten durch Panzerung und alles dahinter.'); ring(p.x, p.y - 1.5, 12, .7, PAL[C.mag]); }
     }
   }
   S.pks = S.pks.filter(k => !k.got);
   for (const c of S.L.cps) {
     if (!c.on && !p.dead && Math.abs(p.x - c.x) < 3 && Math.abs(p.y - c.y) < 5) {
-      c.on = true; S.respawn = { x: c.x, y: c.y }; p.hp = 100; sfx('cp'); banner(c.label, 'SIGNAL SYNCED // INTEGRITY RESTORED', C.mint); ring(c.x, c.y - 1, 14, .9, PAL[C.mint]); ring(c.x, c.y - 1, 8, .6, PAL[C.white]);
+      c.on = true; S.respawn = { x: c.x, y: c.y }; p.hp = 100; sfx('cp'); banner(c.label, 'SIGNAL SYNCHRON // INTEGRITÄT RESTAURIERT', C.mint); ring(c.x, c.y - 1, 14, .9, PAL[C.mint]); ring(c.x, c.y - 1, 8, .6, PAL[C.white]);
       for (let i = 0; i < 24; i++) pt(c.x + rr(-2, 2), c.y - rr(0, 3), rr(-4, 4), rr(-20, -6), rr(.6, 1.4), ['0', '1', '+'], PAL[C.mint], { g: -4 });
     }
   }
@@ -644,9 +644,9 @@ function updZones(dt) {
   }
   // arenas
   for (const a of L.arenas) {
-    if (a.state === 0 && p.x > a.x + 3 && p.x < a.x + a.w - 3 && p.y > a.y && p.y < a.y + a.h + 1) { a.state = 1; a.wave = 0; a.t = .8; a.alive = 0; a.doors.forEach(id => L.doors[id].target = 0); banner(a.title || 'LOCKDOWN', 'ELIMINATE ALL HOSTILES', C.red); sfx('warn'); sfx('warn'); MUS.inten = 1; shake(.4); }
+    if (a.state === 0 && p.x > a.x + 3 && p.x < a.x + a.w - 3 && p.y > a.y && p.y < a.y + a.h + 1) { a.state = 1; a.wave = 0; a.t = .8; a.alive = 0; a.doors.forEach(id => L.doors[id].target = 0); banner(a.title || 'ABRIEGELUNG', 'ALLE FEINDE ELIMINIEREN', C.red); sfx('warn'); sfx('warn'); MUS.inten = 1; shake(.4); }
     else if (a.state === 1) {
-      if (a.alive <= 0) { a.t -= dt; if (a.t <= 0) { if (a.wave >= a.waves.length) { a.state = 2; a.doors.forEach(id => L.doors[id].target = 1); banner('AREA SECURED', 'DOORS UNLOCKED', C.mint); MUS.inten = 0; S.pks.push({ k: 'hp', x: a.x + a.w / 2, y: a.y + a.h - 3, t: 0 }); sfx('heal'); } else { const w = a.waves[a.wave++]; a.t = 99; for (const sp of w) { const e = spawnEnemy(Object.assign({}, sp[3] || {}, { k: sp[0], x: sp[1], y: sp[2], arena: a, range: 90 })); if (e) { a.alive++; ring(e.x, e.y - e.h / 2, 6, .5, PAL[C.mag]); for (let i = 0; i < 10; i++) pt(e.x + rr(-1, 1), e.y - rr(0, e.h), rr(-6, 6), rr(-16, -2), rr(.4, .8), ['0', '1', '#'], PAL[C.mag], {}); } } sfx('boot', .6); glitchAmt = .6; } } }
+      if (a.alive <= 0) { a.t -= dt; if (a.t <= 0) { if (a.wave >= a.waves.length) { a.state = 2; a.doors.forEach(id => L.doors[id].target = 1); banner('BEREICH GESICHERT', 'TÜREN ENTRIEGELT', C.mint); MUS.inten = 0; S.pks.push({ k: 'hp', x: a.x + a.w / 2, y: a.y + a.h - 3, t: 0 }); sfx('heal'); } else { const w = a.waves[a.wave++]; a.t = 99; for (const sp of w) { const e = spawnEnemy(Object.assign({}, sp[3] || {}, { k: sp[0], x: sp[1], y: sp[2], arena: a, range: 90 })); if (e) { a.alive++; ring(e.x, e.y - e.h / 2, 6, .5, PAL[C.mag]); for (let i = 0; i < 10; i++) pt(e.x + rr(-1, 1), e.y - rr(0, e.h), rr(-6, 6), rr(-16, -2), rr(.4, .8), ['0', '1', '#'], PAL[C.mag], {}); } } sfx('boot', .6); glitchAmt = .6; } } }
       else a.t = .9;
     }
   }

@@ -4,10 +4,10 @@
                                       play -> (boss dies) -> ending -> title
    ========================================================================= */
 const STAGES = [
-  { build: buildStage1, name: 'RAINLINE', sub: 'ROOFTOP RUN // SPRAWL DISTRICT 7', par: 230 },
-  { build: buildStage2, name: 'NEON BAZAAR', sub: 'STREET LEVEL // KOWLOON STACKS', par: 230 },
-  { build: buildStage3, name: 'MERIDIAN TOWER', sub: 'CORPORATE INTERIOR // LEVELS 01-88', par: 300 },
-  { build: buildStage4, name: 'THE SPIRE', sub: 'APEX CLIMB // ARCHON', par: 240 },
+  { build: buildStage1, name: 'RAINLINE', sub: 'DACHLAUF // SPRAWL-BEZIRK 7', par: 230 },
+  { build: buildStage2, name: 'NEON BASAR', sub: 'STRASSENEBENE // KOWLOON-TÜRME', par: 230 },
+  { build: buildStage3, name: 'MERIDIAN TURM', sub: 'KONZERNINNERES // EBENEN 01-88', par: 300 },
+  { build: buildStage4, name: 'DIE SPITZE', sub: 'GIPFELAUFSTIEG // ARCHON', par: 240 },
 ];
 const G = { scene: 'boot', t: 0, sel: 0, stage: 0, introT: 0, clearT: 0, endT: 0, pauseSel: 0, base: null, stats: null, fade: 1, started: false, titleL: null, camGY: 40 };
 const STEP = 1 / 60;
@@ -34,7 +34,7 @@ function loadStage(i, wpns) {
 function stageClear() {
   if (G.scene !== 'play') return;
   G.scene = 'clearing'; G.clearT = 0;
-  banner('STAGE CLEAR', STAGES[G.stage].name + ' // SIGNAL SECURED', C.mint); sfx('cp'); sfx('pick'); ring(S.P.x, S.P.y - 1.5, 20, 1, PAL[C.mint]); MUS.inten_t = 0;
+  banner('SEKTOR GESCHAFFT', STAGES[G.stage].name + ' // SIGNAL GESICHERT', C.mint); sfx('cp'); sfx('pick'); ring(S.P.x, S.P.y - 1.5, 20, 1, PAL[C.mint]); MUS.inten_t = 0;
 }
 function rankFor(t, d, par) { return d === 0 && t < par ? 'S' : d <= 1 && t < par * 1.5 ? 'A' : d <= 4 ? 'B' : 'C'; }
 function computeStats() {
@@ -65,7 +65,7 @@ function bossDieStep(dt) {
     sfx('bigboom'); sfx('bigboom', .6); musStop();
   } else if (bd > 3.4 && S.mode === 'bossdie') {
     S.mode = 'play'; S.cam.lock = null; S.L.doors.forEach(d => { if (d.mode === 'arena') d.target = 1; }); MUS.inten_t = 0;
-    banner('ARCHON OFFLINE', 'THE SPIRE IS DARK', C.mint); S.pks.push({ k: 'hp', x: b.x, y: S.L.bossArena.floor - 2, t: 0 }); sfx('cp');
+    banner('ARCHON OFFLINE', 'DIE SPITZE IST DUNKEL', C.mint); S.pks.push({ k: 'hp', x: b.x, y: S.L.bossArena.floor - 2, t: 0 }); sfx('cp');
     S.endTimer = 0;
   }
 }
@@ -118,23 +118,24 @@ function drawTitle(t) {
   // underline scan
   const ly = top + 12, lw = Math.max(lw0, 40);
   for (let i = 0; i < lw; i++) { const k = (i / lw), on = Math.sin(t * 3 - i * .2) * .5 + .5; gl(i % 4 === 0 ? '◆' : '═', Math.round((tcx - lw / 2 + i) * CW), Math.round(ly * CH), k < .5 ? '#19f0ff' : '#ff2fb9', .35 + on * .5); }
-  txtC('S T A R R I N G   S A M U E L   A U M A N N', tcx, ly + 1.5, '#ffe45e', Math.min(1, G.t * .6));
-  txtC('N E O N   ·   R A I N   ·   S T E E L', tcx, ly + 2.9, '#8a96c4', Math.min(1, G.t * .6));
+  txtC('M I T   S A M U E L   A U M A N N', tcx, ly + 1.5, '#ffe45e', Math.min(1, G.t * .6));
+  txtC('N E O N   ·   R E G E N   ·   S T A H L', tcx, ly + 2.9, '#8a96c4', Math.min(1, G.t * .6));
   // stage select
   const sy = Math.max(top + 17, ROWS - 12), st = STAGES[G.sel], bw = 54;
-  panel(Math.round((COLS - bw) / 2), sy - 1, bw, 6, '#19f0ff', 'SELECT SECTOR', .66);
+  panel(Math.round((COLS - bw) / 2), sy - 1, bw, 6, '#19f0ff', 'SEKTOR WÄHLEN', .66);
   const wob = Math.floor(t * 2.5) % 2;
   txtC('◄', COLS / 2 - bw / 2 + 4 - wob * .4, sy + 1.3, '#19f0ff'); txtC('►', COLS / 2 + bw / 2 - 4 + wob * .4, sy + 1.3, '#19f0ff');
-  txtC('S E C T O R   0' + (G.sel + 1), COLS / 2, sy + .2, '#8a96c4');
+  txtC('S E K T O R   0' + (G.sel + 1), COLS / 2, sy + .2, '#8a96c4');
   txtC(st.name.split('').join(' '), COLS / 2, sy + 1.3, '#eaf6ff'); txtC(st.sub, COLS / 2, sy + 2.4, '#ff2fb9');
   for (let i = 0; i < STAGES.length; i++) gl(i === G.sel ? '◆' : '◇', Math.round((COLS / 2 - STAGES.length * 1.5 + i * 3 + .5) * CW), Math.round((sy + 3.6) * CH), i === G.sel ? '#ffe45e' : '#3d4676');
   const bl = Math.floor(t * 1.8) % 2 === 0;
-  if (bl) txtC('[ PRESS ENTER OR CLICK TO JACK IN ]', COLS / 2, sy + 6.2, '#5dffb0');
+  if (bl) txtC('[ ENTER DRÜCKEN ODER KLICKEN ZUM EINSTEIGEN ]', COLS / 2, sy + 6.2, '#5dffb0');
   // controls
-  const cy = ROWS - 3;
-  txtC('A D  MOVE   SPACE  JUMP   F  FLY   SHIFT  DASH   MOUSE  AIM   LMB  SHOOT   RMB  GRAPPLE   1 2 3  GUN', COLS / 2, cy, '#7384c8');
-  txtC('M  MUTE    P  PAUSE    R  RESPAWN        hook onto anything. swing. let go. fly.', COLS / 2, cy + 1.3, '#4d5a96');
-  if (MOUSE.touch) txtC('KEYBOARD + MOUSE REQUIRED', COLS / 2, 1, '#ff3b4d');
+  const cy = ROWS - 4.1;
+  txtC('A D  LAUFEN     LEERTASTE  SPRINGEN     F  FLIEGEN     SHIFT  DASH', COLS / 2, cy, '#7384c8');
+  txtC('MAUS  ZIELEN     LINKSKLICK  SCHIESSEN     RECHTSKLICK  ENTERHAKEN     1 2 3  WAFFE', COLS / 2, cy + 1.3, '#7384c8');
+  txtC('M  TON     P  PAUSE     R  NEUSTART          häng dich an alles. schwing. lass los. flieg.', COLS / 2, cy + 2.6, '#4d5a96');
+  if (MOUSE.touch) txtC('TASTATUR + MAUS ERFORDERLICH', COLS / 2, 1, '#ff3b4d');
 }
 
 /* ---------------- intro / clear / ending / pause ---------------- */
@@ -143,7 +144,7 @@ function drawIntro(t) {
   drawWorld(t); drawHud(t);
   const k = G.introT, a = clamp(Math.min(k * 3, (3.6 - k) * 3), 0, 1), L = S.L, st = STAGES[G.stage], cy = Math.round(ROWS * .3);
   g.globalAlpha = a; drawBand(cy - 2, 12, .78);
-  txtC('S E C T O R   0' + (G.stage + 1), COLS / 2, cy - .5, '#ff2fb9');
+  txtC('S E K T O R   0' + (G.stage + 1), COLS / 2, cy - .5, '#ff2fb9');
   const sx = bigFit(L.intro.title, 3, COLS - 10), x = Math.round((COLS - bigWidth(L.intro.title, sx)) / 2);
   bigText(L.intro.title, x, cy + 1, sx, TITLE_GRADS[G.stage % 2 ? 1 : 0], '#1a0838', a, k < .5 ? 1 - k * 2 : 0);
   txtC(L.intro.sub, COLS / 2, cy + 7.2, '#8a96c4');
@@ -153,25 +154,25 @@ function drawIntro(t) {
 function drawClear(t) {
   drawWorld(t); drawBand(0, ROWS, .62);
   const s = G.stats, k = G.clearT, x = Math.round((COLS - 56) / 2), y = Math.max(1, Math.round(ROWS * .1));
-  panel(x, y, 56, 23, '#5dffb0', 'SECTOR CLEARED', .85);
+  panel(x, y, 56, 23, '#5dffb0', 'SEKTOR GESCHAFFT', .85);
   txtC((STAGES[G.stage].name).split('').join(' '), COLS / 2, y + 2, '#eaf6ff'); txtC(STAGES[G.stage].sub, COLS / 2, y + 3, '#8a96c4');
-  const rows = [['TIME', String(s.t / 60 | 0).padStart(2, '0') + ':' + String(Math.floor(s.t % 60)).padStart(2, '0') + '   (PAR ' + String(STAGES[G.stage].par / 60 | 0) + ':' + String(STAGES[G.stage].par % 60).padStart(2, '0') + ')'], ['HOSTILES', String(s.k)], ['DATA CHIPS', '◊ ' + String(s.c)], ['DEATHS', String(s.d)], ['BONUS', '+' + s.bonus], ['TOTAL SCORE', String(s.score).padStart(6, '0')]];
+  const rows = [['ZEIT', String(s.t / 60 | 0).padStart(2, '0') + ':' + String(Math.floor(s.t % 60)).padStart(2, '0') + '   (SOLL ' + String(STAGES[G.stage].par / 60 | 0) + ':' + String(STAGES[G.stage].par % 60).padStart(2, '0') + ')'], ['GEGNER', String(s.k)], ['DATENCHIPS', '◊ ' + String(s.c)], ['TODE', String(s.d)], ['BONUS', '+' + s.bonus], ['GESAMTPUNKTE', String(s.score).padStart(6, '0')]];
   rows.forEach((r, i) => { const on = clamp((k - .3 - i * .28) * 4, 0, 1); if (on <= 0) return; g.globalAlpha = on; txtPx(r[0], Math.round((x + 8) * CW), Math.round((y + 5 + i * 1.5) * CH), '#8a96c4'); txtPx(r[1], Math.round((x + 30) * CW), Math.round((y + 5 + i * 1.5) * CH), i === 5 ? '#ffe45e' : '#eaf6ff'); g.globalAlpha = 1; });
-  const rk = clamp((k - 2.2) * 3, 0, 1); if (rk > 0) { g.globalAlpha = rk; const col = { S: '#ffe45e', A: '#5dffb0', B: '#19f0ff', C: '#8a96c4' }[s.rank]; txtC('R A N K', COLS / 2, y + 15.2, '#8a96c4'); const gx = Math.round(COLS / 2 - 3); bigText(s.rank, gx, y + 16.4, 1, [col, col, col, col, col], '#0a0a20', rk, 0); g.globalAlpha = 1; }
-  if (k > 3 && Math.floor(k * 1.8) % 2 === 0) txtC(G.stage < STAGES.length - 1 ? '[ ENTER :: NEXT SECTOR ]' : '[ ENTER ]', COLS / 2, y + 24.2, '#5dffb0');
+  const rk = clamp((k - 2.2) * 3, 0, 1); if (rk > 0) { g.globalAlpha = rk; const col = { S: '#ffe45e', A: '#5dffb0', B: '#19f0ff', C: '#8a96c4' }[s.rank]; txtC('R A N G', COLS / 2, y + 15.2, '#8a96c4'); const gx = Math.round(COLS / 2 - 3); bigText(s.rank, gx, y + 16.4, 1, [col, col, col, col, col], '#0a0a20', rk, 0); g.globalAlpha = 1; }
+  if (k > 3 && Math.floor(k * 1.8) % 2 === 0) txtC(G.stage < STAGES.length - 1 ? '[ ENTER :: NÄCHSTER SEKTOR ]' : '[ ENTER ]', COLS / 2, y + 24.2, '#5dffb0');
 }
 const END_LINES = [
-  ['ECHO', 'Archon is down. The whole grid just exhaled.'],
-  ['ECHO', 'Every screen in Meridian is blinking. Nobody is giving orders anymore.'],
-  ['ECHO', 'Look at that skyline, Sam. For once, it belongs to the people living under it.'],
-  ['ECHO', 'Well done, Samuel Aumann. The city has a new hero: Super Sam.'],
+  ['ECHO', 'Archon ist erledigt. Das ganze Netz hat gerade ausgeatmet.'],
+  ['ECHO', 'Auf jedem Bildschirm in Meridian blinkt es. Niemand gibt mehr Befehle.'],
+  ['ECHO', 'Sieh dir die Skyline an, Sam. Zum ersten Mal gehört sie denen, die darunter leben.'],
+  ['ECHO', 'Gut gemacht, Samuel Aumann. Die Stadt hat einen neuen Helden: Super Sam.'],
 ];
 function drawEnding(t) {
   drawWorld(t); const k = G.endT; drawBand(0, ROWS, clamp(k * .3, 0, .78));
   const a = clamp((k - .6) * 1.2, 0, 1), top = Math.round(ROWS * .12), LO = logoLayout(), sx = LO.sx;
   g.globalAlpha = a; bigText('SUPER', LO.lx0, top, sx, TITLE_GRADS[0], '#1a0838', a, 0); bigText('SAM', LO.samX, top + 6, sx, TITLE_GRADS[1], '#1a0838', a, 0);
   if (LO.withBust) drawSamBust(LO.bx * CW, (top - .9) * CH, LO.bu, t, a);
-  txtC('S A M U E L   A U M A N N   ::   S I G N A L   F R E E', COLS / 2, top + 12.5, '#5dffb0', a); g.globalAlpha = 1;
+  txtC('S A M U E L   A U M A N N   ::   S I G N A L   F R E I', COLS / 2, top + 12.5, '#5dffb0', a); g.globalAlpha = 1;
   const ly = top + 15;
   END_LINES.forEach((l, i) => {
     const st = 2 + i * 3.4, sh = Math.floor((k - st) * 42); if (sh <= 0) return;
@@ -181,17 +182,17 @@ function drawEnding(t) {
   });
   const st = G.stats, sy = ly + 7.6; if (k > 11) {
     const aa = clamp((k - 11) * 2, 0, 1); g.globalAlpha = aa;
-    const t0 = S.stageT | 0; txtC('TOTAL SCORE ' + String(st.score).padStart(6, '0') + '     DEATHS ' + S.deaths + '     CHIPS ◊ ' + S.chips + '     HOSTILES ' + S.kills, COLS / 2, sy, '#ffe45e');
-    if (Math.floor(k * 1.8) % 2 === 0) txtC('[ ENTER :: RETURN TO TITLE ]', COLS / 2, sy + 2.4, '#5dffb0'); g.globalAlpha = 1;
+    const t0 = S.stageT | 0; txtC('PUNKTE ' + String(st.score).padStart(6, '0') + '     TODE ' + S.deaths + '     CHIPS ◊ ' + S.chips + '     GEGNER ' + S.kills, COLS / 2, sy, '#ffe45e');
+    if (Math.floor(k * 1.8) % 2 === 0) txtC('[ ENTER :: ZUM TITEL ]', COLS / 2, sy + 2.4, '#5dffb0'); g.globalAlpha = 1;
   }
 }
 function drawPause(t) {
   drawWorld(t); drawBand(0, ROWS, .82);
   const pw = 66, x = Math.round((COLS - pw) / 2), y = Math.max(1, Math.round(ROWS * .12));
-  panel(x, y, pw, 22, '#19f0ff', 'PAUSED', .92);
-  const items = ['RESUME', 'RESTART SECTOR', 'RETURN TO TITLE', AU.muted ? 'SOUND: OFF' : 'SOUND: ON'];
+  panel(x, y, pw, 22, '#19f0ff', 'PAUSE', .92);
+  const items = ['WEITER', 'SEKTOR NEU STARTEN', 'ZUM TITEL', AU.muted ? 'TON: AUS' : 'TON: AN'];
   items.forEach((s, i) => { const on = i === G.pauseSel; txtC((on ? '► ' : '  ') + s + (on ? ' ◄' : '  '), COLS / 2, y + 2.5 + i * 1.5, on ? '#5dffb0' : '#8a96c4'); });
-  const cs = [['A D  /  ← →', 'MOVE'], ['SPACE  /  W', 'JUMP  (slide on walls, jump off them)'], ['SHIFT', 'DASH  (you cannot be hit mid-dash)'], ['F', 'FLY  (toggle; WASD steers; refuels on the ground)'], ['MOUSE', 'AIM'], ['LEFT CLICK', 'SHOOT'], ['RIGHT CLICK / E / K', 'GRAPPLE: hold to swing, release to let go'], ['SPACE (while hooked)', 'LET GO WITH A BOOST'], ['1 2 3  /  Q  /  WHEEL', 'SWITCH WEAPON'], ['S  /  ↓', 'DROP THROUGH THIN PLATFORMS'], ['R', 'RESPAWN AT LAST CHECKPOINT'], ['M  /  P  or  ESC', 'MUTE  /  PAUSE']];
+  const cs = [['A D  /  ← →', 'LAUFEN'], ['LEERTASTE  /  W', 'SPRINGEN  (an Wänden abspringen)'], ['SHIFT', 'DASH  (dabei unverwundbar)'], ['F', 'FLIEGEN  (WASD lenkt, Boden tankt)'], ['MAUS', 'ZIELEN'], ['LINKSKLICK', 'SCHIESSEN'], ['RECHTSKLICK / E / K', 'HAKEN: halten = schwingen'], ['LEERTASTE (am Haken)', 'MIT SCHWUNG LOSLASSEN'], ['1 2 3  /  Q  /  RAD', 'WAFFE WECHSELN'], ['S  /  ↓', 'DURCH DÜNNE PLATTFORMEN'], ['R', 'NEUSTART AM KONTROLLPUNKT'], ['M  /  P  oder  ESC', 'TON  /  PAUSE']];
   cs.forEach((r, i) => { txtPx(r[0], Math.round((x + 4) * CW), Math.round((y + 9.2 + i) * CH), '#7f8fd8'); txtPx(r[1], Math.round((x + 28) * CW), Math.round((y + 9.2 + i) * CH), '#5a6aa8'); });
 }
 

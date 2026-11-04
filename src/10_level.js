@@ -15,7 +15,7 @@ class Level {
     this.sty = new Uint8Array(n); this.bid = new Uint8Array(n);
     this.ents = []; this.pks = []; this.cps = []; this.zones = []; this.movers = []; this.doors = []; this.decor = []; this.arenas = [];
     this.start = { x: 8, y: 20 }; this.exit = null; this.deathY = H + 6; this.nb = 1;
-    this.camBox = null; this.intro = { title: 'STAGE', sub: '', lines: [] };
+    this.camBox = null; this.intro = { title: 'SEKTOR', sub: '', lines: [] };
     this.wet = null; this.wind = 0; this.lasers = []; this.blades = []; this.camRef = 50;
   }
   idx(x, y) { return y * this.W + x; }
@@ -61,7 +61,7 @@ class Level {
   /* entities */
   en(k, x, y, o) { this.ents.push(Object.assign({ k, x, y }, o || {})); }
   pk(k, x, y) { this.pks.push({ k, x, y }); }
-  cp(x, y, label) { this.cps.push({ x, y, label: label || 'CHECKPOINT', on: false }); }
+  cp(x, y, label) { this.cps.push({ x, y, label: label || 'KONTROLLPUNKT', on: false }); }
   zone(x, y, w, h, o) { this.zones.push(Object.assign({ x, y, w, h, done: false }, o)); }
   dec(k, x, y, o) { const d = Object.assign({ k, x, y }, o || {}); this.decor.push(d); return d; }
   door(x, y, h, o) { const d = Object.assign({ x, y, h, w: 2, open: 0, target: 0, id: this.doors.length }, o || {}); this.doors.push(d); doorTiles(this, d); return d; }

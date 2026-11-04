@@ -478,26 +478,26 @@ function drawHud(t) {
   const hpf = clamp(p.hp / 100, 0, 1), hcol = hpf > .55 ? '#5dffb0' : hpf > .28 ? '#ffb347' : '#ff3b4d';
   panel(2, 1, 41, 6, '#19f0ff', 'SUPER SAM');
   { const bu = Math.max(2, Math.floor(CH * .25)); drawSamBadge(Math.round(3.4 * CW), Math.round(2 * CH + (4 * CH - 12 * bu) / 2), bu, S.t); }
-  txtPx('HP', Math.round(11 * CW), Math.round(2 * CH), '#8a96c4'); const bw = 20, fill = Math.round(bw * hpf);
+  txtPx('LP', Math.round(11 * CW), Math.round(2 * CH), '#8a96c4'); const bw = 20, fill = Math.round(bw * hpf);
   for (let i = 0; i < bw; i++) gl(i < fill ? '█' : '░', Math.round((14 + i) * CW), Math.round(2 * CH), i < fill ? hcol : '#3d4676');
   txtPx(String(Math.max(0, Math.round(p.hp))).padStart(3, ' '), Math.round(35 * CW), Math.round(2 * CH), hcol);
   txtPx('DASH', Math.round(11 * CW), Math.round(3 * CH), '#8a96c4'); const dk = p.dashCd > 0 ? 1 - p.dashCd / EASY.dashCd : 1; for (let i = 0; i < 6; i++) gl('▰', Math.round((16 + i) * CW), Math.round(3 * CH), i < dk * 6 ? '#19f0ff' : '#2a3470');
-  txtPx('◊ ' + String(S.chips).padStart(3, '0'), Math.round(25 * CW), Math.round(3 * CH), '#ffe45e'); txtPx('KILLS ' + String(S.kills).padStart(2, '0'), Math.round(33 * CW), Math.round(3 * CH), '#8a96c4');
+  txtPx('◊ ' + String(S.chips).padStart(3, '0'), Math.round(24 * CW), Math.round(3 * CH), '#ffe45e'); txtPx('GEGNER ' + String(S.kills).padStart(2, '0'), Math.round(31 * CW), Math.round(3 * CH), '#8a96c4');
   let wx = 11; for (let i = 0; i < 3; i++) { if (!p.wpns[i]) continue; const on = p.wpn === i, c = on ? ['#19f0ff', '#ffb347', '#ff2fb9'][i] : '#3d4676', lab = (i + 1) + ':' + WEAPONS[i].name; txtPx((on ? '[' : ' ') + lab + (on ? ']' : ' '), Math.round(wx * CW), Math.round(4 * CH), c); wx += lab.length + 3; }
   { // flight fuel
-    const low = p.fuel < .2, blink = low && Math.floor(S.t * 6) % 2, col = p.fly ? '#ffe45e' : low ? '#ff3b4d' : '#19f0ff', n = 16, on = Math.round(n * p.fuel);
-    txtPx('FLY', Math.round(11 * CW), Math.round(5 * CH), p.fly ? '#ffe45e' : '#8a96c4');
-    for (let i = 0; i < n; i++) gl(i < on ? '▰' : '▱', Math.round((15 + i) * CW), Math.round(5 * CH), i < on ? (blink ? '#ffffff' : col) : '#2a3470');
-    txtPx(p.fly ? '[F] LAND' : p.fuel > .06 ? '[F] FLY' : 'REFUEL', Math.round(32 * CW), Math.round(5 * CH), p.fly ? '#ffe45e' : p.fuel > .06 ? '#5dffb0' : '#ff3b4d');
-    if (p.flyHint > 0) txtC('FUEL EMPTY  -  LAND TO REFUEL', COLS / 2, 9, '#ff3b4d', Math.min(1, p.flyHint));
+    const low = p.fuel < .2, blink = low && Math.floor(S.t * 6) % 2, col = p.fly ? '#ffe45e' : low ? '#ff3b4d' : '#19f0ff', n = 14, on = Math.round(n * p.fuel);
+    txtPx('FLUG', Math.round(11 * CW), Math.round(5 * CH), p.fly ? '#ffe45e' : '#8a96c4');
+    for (let i = 0; i < n; i++) gl(i < on ? '▰' : '▱', Math.round((16 + i) * CW), Math.round(5 * CH), i < on ? (blink ? '#ffffff' : col) : '#2a3470');
+    txtPx(p.fly ? '[F] LANDEN' : p.fuel > .06 ? '[F] FLIEGEN' : 'TANKEN', Math.round(31 * CW), Math.round(5 * CH), p.fly ? '#ffe45e' : p.fuel > .06 ? '#5dffb0' : '#ff3b4d');
+    if (p.flyHint > 0) txtC('TANK LEER  -  ZUM AUFTANKEN LANDEN', COLS / 2, 9, '#ff3b4d', Math.min(1, p.flyHint));
   }
   // top right
-  const sc = 'SCORE ' + String(S.score).padStart(6, '0'); panel(COLS - 26, 1, 24, 4, '#ff2fb9', L.intro.title);
-  txtPx(sc, Math.round((COLS - 24) * CW), Math.round(2 * CH), '#eaf6ff'); const tm = S.stageT | 0; txtPx('TIME  ' + String(tm / 60 | 0).padStart(2, '0') + ':' + String(tm % 60).padStart(2, '0'), Math.round((COLS - 24) * CW), Math.round(3 * CH), '#8a96c4');
+  const sc = 'PUNKTE ' + String(S.score).padStart(6, '0'); panel(COLS - 26, 1, 24, 4, '#ff2fb9', L.intro.title);
+  txtPx(sc, Math.round((COLS - 24) * CW), Math.round(2 * CH), '#eaf6ff'); const tm = S.stageT | 0; txtPx('ZEIT   ' + String(tm / 60 | 0).padStart(2, '0') + ':' + String(tm % 60).padStart(2, '0'), Math.round((COLS - 24) * CW), Math.round(3 * CH), '#8a96c4');
   // boss bar: top centre, between the two panels (drops under them on narrow screens)
   if (S.boss && S.boss.intro <= 0.5) {
     const b = S.boss, free = COLS - 90, wide = free >= 20, bw2 = wide ? Math.min(60, free) : Math.min(60, COLS - 8), by = wide ? 2.6 : 6.8, f = Math.round(bw2 * clamp(b.hp / b.maxhp, 0, 1)), x0 = Math.round((COLS - bw2) / 2);
-    txtC(wide && bw2 < 54 ? 'A R C H O N' : 'A R C H O N   //   W A R D E N   O F   T H E   S P I R E', COLS / 2, by - 1.3, '#ff3b4d');
+    txtC(wide && bw2 < 54 ? 'A R C H O N' : 'A R C H O N   //   W Ä C H T E R   D E R   S P I T Z E', COLS / 2, by - 1.3, '#ff3b4d');
     for (let i = 0; i < bw2; i++) gl(i < f ? '█' : '░', Math.round((x0 + i) * CW), Math.round(by * CH), i < f ? (b.ph === 3 ? '#ff5a2d' : '#ff3b4d') : '#3a1a30');
     gl('▐', Math.round((x0 - 1) * CW), Math.round(by * CH), '#ff3b4d'); gl('▌', Math.round((x0 + bw2) * CW), Math.round(by * CH), '#ff3b4d');
   }
@@ -505,7 +505,7 @@ function drawHud(t) {
   if (S.comms.length) {
     const c = S.comms[0], bwid = Math.min(78, COLS - 8), lines = wrapText(c.text, bwid - 10), shown = Math.floor(c.t * 62), x0 = Math.round((COLS - bwid) / 2), y0 = ROWS - 4 - lines.length - 1;
     const slide = Math.min(1, c.t * 5, (c.dur - c.t) * 5); g.globalAlpha = Math.max(0, slide);
-    panel(x0, y0, bwid, lines.length + 3, '#5dffb0', c.who + ' // SECURE LINE', .82);
+    panel(x0, y0, bwid, lines.length + 3, '#5dffb0', c.who + ' // SICHERE LEITUNG', .82);
     // portrait
     const blink = Math.floor(c.t * 3) % 7 === 0; const face = [' ▄▄▄ ', '▐' + (blink ? '─ ─' : '◙ ◙') + '▌', ' ▀▀▀ ']; for (let j = 0; j < 3; j++) txtPx(face[j], Math.round((x0 + 2) * CW), Math.round((y0 + 1 + j) * CH), '#5dffb0');
     let rem = shown; for (let j = 0; j < lines.length; j++) { const ln = lines[j].slice(0, Math.max(0, rem)); rem -= lines[j].length + 1; txtPx(ln, Math.round((x0 + 9) * CW), Math.round((y0 + 1 + j) * CH), '#eaf6ff'); }
