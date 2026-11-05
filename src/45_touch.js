@@ -37,12 +37,13 @@ function touchLayout() {
   const B = {};
   const riding = !!(S.P && S.P.veh), vehOn = riding || !!S.near;
   if (play) {
-    B.jump = { x: jx, y: jy, r: 1.15 * u, label: riding && S.P.veh.k === 'heli' ? 'HOCH' : 'SPRUNG' };
-    B.dash = { x: jx - 2.6 * u, y: jy + .4 * u, r: .88 * u, label: riding ? 'TURBO' : 'DASH' };
-    B.hook = { x: jx - 2.2 * u, y: jy - 2.15 * u, r: .88 * u, label: riding ? 'RAKETE' : 'HAKEN' };
+    B.jump = { x: jx, y: jy, r: 1.15 * u, label: riding && S.P.veh.k === 'heli' ? 'HOCH' : riding && S.P.veh.k === 'cannon' ? 'FEUER' : 'SPRUNG' };
+    const cannon = riding && S.P.veh.k === 'cannon';
+    if (!cannon) B.dash = { x: jx - 2.6 * u, y: jy + .4 * u, r: .88 * u, label: riding ? 'TURBO' : 'DASH' };
+    if (!cannon) B.hook = { x: jx - 2.2 * u, y: jy - 2.15 * u, r: .88 * u, label: riding ? 'RAKETE' : 'HAKEN' };
     if (!riding) B.fly = { x: jx + .05 * u, y: jy - 2.7 * u, r: .88 * u, label: 'FLUG' };
     if (!riding && S.P && S.P.wpns && (S.P.wpns[1] || S.P.wpns[2])) B.wpn = { x: W - sr - 1.5 * u, y: Math.max(CH * 6.4, H * .3), r: .72 * u, label: 'WAFFE' };
-    if (vehOn) B.veh = riding ? { x: jx + .05 * u, y: jy - 2.7 * u, r: .88 * u, label: 'RAUS' } : { x: jx - 4.3 * u, y: jy - .3 * u, r: .95 * u, label: 'REIN' };
+    if (vehOn && !cannon) B.veh = riding ? { x: jx + .05 * u, y: jy - 2.7 * u, r: .88 * u, label: 'RAUS' } : { x: jx - 4.3 * u, y: jy - .3 * u, r: .95 * u, label: 'REIN' };
     const cy = CH * 8.8, cx = sl + 1.1 * u;
     B.pause = { x: cx, y: cy, r: .7 * u, label: 'II' };
     B.fs = { x: cx + 1.75 * u, y: cy, r: .7 * u, label: fsEl() ? '><' : '<>', off: !fsCan() };
@@ -196,8 +197,10 @@ function drawTouch(t) {
     tcRing(mx0, my0, R, '#19f0ff', m ? .55 : .2, .25);
     if (m) { const l = Math.hypot(m.vx, m.vy), k = l > 1 ? 1 / l : 1; tcRing(mx0 + m.vx * R * k, my0 + m.vy * R * k, u * .62, '#19f0ff', .8, .6); } else tcLabel('LAUFEN', mx0, my0, '#19f0ff', .35);
     const ax0 = a ? a.ox : W * .6, ay0 = a ? a.oy : H - sb - 2.4 * u;
+    if (!a && S.P && S.P.veh && S.P.veh.k === 'cannon') { /* the cannon only fires straight up: no aim ring */ } else {
     tcRing(ax0, ay0, R, '#ff2fb9', a ? .55 : .2, .25);
     if (a) { const l = Math.hypot(a.vx, a.vy), k = l > 1 ? 1 : l; tcRing(ax0 + a.nx * R * k, ay0 + a.ny * R * k, u * .62, '#ff2fb9', .85, .6); } else tcLabel('ZIELEN', ax0, ay0, '#ff2fb9', .35);
+    }
   }
   for (const k in TC.btn) {
     const b = TC.btn[k]; if (b.off) continue;

@@ -8,6 +8,7 @@ const VEH = {
   heli:  { name: 'HUBSCHRAUBER', w: 9, h: 3.8, hp: 120, speed: 31, boost: 50 },
   car:   { name: 'FLUCHTWAGEN',  w: 9, h: 3.2, hp: 140, speed: 34, boost: 54 },
   hover: { name: 'GLEITER',      w: 9, h: 3.2, hp: 130, speed: 40, boost: 62 },
+  racer: { name: 'RENNWAGEN',    w: 9, h: 3.2, hp: 130, speed: 40, boost: 64 },
 };
 S.veh = []; S.rkt = []; S.near = null; S.vseen = {};
 ENEMY.gunship = { w: 9, h: 3.8, hp: 18, hook: true, score: 400 };
@@ -36,6 +37,7 @@ function vehHint(v) {
     'Hubschrauber! Linker Stick fliegt, rechter Stick zielt und feuert die Bordkanone. RAKETE schießt, TURBO gibt Schub, RAUS steigt aus.'), 7.5);
   else if (v.k === 'car') say('ECHO', TX('Fluchtwagen! A und D geben Gas und bremsen, LEERTASTE springt, SHIFT gibt Turbo. Fahr die Fußtruppen um, spring über Lücken und Sperren. V steigt aus.',
     'Fluchtwagen! Linker Stick gibt Gas und bremst, nach oben springt er. TURBO gibt Schub, RAKETE und rechter Stick feuern. RAUS steigt aus.'), 7.5);
+  else if (v.k === 'cannon') say('ECHO', TX('Laserkanone! A und D fahren, J, LEERTASTE oder Linksklick feuern senkrecht nach oben. Du kannst nicht aussteigen, bis das Spiel gewonnen ist.', 'Laserkanone! Linker Stick fährt, SPRUNG oder rechter Stick feuern senkrecht nach oben. Aussteigen geht erst nach dem Sieg.'), 7.5);
   else say('ECHO', TX('Gleiter! Fährt wie ein Wagen, schwebt aber und springt höher. Maus zielt, Linksklick feuert, Rechtsklick schießt Raketen. V steigt aus.',
     'Gleiter! Fährt wie ein Wagen, schwebt aber und springt höher. Rechter Stick zielt und feuert, RAKETE schießt, RAUS steigt aus.'), 7.5);
 }
@@ -46,7 +48,7 @@ function boardVeh(v) {
   v.face = p.face || 1; v.rktCd = Math.max(v.rktCd, .4);
   sfx('board'); ring(v.x, v.y - v.h / 2, 8, .5, PAL[C.cyan]); ring(v.x, v.y - v.h / 2, 12, .7, PAL[C.mag], ['.', '·']);
   for (let i = 0; i < 12; i++) pt(v.x + rr(-4, 4), v.y - rr(0, v.h), rr(-8, 8), rr(-14, -2), rr(.3, .7), ['*', '+', '·'], PAL[C.cyan], { drag: 2 });
-  banner(vehName(v), TX('V = AUSSTEIGEN', 'RAUS = AUSSTEIGEN'), C.cyan); vehHint(v);
+  banner(vehName(v), v.k === 'cannon' ? 'NUR NACH OBEN SCHIESSEN' : TX('V = AUSSTEIGEN', 'RAUS = AUSSTEIGEN'), v.k === 'cannon' ? C.mint : C.cyan); vehHint(v);
 }
 function placePlayerNear(v) {
   /* a standing spot on real ground close to the vehicle; if there is none (open sky), Sam bails out above it with the flight pack lit */
@@ -72,6 +74,7 @@ function healVeh(v, k) {
 
 /* ---------- damage ---------- */
 function hurtVeh(v, dmg, fromX, fromY) {
+  if (v.k === 'cannon') return cannonHit(v);
   if (v.dead || v.inv > 0) return false;
   v.hp -= dmg * .62; v.inv = .35; v.flash = .12;
   v.vx += (sign(v.x - fromX) || -v.face) * 5;
@@ -150,6 +153,8 @@ function updRockets(dt) {
 function vehGroundDist(v, maxD) { const h = rayTile(v.x, v.y, 0, 1, maxD); return h ? h.d : maxD; }
 function updRide(v, dt) {
   const p = S.P, L = S.L, d = VEH[v.k];
+  if (S.race && S.race.phase === 'grid') { v.vx = 0; v.vy = Math.min(PH.maxFall, v.vy + 84 * dt); moveEnt(v, dt, false); v.t += dt; p.x = v.x; p.y = v.y; p.vx = p.vy = 0; p.ground = v.ground; p.face = v.face; p.w = v.w; p.h = v.h; p.inv = 0; return; }
+  if (v.k === 'cannon') return updCannon(v, dt);
   const left = KEY.KeyA || KEY.ArrowLeft, right = KEY.KeyD || KEY.ArrowRight, up = KEY.KeyW || KEY.ArrowUp || KEY.Space, down = KEY.KeyS || KEY.ArrowDown;
   const dir = (right ? 1 : 0) - (left ? 1 : 0), jumpP = pressed('Space') || pressed('KeyW') || pressed('ArrowUp'), boostHeld = KEY.ShiftLeft || KEY.ShiftRight || KEY.KeyL;
   v.fireCd = Math.max(0, v.fireCd - dt); v.rktCd = Math.max(0, v.rktCd - dt); v.inv = Math.max(0, v.inv - dt); v.flash = Math.max(0, v.flash - dt); v.t += dt;
@@ -185,6 +190,7 @@ function updRide(v, dt) {
     if (v.ground && Math.abs(v.vx) > 6 && Math.random() < dt * 40) pt(v.x - v.face * 4.5, v.y - .1, -v.face * rr(2, 9), rr(-4, -.5), rr(.2, .5), ['░', '·', '.'], PAL[C.greyD], { drag: 3 });
     v.spin = 1;
   }
+  if (v.padT > 0) { v.padT -= dt; if (v.ground) v.vx = v.face > 0 ? Math.max(v.vx, d.speed * 1.28) : Math.min(v.vx, -d.speed * 1.28); }
   /* weapons */
   const fireHeld = MOUSE.l || KEY.KeyJ;
   if (fireHeld && v.fireCd <= 0) vehGun(v, a);
@@ -198,7 +204,7 @@ function updRide(v, dt) {
   /* ramming */
   if (v.k !== 'heli' && Math.abs(v.vx) > 18) {
     for (const e of S.en) {
-      if (e.dead || e.k === 'boss' || e.noHit || e.k === 'gunship') continue;
+      if (e.dead || e.k === 'boss' || e.noHit || e.k === 'gunship' || (ENEMY[e.k] && ENEMY[e.k].noRam)) continue;
       if (Math.abs(e.x - v.x) < (e.w + v.w) / 2 - .6 && e.y > v.y - v.h && e.y - e.h < v.y - .4 && S.t - (e.rammed || -9) > .35) {
         e.rammed = S.t; damageEnemy(e, e.k === 'warden' ? 5 : 4, sign(v.vx), -.4, false); v.vx *= .88; shake(.45); sparks(e.x, e.y - 1.2, 14, sign(v.vx), -.5, PAL[C.yel], 38); sfx('stomp', .5);
       }
@@ -231,7 +237,7 @@ function updRide(v, dt) {
   p.x = v.x; p.y = v.y; p.vx = v.vx; p.vy = v.vy; p.ground = v.ground; p.face = v.face; p.w = v.w; p.h = v.h; p.inv = 0;
   p.hitT = 0; p.fuel = Math.min(1, p.fuel + dt * .5); p.hp = Math.min(100, p.hp + dt * 4);
   /* leaving */
-  if (pressed('KeyV')) exitVeh(v);
+  if (pressed('KeyV')) { if (S.race && S.race.phase !== 'done') { KP.KeyV = false; if (S.t - (S.race.noExit || -9) > 3) { S.race.noExit = S.t; banner('AUSSTEIGEN GESPERRT', 'DAS RENNEN LÄUFT', C.amber); sfx('select', .5); } } else exitVeh(v); }
 }
 
 /* ---------- parked and wrecked vehicles ---------- */
@@ -355,6 +361,7 @@ function drawGunGlyph(cx, cy, a, fl, col) {
   const gg = gunGlyph(a); wgl(gg, cx + Math.cos(a) * 1 - .5, cy + Math.sin(a) * .5 - .5, fl ? '#fff' : '#d0d8ff'); wgl(gg, cx + Math.cos(a) * 2 - .5, cy + Math.sin(a) * 1 - .5, fl ? '#fff' : col);
 }
 function drawVeh(v, t) {
+  if (v.k === 'cannon') return drawCannon(v, t);
   const fl = v.flash > .02, dead = v.dead, al = dead ? .85 : (v.inv > 0 && Math.floor(t * 24) % 2 ? .6 : 1), cy = v.y - v.h / 2;
   const dcol = r => dead ? r.map(s => s.replace(/[^ ]/g, 'G')) : r;
   if (v.k === 'heli') {
@@ -368,10 +375,10 @@ function drawVeh(v, t) {
     if (!dead) wgl('▪', v.x - v.face * 6.1 - .5, y0 + 1.4, Math.floor(t * 2) % 2 ? '#ff3b4d' : '#3a1020', .9);
     if (!dead) cockpit(v.x + v.face * 3, v.y - 3, 2, 2, v.driver ? 1 : 0, t);
   } else {
-    const rows = v.k === 'hover' ? HOV_R : CAR_R, cols = v.k === 'hover' ? HOV_C : CAR_C, x0 = v.x - 4.5, y0 = v.y - 3, bob = v.k === 'hover' && !dead ? Math.sin(t * 5 + v.t) * .15 : 0;
+    const rows = v.k === 'hover' ? HOV_R : v.k === 'racer' ? RCR_R : CAR_R, cols = v.k === 'hover' ? HOV_C : v.k === 'racer' ? RCR_C.map(r => r.replace(/t/g, 'c')) : CAR_C, x0 = v.x - 4.5, y0 = v.y - 3, bob = v.k === 'hover' && !dead ? Math.sin(t * 5 + v.t) * .15 : 0;
     spr(rows, dcol(cols), x0, y0 + bob - (v.k === 'hover' && !dead ? .35 : 0), v.face, al, fl);
     if (!dead) cockpit(v.x, y0 + 1 + bob - (v.k === 'hover' ? .35 : 0), 3, 1, v.driver ? 1 : 0, t);
-    if (v.k === 'car' && !dead) { const wf = Math.floor(v.wheel) % 2 ? '+' : 'x'; wgl(wf, x0 + 1 - .5, y0 + 2, '#eaf6ff', .85); wgl(wf, x0 + 7 - .5, y0 + 2, '#eaf6ff', .85); }
+    if ((v.k === 'car' || v.k === 'racer') && !dead) { const wf = Math.floor(v.wheel) % 2 ? '+' : 'x'; wgl(wf, x0 + 1 - .5, y0 + 2, '#eaf6ff', .85); wgl(wf, x0 + 7 - .5, y0 + 2, '#eaf6ff', .85); }
     if (!dead) {
       glow(v.x, v.y - .6, 8, v.k === 'hover' ? '#19f0ff' : '#ff2fb9', v.boosting ? .5 : .2);
       if (v.k === 'hover') for (let i = 0; i < 7; i++) wgl('▔', x0 + 1 + i - .5, v.y - .1 + bob - .35, '#19f0ff', .5 + .3 * Math.sin(t * 9 + i));
@@ -435,6 +442,7 @@ function drawFlyer(d, t) {
 
 /* ---------- cockpit HUD: replaces Sam's vitals while he rides ---------- */
 function drawVehHud(p, t) {
+  if (p.veh.k === 'cannon') return drawCannonHud(p, t);
   const v = p.veh, f = clamp(v.hp / v.maxhp, 0, 1), col = f > .55 ? '#5dffb0' : f > .28 ? '#ffb347' : '#ff3b4d', blink = f < .28 && Math.floor(S.t * 6) % 2;
   const X = c => Math.round(c * CW), Y = r => Math.round(r * CH);
   panel(2, 1, 41, 6, '#19f0ff', vehName(v));
@@ -446,5 +454,5 @@ function drawVehHud(p, t) {
   txtPx('◊ ' + String(S.chips).padStart(3, '0'), X(24), Y(3), '#ffe45e'); txtPx('GEGNER ' + String(S.kills).padStart(2, '0'), X(31), Y(3), '#8a96c4');
   const rk = 1 - v.rktCd / VROCKET_CD; txtPx('RAKETE', X(11), Y(4), '#8a96c4'); for (let i = 0; i < 8; i++) gl('▰', X(18 + i), Y(4), i < rk * 8 ? '#ffb347' : '#2a3470');
   txtPx(v.rktCd <= 0 ? TX('RECHTSKLICK', 'RAKETE-KNOPF') : 'LÄDT...', X(28), Y(4), v.rktCd <= 0 ? '#5dffb0' : '#8a96c4');
-  txtPx(TX('[V] AUSSTEIGEN', 'RAUS = AUSSTEIGEN'), X(11), Y(5), '#5dffb0');
+  txtPx(S.race ? 'RENNEN LÄUFT' : TX('[V] AUSSTEIGEN', 'RAUS = AUSSTEIGEN'), X(11), Y(5), S.race ? '#ffb347' : '#5dffb0');
 }
