@@ -1,13 +1,18 @@
-<!doctype html><html lang="de"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Super Sam</title><meta name="description" content="Super Sam: ein Cyberpunk-ASCII-Jump-and-Run mit Ballerei. Flieg, schwing am Enterhaken und kämpf dich durch vier Sektoren."><meta name="robots" content="noindex,nofollow"><link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'%3E%3Crect width='16' height='16' fill='%2302030a'/%3E%3Cpath d='M9 1 3 9h4l-1 6 7-9H9z' fill='%23ffd83d'/%3E%3C/svg%3E"><link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin><link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@700&display=swap" rel="stylesheet"><style>
+<!doctype html><html lang="de"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no"><meta name="theme-color" content="#02030a"><meta name="mobile-web-app-capable" content="yes"><meta name="apple-mobile-web-app-capable" content="yes"><meta name="apple-mobile-web-app-status-bar-style" content="black"><meta name="apple-mobile-web-app-title" content="Super Sam"><link rel="manifest" href="manifest.webmanifest"><link rel="apple-touch-icon" href="icon-180.png"><title>Super Sam</title><meta name="description" content="Super Sam: ein Cyberpunk-ASCII-Jump-and-Run mit Ballerei. Flieg, schwing am Enterhaken und kämpf dich durch vier Sektoren."><meta name="robots" content="noindex,nofollow"><link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'%3E%3Crect width='16' height='16' fill='%2302030a'/%3E%3Cpath d='M9 1 3 9h4l-1 6 7-9H9z' fill='%23ffd83d'/%3E%3C/svg%3E"><link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin><link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@700&display=swap" rel="stylesheet"><style>
 /* Layout: one full-viewport canvas with CSS scanline + vignette overlays. A deliberate single-theme neon-dark page. */
 :root{--bg:#02030a;--ink:#eaf6ff;--scan:rgba(0,0,0,.16);--vig:rgba(0,0,6,.55);color-scheme:dark}
-html,body{height:100%;margin:0;background:var(--bg);color:var(--ink);overflow:hidden}
+html,body{height:100%;margin:0;background:var(--bg);color:var(--ink);overflow:hidden;overscroll-behavior:none;touch-action:none;-webkit-touch-callout:none;-webkit-tap-highlight-color:transparent}
 body{cursor:none;-webkit-user-select:none;user-select:none}
 #ww{position:fixed;inset:0;background:var(--bg)}
 #cv{position:absolute;inset:0;width:100%;height:100%;display:block;cursor:none;outline:none}
 #scan{position:absolute;inset:0;pointer-events:none;background:repeating-linear-gradient(to bottom,rgba(0,0,0,0) 0,rgba(0,0,0,0) 2px,var(--scan) 3px,rgba(0,0,0,0) 4px);mix-blend-mode:multiply;opacity:.55}
+#fsb{position:fixed;right:10px;bottom:10px;width:34px;height:34px;padding:6px;margin:0;border:1px solid rgba(25,240,255,.55);background:rgba(2,3,10,.55);color:#19f0ff;border-radius:4px;cursor:pointer;opacity:.4;z-index:5;transition:opacity .2s}
+#fsb:hover,#fsb:focus-visible{opacity:1}
+#fsb svg{display:block;width:100%;height:100%}
+@media (pointer:coarse){#fsb{display:none}}
+#safe{position:fixed;left:0;top:0;width:0;height:0;visibility:hidden;padding:env(safe-area-inset-top,0px) env(safe-area-inset-right,0px) env(safe-area-inset-bottom,0px) env(safe-area-inset-left,0px)}
 #vig{position:absolute;inset:0;pointer-events:none;background:radial-gradient(ellipse at 50% 50%,rgba(0,0,0,0) 55%,var(--vig) 100%)}
-</style></head><body><div id="ww"><canvas id="cv" tabindex="0"></canvas><div id="scan"></div><div id="vig"></div></div><script>
+</style></head><body><div id="ww"><canvas id="cv" tabindex="0"></canvas><div id="scan"></div><div id="vig"></div></div><button id="fsb" type="button" title="Vollbild" aria-label="Vollbild"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="square"><path d="M3 9V3h6M15 3h6v6M21 15v6h-6M9 21H3v-6"/></svg></button><div id="safe"></div><script>
 'use strict';
 /* =========================================================================
    SUPER SAM  ::  core  (math, palette, glyph renderer, input, audio)
@@ -59,7 +64,7 @@ const ROWS_TARGET = 30;
 const FONT_FAMILY = '"JetBrains Mono","DejaVu Sans Mono","Cascadia Mono","SF Mono",Menlo,Consolas,monospace';
 const resizeHooks = [];
 function resize() {
-  DPR = Math.min(window.devicePixelRatio || 1, 1.6);
+  DPR = Math.min(window.devicePixelRatio || 1, TC.coarse ? 1.4 : 1.6);
   const cw = Math.max(320, innerWidth), ch = Math.max(240, innerHeight);
   W = Math.floor(cw * DPR); H = Math.floor(ch * DPR);
   cv.width = W; cv.height = H; cv.style.width = cw + 'px'; cv.style.height = ch + 'px';
@@ -195,6 +200,9 @@ function present(bloomK) {
 
 /* ---------- input ---------- */
 const KEY = {}, KP = {};
+/* touch state (filled in by 45_touch.js) and a tiny helper to word text differently for touch players */
+const TC = { on: false, coarse: false, lastT: -1e9, keys: {}, ptrs: new Map(), mv: null, aim: null, firing: false, latched: false, aimDX: 1, aimDY: -1, aimAge: 99, jumpHeld: false, hookHold: false, hookSeen: false, hookReq: false, hookAuto: false, btn: {}, safe: { t: 0, r: 0, b: 0, l: 0 }, u: 46, fsDone: false };
+const TX = (pc, touch) => TC.on ? touch : pc;
 const MOUSE = { x: COLS / 2, y: ROWS / 2, l: false, r: false, lp: false, rp: false, moved: -99, touch: false };
 const BLOCKKEYS = new Set(['Space', 'ArrowUp', 'ArrowDown', 'ArrowLeft', 'ArrowRight', 'Tab', 'ShiftLeft', 'ShiftRight']);
 addEventListener('keydown', e => {
@@ -205,9 +213,9 @@ addEventListener('keydown', e => {
 addEventListener('keyup', e => { KEY[e.code] = false; });
 addEventListener('blur', () => { for (const k in KEY) KEY[k] = false; MOUSE.l = MOUSE.r = false; if (window.onGameBlur) window.onGameBlur(); });
 cv.addEventListener('contextmenu', e => e.preventDefault());
-function mpos(e) { const r = cv.getBoundingClientRect(); MOUSE.x = (e.clientX - r.left) / r.width * W / CW; MOUSE.y = (e.clientY - r.top) / r.height * H / CH; MOUSE.moved = performance.now() / 1000; }
+function mpos(e) { if (performance.now() - TC.lastT < 700) return; const r = cv.getBoundingClientRect(); MOUSE.x = (e.clientX - r.left) / r.width * W / CW; MOUSE.y = (e.clientY - r.top) / r.height * H / CH; MOUSE.moved = performance.now() / 1000; }
 cv.addEventListener('mousemove', mpos);
-cv.addEventListener('mousedown', e => { mpos(e); if (e.button === 0) { MOUSE.l = true; MOUSE.lp = true; } if (e.button === 2) { MOUSE.r = true; MOUSE.rp = true; } e.preventDefault(); });
+cv.addEventListener('mousedown', e => { if (performance.now() - TC.lastT < 700) { e.preventDefault(); return; } TC.on = TC.coarse && TC.on; mpos(e); if (e.button === 0) { MOUSE.l = true; MOUSE.lp = true; } if (e.button === 2) { MOUSE.r = true; MOUSE.rp = true; } e.preventDefault(); });
 addEventListener('mouseup', e => { if (e.button === 0) MOUSE.l = false; if (e.button === 2) MOUSE.r = false; });
 cv.addEventListener('wheel', e => { MOUSE.wheel = (MOUSE.wheel || 0) + sign(e.deltaY); e.preventDefault(); }, { passive: false });
 addEventListener('touchstart', () => { MOUSE.touch = true; }, { passive: true });
@@ -647,7 +655,7 @@ function aimWorld() {
   const p = S.P, c = chest(p);
   let ax, ay;
   if (MOUSE.moved > 0) { ax = MOUSE.x + S.cam.x - c.x; ay = MOUSE.y + S.cam.y - c.y; }
-  else { ax = p.face * 6; ay = -2; }
+  else { ax = p.face * 6; ay = TC.on ? -5 : -2; }
   const d = Math.hypot(ax, ay) || 1, a = vang(ax, ay);
   return { x: ax / d, y: ay / d, a, cx: Math.cos(a), cy: Math.sin(a) * .5, d, wx: c.x + ax, wy: c.y + ay };
 }
@@ -685,9 +693,23 @@ function detachHook(silent) {
   if (h.st === 2 && !silent) sfx('release');
   h.st = 3; h.rt = 0; h.tgt = null; h.sx = h.x; h.sy = h.y;
 }
+/* touch: the HAKEN button finds its own anchor, a solid spot up and ahead of Sam (unless the aim stick is in use) */
+function autoHookAim(c) {
+  const p = S.P, dirX = Math.abs(p.vx) > 4 ? sign(p.vx) : p.face; let best = null, bs = -1e9;
+  for (let deg = 20; deg <= 85; deg += 5) {
+    const th = deg * Math.PI / 180, ax = Math.cos(th) * dirX, ay = -Math.sin(th) * .5, d = Math.hypot(ax, ay), nx = ax / d, ny = ay / d;
+    const hit = rayTile(c.x, c.y, nx, ny, PH.hook - 2); if (!hit || hit.d < 6) continue;
+    const ahead = (hit.x - c.x) * dirX, up = c.y - hit.y; if (up < 5) continue;
+    const sc = -Math.abs(ahead - 14) - Math.abs(up - 17) * .6 - Math.abs(hit.d - 24) * .15;
+    if (sc > bs) { bs = sc; const a = vang(ax, ay); best = { x: nx, y: ny, a, cx: Math.cos(a), cy: Math.sin(a) * .5, d: hit.d, wx: hit.x, wy: hit.y }; }
+  }
+  return best;
+}
+function hookAim(c) { if (TC.on && TC.hookAuto) { TC.hookAuto = false; const a = autoHookAim(c); if (a) return a; } return aimWorld(); }
 function fireHook() {
-  const p = S.P, h = p.hook, c = chest(p), aim = aimWorld();
+  const p = S.P, h = p.hook, c = chest(p);
   if (h.st === 1 || h.st === 2) return;
+  const aim = hookAim(c);
   let tx = c.x + aim.x * PH.hook, ty = c.y + aim.y * PH.hook, dist = PH.hook, tgt = null, miss = true;
   const hit = rayTile(c.x, c.y, aim.x, aim.y, PH.hook);
   if (hit) { tx = hit.x; ty = hit.y; dist = hit.d; miss = false; }
@@ -1110,8 +1132,8 @@ function updPickups(dt) {
     if (d < 2.2) {
       if (k.k === 'hp') { if (p.hp >= 100) continue; p.hp = Math.min(100, p.hp + EASY.heal); sfx('heal'); ring(p.x, p.y - 1.5, 6, .5, PAL[C.mint]); for (let i = 0; i < 10; i++) pt(p.x + rr(-1, 1), p.y - rr(0, 3), 0, rr(-14, -4), rr(.4, .9), ['+'], PAL[C.mint], {}); k.got = true; }
       else if (k.k === 'chip') { S.chips++; S.score += 25; sfx('chip'); k.got = true; sparks(k.x, k.y, 4, 0, -1, PAL[C.yel], 20); }
-      else if (k.k === 'w_scatter') { p.wpns[1] = true; p.wpn = 1; sfx('pick'); k.got = true; banner('SCATTER-9 ERHALTEN', 'TASTE 2  //  KURZE REICHWEITE, HARTER AUFPRALL', C.amber); say('ECHO', 'Streumunition. Kurze Reichweite, breite Streuung. Der Rückstoß schleudert dich weg. Nutz das.'); ring(p.x, p.y - 1.5, 12, .7, PAL[C.amber]); }
-      else if (k.k === 'w_rail') { p.wpns[2] = true; p.wpn = 2; sfx('pick'); k.got = true; banner('RAILCASTER ERHALTEN', 'TASTE 3  //  DURCHSCHLÄGT ALLES IN DER LINIE', C.mag); say('ECHO', 'Railcaster. Ein Schuss, mitten durch Panzerung und alles dahinter.'); ring(p.x, p.y - 1.5, 12, .7, PAL[C.mag]); }
+      else if (k.k === 'w_scatter') { p.wpns[1] = true; p.wpn = 1; sfx('pick'); k.got = true; banner('SCATTER-9 ERHALTEN', TX('TASTE 2  //  KURZE REICHWEITE, HARTER AUFPRALL', 'WAFFE-KNOPF  //  KURZE REICHWEITE, HARTER AUFPRALL'), C.amber); say('ECHO', 'Streumunition. Kurze Reichweite, breite Streuung. Der Rückstoß schleudert dich weg. Nutz das.'); ring(p.x, p.y - 1.5, 12, .7, PAL[C.amber]); }
+      else if (k.k === 'w_rail') { p.wpns[2] = true; p.wpn = 2; sfx('pick'); k.got = true; banner('RAILCASTER ERHALTEN', TX('TASTE 3  //  DURCHSCHLÄGT ALLES IN DER LINIE', 'WAFFE-KNOPF  //  DURCHSCHLÄGT ALLES IN DER LINIE'), C.mag); say('ECHO', 'Railcaster. Ein Schuss, mitten durch Panzerung und alles dahinter.'); ring(p.x, p.y - 1.5, 12, .7, PAL[C.mag]); }
     }
   }
   S.pks = S.pks.filter(k => !k.got);
@@ -1951,7 +1973,7 @@ function drawHud(t) {
     const low = p.fuel < .2, blink = low && Math.floor(S.t * 6) % 2, col = p.fly ? '#ffe45e' : low ? '#ff3b4d' : '#19f0ff', n = 14, on = Math.round(n * p.fuel);
     txtPx('FLUG', Math.round(11 * CW), Math.round(5 * CH), p.fly ? '#ffe45e' : '#8a96c4');
     for (let i = 0; i < n; i++) gl(i < on ? '▰' : '▱', Math.round((16 + i) * CW), Math.round(5 * CH), i < on ? (blink ? '#ffffff' : col) : '#2a3470');
-    txtPx(p.fly ? '[F] LANDEN' : p.fuel > .06 ? '[F] FLIEGEN' : 'TANKEN', Math.round(31 * CW), Math.round(5 * CH), p.fly ? '#ffe45e' : p.fuel > .06 ? '#5dffb0' : '#ff3b4d');
+    const fk = TC.on ? '' : '[F] '; txtPx(p.fly ? fk + 'LANDEN' : p.fuel > .06 ? fk + 'FLIEGEN' : 'TANKEN', Math.round(31 * CW), Math.round(5 * CH), p.fly ? '#ffe45e' : p.fuel > .06 ? '#5dffb0' : '#ff3b4d');
     if (p.flyHint > 0) txtC('TANK LEER  -  ZUM AUFTANKEN LANDEN', COLS / 2, 9, '#ff3b4d', Math.min(1, p.flyHint));
   }
   // top right
@@ -1966,7 +1988,7 @@ function drawHud(t) {
   }
   // comms
   if (S.comms.length) {
-    const c = S.comms[0], bwid = Math.min(78, COLS - 8), lines = wrapText(c.text, bwid - 10), shown = Math.floor(c.t * 62), x0 = Math.round((COLS - bwid) / 2), y0 = ROWS - 4 - lines.length - 1;
+    const c = S.comms[0], bwid = TC.on ? Math.min(72, COLS - 44) : Math.min(78, COLS - 8), lines = wrapText(c.text, bwid - 10), shown = Math.floor(c.t * 62), x0 = Math.round((COLS - bwid) / 2), y0 = ROWS - 4 - lines.length - 1;
     const slide = Math.min(1, c.t * 5, (c.dur - c.t) * 5); g.globalAlpha = Math.max(0, slide);
     panel(x0, y0, bwid, lines.length + 3, '#5dffb0', c.who + ' // SICHERE LEITUNG', .82);
     // portrait
@@ -2253,6 +2275,227 @@ function drawSamBadge(px, py, u, t) {
 }
 
 /* =========================================================================
+   touch controls + fullscreen
+   left thumb : floating move stick (up = jump / climb, down = drop through)
+   right thumb: floating aim stick (aims and fires)
+   buttons bottom right: SPRUNG, DASH, HAKEN (toggle, finds its own anchor), FLUG (toggle)
+   ========================================================================= */
+TC.coarse = !!(window.matchMedia && matchMedia('(pointer: coarse)').matches); TC.on = TC.coarse;
+const IS_IOS = /iPad|iPhone|iPod/.test(navigator.userAgent) || (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1);
+const isStandalone = () => !!((window.matchMedia && matchMedia('(display-mode: fullscreen), (display-mode: standalone)').matches) || navigator.standalone === true);
+const fsEl = () => document.fullscreenElement || document.webkitFullscreenElement || null;
+const fsCan = () => !!(document.documentElement.requestFullscreen || document.documentElement.webkitRequestFullscreen);
+const portraitNow = () => TC.coarse && innerHeight > innerWidth * 1.08;
+
+function toggleFS() {
+  try {
+    if (fsEl()) { (document.exitFullscreen || document.webkitExitFullscreen).call(document); return; }
+    const el = document.documentElement, rq = el.requestFullscreen || el.webkitRequestFullscreen; if (!rq) return;
+    const pr = rq.call(el, { navigationUI: 'hide' });
+    const lock = () => { try { if (TC.coarse && screen.orientation && screen.orientation.lock) screen.orientation.lock('landscape').catch(() => { }); } catch (e) { } };
+    if (pr && pr.then) pr.then(lock, () => { }); else lock();
+  } catch (e) { }
+}
+function measureSafe() {
+  const el = document.getElementById('safe'); if (!el) return;
+  const cs = getComputedStyle(el); TC.safe = { t: parseFloat(cs.paddingTop) || 0, r: parseFloat(cs.paddingRight) || 0, b: parseFloat(cs.paddingBottom) || 0, l: parseFloat(cs.paddingLeft) || 0 };
+}
+resizeHooks.push(measureSafe);
+addEventListener('fullscreenchange', () => resize()); addEventListener('webkitfullscreenchange', () => resize());
+addEventListener('orientationchange', () => setTimeout(resize, 120));
+
+/* ---------- layout (device px) ---------- */
+function touchLayout() {
+  const u = clamp(Math.min(W, H) * .085, 34, 64); TC.u = u;
+  const sl = TC.safe.l * DPR, sr = TC.safe.r * DPR, sb = TC.safe.b * DPR, st = TC.safe.t * DPR;
+  const play = G.scene === 'play' || G.scene === 'clearing';
+  const jx = W - sr - 1.7 * u, jy = H - sb - 1.8 * u;
+  const B = {};
+  const vehOn = !!(S.P && S.P.veh) || (S.near && S.near.v);
+  if (play) {
+    B.jump = { x: jx, y: jy, r: 1.15 * u, label: 'SPRUNG' };
+    B.dash = { x: jx - 2.6 * u, y: jy + .4 * u, r: .88 * u, label: 'DASH' };
+    B.hook = { x: jx - 2.2 * u, y: jy - 2.15 * u, r: .88 * u, label: 'HAKEN' };
+    B.fly = { x: jx + .05 * u, y: jy - 2.7 * u, r: .88 * u, label: 'FLUG' };
+    if (S.P && S.P.wpns && (S.P.wpns[1] || S.P.wpns[2])) B.wpn = { x: W - sr - 1.5 * u, y: Math.max(CH * 6.4, H * .3), r: .72 * u, label: 'WAFFE' };
+    if (vehOn) B.veh = { x: jx - 4.3 * u, y: jy - .3 * u, r: .95 * u, label: S.P && S.P.veh ? 'AUSSTEIGEN' : 'EINSTEIGEN' };
+    const cy = CH * 8.8, cx = sl + 1.1 * u;
+    B.pause = { x: cx, y: cy, r: .7 * u, label: 'II' };
+    B.fs = { x: cx + 1.75 * u, y: cy, r: .7 * u, label: fsEl() ? '><' : '<>', off: !fsCan() };
+    B.mute = { x: cx + 3.5 * u, y: cy, r: .7 * u, label: AU.muted ? 'x)' : '))' };
+  } else {
+    B.fs = { x: W - sr - 1.1 * u, y: st + 1.1 * u, r: .7 * u, label: fsEl() ? '><' : '<>', off: !fsCan() };
+    B.mute = { x: W - sr - 2.9 * u, y: st + 1.1 * u, r: .7 * u, label: AU.muted ? 'x)' : '))' };
+  }
+  TC.btn = B;
+}
+const tcPos = e => { const r = cv.getBoundingClientRect(); return [(e.clientX - r.left) * W / r.width, (e.clientY - r.top) * H / r.height]; };
+function tcHitBtn(px, py) {
+  let best = null, bd = 1e9;
+  for (const k in TC.btn) { const b = TC.btn[k]; if (b.off) continue; const d = Math.hypot(px - b.x, py - b.y); if (d <= b.r * 1.2 && d < bd) { bd = d; best = k; } }
+  return best;
+}
+function stickUpd(s, px, py, R) {
+  s.x = px; s.y = py; let dx = px - s.ox, dy = py - s.oy; const d = Math.hypot(dx, dy);
+  if (d > R) { s.ox += dx / d * (d - R); s.oy += dy / d * (d - R); dx = px - s.ox; dy = py - s.oy; }
+  const dd = Math.min(R, d); s.mag = dd / R; s.vx = dx / R; s.vy = dy / R; s.nx = d > 1e-3 ? dx / d : 0; s.ny = d > 1e-3 ? dy / d : 0;
+}
+
+/* ---------- menus by tap ---------- */
+function tcMenu(px, py) {
+  const sc = G.scene;
+  const b = tcHitBtn(px, py); if (b === 'fs' || b === 'mute') return b;
+  if (sc === 'title') {
+    const h = G.titleHit;
+    if (h && px >= h.x && px <= h.x + h.w && py >= h.y && py <= h.y + h.h) {
+      const f = (px - h.x) / h.w;
+      if (f < .26) { G.sel = (G.sel + STAGES.length - 1) % STAGES.length; sfx('select'); return null; }
+      if (f > .74) { G.sel = (G.sel + 1) % STAGES.length; sfx('select'); return null; }
+    }
+    MOUSE.lp = true; return null;
+  }
+  if (sc === 'pause') {
+    const r = G.pauseRect, rows = G.pauseRows || [];
+    for (let i = 0; i < rows.length; i++) if (py >= rows[i][0] && py <= rows[i][1] && (!r || (px >= r.x && px <= r.x + r.w))) { G.pauseSel = i; sfx('pick'); doPauseItem(i); return null; }
+    if (r && (px < r.x || px > r.x + r.w || py < r.y || py > r.y + r.h)) G.scene = 'play';
+    return null;
+  }
+  MOUSE.lp = true; return null;
+}
+function tcBtnDown(k) {
+  const b = TC.btn[k]; if (b) b.down = true;
+  if (k === 'jump') TC.jumpHeld = true;
+  else if (k === 'dash') KP.ShiftLeft = true;
+  else if (k === 'fly') KP.KeyF = true;
+  else if (k === 'hook') TC.hookReq = true;
+  else if (k === 'wpn') KP.KeyQ = true;
+  else if (k === 'pause') KP.KeyP = true;
+  else if (k === 'veh') KP.KeyV = true;
+}
+function tcBtnUp(k) {
+  const b = TC.btn[k]; if (b) b.down = false;
+  if (k === 'jump') TC.jumpHeld = false;
+  else if (k === 'fs') toggleFS();
+  else if (k === 'mute') { auMute(!AU.muted); }
+}
+
+/* ---------- pointer events (touch / pen only; the mouse keeps its own handlers) ---------- */
+cv.addEventListener('pointerdown', e => {
+  if (e.pointerType === 'mouse') return;
+  TC.lastT = performance.now(); TC.on = true; MOUSE.touch = true; e.preventDefault();
+  try { cv.setPointerCapture(e.pointerId); } catch (x) { }
+  activateAudio();
+  const [px, py] = tcPos(e); touchLayout();
+  if (G.scene !== 'play') { const k = tcMenu(px, py); TC.ptrs.set(e.pointerId, k ? { kind: 'btn', b: k } : { kind: 'menu' }); return; }
+  const b = tcHitBtn(px, py);
+  if (b) { TC.ptrs.set(e.pointerId, { kind: 'btn', b }); tcBtnDown(b); return; }
+  if (px < W * .46) { if (!TC.mv) { TC.mv = { id: e.pointerId, ox: px, oy: py, x: px, y: py, vx: 0, vy: 0, nx: 0, ny: 0, mag: 0 }; TC.ptrs.set(e.pointerId, { kind: 'mv' }); } }
+  else if (!TC.aim) { TC.aim = { id: e.pointerId, ox: px, oy: py, x: px, y: py, vx: 0, vy: 0, nx: 0, ny: 0, mag: 0 }; TC.ptrs.set(e.pointerId, { kind: 'aim' }); }
+});
+cv.addEventListener('pointermove', e => {
+  if (e.pointerType === 'mouse') { if (TC.on && !TC.coarse && performance.now() - TC.lastT > 800) TC.on = false; return; }
+  const k = TC.ptrs.get(e.pointerId); if (!k) return; e.preventDefault();
+  const [px, py] = tcPos(e);
+  if (k.kind === 'mv' && TC.mv) stickUpd(TC.mv, px, py, TC.u * 1.4);
+  else if (k.kind === 'aim' && TC.aim) stickUpd(TC.aim, px, py, TC.u * 1.4);
+});
+function tcUp(e) {
+  if (e.pointerType === 'mouse') return;
+  const k = TC.ptrs.get(e.pointerId); TC.ptrs.delete(e.pointerId); TC.lastT = performance.now();
+  if (k) {
+    if (k.kind === 'btn') tcBtnUp(k.b);
+    else if (k.kind === 'mv') TC.mv = null;
+    else if (k.kind === 'aim') { TC.aim = null; TC.aimAge = 0; }
+  }
+  if (e.type === 'pointerup') activateAudio();   // iOS only unlocks audio on touchend
+  if (e.type === 'pointerup' && !TC.fsDone) {   // first finger lift is a user gesture: go fullscreen by itself
+    TC.fsDone = true;
+    if (TC.coarse && !fsEl() && !isStandalone() && fsCan()) toggleFS();
+  }
+}
+cv.addEventListener('pointerup', tcUp); cv.addEventListener('pointercancel', tcUp);
+addEventListener('contextmenu', e => { if (TC.on) e.preventDefault(); });
+{ const fsb = document.getElementById('fsb'); if (fsb) { if (!fsCan()) fsb.style.display = 'none'; fsb.addEventListener('click', e => { toggleFS(); try { cv.focus(); } catch (x) { } e.stopPropagation(); }); fsb.addEventListener('mousedown', e => e.stopPropagation()); } }
+
+/* ---------- per-frame: sticks and toggles become key state ---------- */
+function tkey(code, down) {
+  if (down) { if (!TC.keys[code]) { TC.keys[code] = true; if (!KEY[code]) KP[code] = true; KEY[code] = true; } }
+  else if (TC.keys[code]) { TC.keys[code] = false; KEY[code] = false; }
+}
+function touchApply(dt) {
+  if (!TC.on) return;
+  const p = S.P, playing = G.scene === 'play' || G.scene === 'clearing';
+  if (!playing || !p) {
+    for (const k in TC.keys) tkey(k, false);
+    TC.hookHold = false; TC.hookSeen = false; TC.hookReq = false; TC.jumpHeld = false; if (TC.firing) { MOUSE.l = false; TC.firing = false; }
+    return;
+  }
+  const m = TC.mv, mx = m ? m.vx : 0, my = m ? m.vy : 0;
+  tkey('KeyA', mx < -.28); tkey('KeyD', mx > .28); tkey('KeyW', my < -.5); tkey('KeyS', my > .5);
+  tkey('Space', TC.jumpHeld);
+  // grapple: tap to throw (own anchor search unless the aim stick is in use), tap again to let go
+  const h = p.hook;
+  if (TC.hookReq) {
+    TC.hookReq = false;
+    if (h.st === 1 || h.st === 2) { TC.hookHold = false; TC.hookSeen = false; }
+    else { TC.hookHold = true; TC.hookSeen = false; TC.hookAuto = !(TC.aim || TC.aimAge < .9); KP.KeyE = true; }
+  }
+  if (TC.hookHold) { if (h.st === 1 || h.st === 2) TC.hookSeen = true; else if (TC.hookSeen || p.dead) { TC.hookHold = false; TC.hookSeen = false; } }
+  KEY.KeyE = TC.hookHold;
+  // aim stick: aims, and fires while held; the direction stays latched for a moment
+  const a = TC.aim;
+  if (a && a.mag > .2) { TC.aimDX = a.nx; TC.aimDY = a.ny; TC.aimAge = 0; if (!TC.firing) { TC.firing = true; } MOUSE.l = true; }
+  else { if (TC.firing) { MOUSE.l = false; TC.firing = false; } if (!a) TC.aimAge += dt; }
+  if (TC.aimAge < .9 || (a && a.mag > .2)) {
+    const c = chest(p);
+    MOUSE.x = c.x - S.cam.x + TC.aimDX * 14; MOUSE.y = c.y - S.cam.y + TC.aimDY * 7; MOUSE.moved = performance.now() / 1000; TC.latched = true;
+  } else if (TC.latched) { MOUSE.moved = -99; TC.latched = false; }
+}
+
+/* ---------- drawing ---------- */
+function tcRing(x, y, r, col, a, fillA) {
+  g.globalAlpha = a * (fillA || .45); g.fillStyle = '#05060f'; g.beginPath(); g.arc(x, y, r, 0, TAU); g.fill();
+  g.globalAlpha = a; g.strokeStyle = col; g.lineWidth = Math.max(2, DPR * 1.7); g.beginPath(); g.arc(x, y, r, 0, TAU); g.stroke();
+  g.globalAlpha = 1; lastFill = '';
+}
+function tcLabel(s, x, y, col, a) { txtPx(s, Math.round(x - s.length * CW / 2), Math.round(y - CH / 2), col, a); }
+function drawTouch(t) {
+  if (!TC.on) return; touchLayout();
+  const u = TC.u, p = S.P, play = G.scene === 'play' || G.scene === 'clearing';
+  if (play && p) {
+    const sl = TC.safe.l * DPR, sb = TC.safe.b * DPR;
+    // sticks (rest hints when idle)
+    const m = TC.mv, a = TC.aim, R = u * 1.4;
+    const mx0 = m ? m.ox : sl + 3 * u, my0 = m ? m.oy : H - sb - 2.4 * u;
+    tcRing(mx0, my0, R, '#19f0ff', m ? .55 : .2, .25);
+    if (m) { const l = Math.hypot(m.vx, m.vy), k = l > 1 ? 1 / l : 1; tcRing(mx0 + m.vx * R * k, my0 + m.vy * R * k, u * .62, '#19f0ff', .8, .6); } else tcLabel('LAUFEN', mx0, my0, '#19f0ff', .35);
+    const ax0 = a ? a.ox : W * .6, ay0 = a ? a.oy : H - sb - 2.4 * u;
+    tcRing(ax0, ay0, R, '#ff2fb9', a ? .55 : .2, .25);
+    if (a) { const l = Math.hypot(a.vx, a.vy), k = l > 1 ? 1 : l; tcRing(ax0 + a.nx * R * k, ay0 + a.ny * R * k, u * .62, '#ff2fb9', .85, .6); } else tcLabel('ZIELEN', ax0, ay0, '#ff2fb9', .35);
+  }
+  for (const k in TC.btn) {
+    const b = TC.btn[k]; if (b.off) continue;
+    let col = '#19f0ff', al = .5, lab = b.label;
+    if (k === 'hook') { const on = p && p.hook && (p.hook.st === 1 || p.hook.st === 2); col = on ? '#5dffb0' : '#19f0ff'; al = on ? .85 : .55; }
+    else if (k === 'fly') { col = p && p.fly ? '#ffe45e' : (p && p.fuel < .2 ? '#ff3b4d' : '#19f0ff'); al = p && p.fly ? .85 : .55; }
+    else if (k === 'dash') { al = p && p.dashCd > 0 ? .25 : .55; }
+    else if (k === 'jump') { col = '#5dffb0'; al = .6; }
+    else if (k === 'wpn') { col = '#ffb347'; if (p) lab = (p.wpn + 1) + ':' + WEAPONS[p.wpn].name; }
+    else if (k === 'veh') { col = '#ffe45e'; al = .8 + Math.sin(t * 8) * .15; }
+    if (b.down) al = Math.min(1, al + .35);
+    tcRing(b.x, b.y, b.r, col, al, .5);
+    if (k === 'fly' && p) { g.globalAlpha = .9; g.strokeStyle = p.fly ? '#ffe45e' : '#19f0ff'; g.lineWidth = Math.max(3, DPR * 3); g.beginPath(); g.arc(b.x, b.y, b.r + 5 * DPR, -Math.PI / 2, -Math.PI / 2 + TAU * p.fuel); g.stroke(); g.globalAlpha = 1; lastFill = ''; }
+    tcLabel(lab, b.x, b.y, col, Math.min(1, al + .3));
+  }
+}
+function drawRotate(t) {
+  rectPx(0, 0, W, H, '#02030a', .96);
+  const cy = Math.round(ROWS / 2), w = Math.sin(t * 3) * 2;
+  txtC('BITTE DAS GERÄT', COLS / 2, cy - 2, '#eaf6ff'); txtC('QUER HALTEN', COLS / 2, cy - .6, '#eaf6ff');
+  txtC('╔════════╗', COLS / 2 + w, cy + 1.6, '#19f0ff'); txtC('║ ◄    ► ║', COLS / 2 + w, cy + 2.6, '#19f0ff'); txtC('╚════════╝', COLS / 2 + w, cy + 3.6, '#19f0ff');
+}
+
+/* =========================================================================
    shared level builders + STAGE 1 :: RAINLINE
    ========================================================================= */
 const SIGNPOOL = ['NEURAL LACE', 'KAIJU-COLA', 'OMNI-NOODLE', 'HOTEL 9', 'MERIDIAN', 'SAKE-BAR', 'CHROM 24H', 'VOID CLUB', 'SYNTH-FLEISCH', 'GHOST SHELL'];
@@ -2313,7 +2556,7 @@ function rack(L, x, y, h) { const rows = ['┌──┐']; for (let i = 0; i < h
    ========================================================================= */
 function buildStage1() {
   const th = THEMES.rain, R = RNG(101), Hh = 126, L = new Level(1, 1060, Hh, th); L.deathY = 114; L.camRef = 54;
-  L.intro = { title: 'RAINLINE', sub: 'SPRAWL-BEZIRK 7 // 02:47 UHR // REGEN 94%', lines: ['ECHO: Meridian bezahlt die ganze Skyline, Sam. Hol sie dir zurück, Dach für Dach.', 'ECHO: Und du kannst FLIEGEN, Super Sam! Drück F zum Abheben, lenke mit A D W S. Der Tank füllt sich, wenn du landest.'] };
+  L.intro = { title: 'RAINLINE', sub: 'SPRAWL-BEZIRK 7 // 02:47 UHR // REGEN 94%', lines: ['ECHO: Meridian bezahlt die ganze Skyline, Sam. Hol sie dir zurück, Dach für Dach.', TX('ECHO: Und du kannst FLIEGEN, Super Sam! Drück F zum Abheben, lenke mit A D W S. Der Tank füllt sich, wenn du landest.', 'ECHO: Und du kannst FLIEGEN, Super Sam! Tipp auf FLUG zum Abheben, lenke mit dem linken Stick. Der Tank füllt sich, wenn du landest.')] };
   let X = 0; const roof = (w, top, sty) => { const x0 = X; L.mass(x0, top, w, sty || ST.ROOF); X += w; return { x0, x1: x0 + w, top, w }; }, gap = g => { X += g; };
   const link = (a, b, sag) => { if (b.x0 - a.x1 <= 16) cable(L, a.x1 - 2, a.top - 7, b.x0 + 2, b.top - 7, sag === undefined ? 3 : sag); };
   const arrows = (r) => L.dec('sign', r.x1 - 8, r.top - 5, { text: '>>>', col: '#ffb347', flick: false });
@@ -2322,27 +2565,27 @@ function buildStage1() {
   const A = roof(60, 70); L.start = { x: 10, y: 70 };
   decorRoof(L, R, A.x0, A.w, A.top, { skip: [[0, 18]], dens: .9 });
   L.dec('sign', 22, 58, { text: 'RAINLINE', col: '#19f0ff', frame: true, flick: false });
-  L.hint(A.x0 + 3, 8, 62, 10, 'ECHO', 'Sam, du bist live über dem Sprawl. A und D zum Laufen, LEERTASTE zum Springen. Halt sie gedrückt für mehr Höhe.');
-  L.hint(A.x0 + 32, 8, 62, 10, 'ECHO', 'Die Maus zielt. Linksklick feuert. Rechtsklick wirft das Greifseil. Halte die Taste, um dich festzuhalten.');
+  L.hint(A.x0 + 3, 8, 62, 10, 'ECHO', TX('Sam, du bist live über dem Sprawl. A und D zum Laufen, LEERTASTE zum Springen. Halt sie gedrückt für mehr Höhe.', 'Sam, du bist live über dem Sprawl. Linker Stick zum Laufen, Stick hoch oder SPRUNG zum Springen. Halt ihn für mehr Höhe.'));
+  L.hint(A.x0 + 32, 8, 62, 10, 'ECHO', TX('Die Maus zielt. Linksklick feuert. Rechtsklick wirft das Greifseil. Halte die Taste, um dich festzuhalten.', 'Der rechte Stick zielt und feuert. HAKEN wirft das Greifseil. Tipp noch einmal, um loszulassen.'));
   L.hint(A.x0 + 50, 6, 62, 10, 'ECHO', 'Lücke voraus. Anlauf und Sprung. Schau nicht nach unten.');
   arrows(A);
   gap(8); const B = roof(30, 70); link(A, B);
   L.en('drone', B.x0 + 20, 57); decorRoof(L, R, B.x0, B.w, B.top, { dens: .6 });
-  L.hint(B.x0, 8, 62, 10, 'ECHO', 'Konzerndrohne voraus. Ziel mit der Maus, Linksklick schießt sie ab.');
+  L.hint(B.x0, 8, 62, 10, 'ECHO', TX('Konzerndrohne voraus. Ziel mit der Maus, Linksklick schießt sie ab.', 'Konzerndrohne voraus. Ziel mit dem rechten Stick, er schießt von selbst.'));
   chips(L, A.x1 - 3, 66, B.x0 + 4, 66, 6, 6);
   gap(10); const C1 = roof(26, 66); link(B, C1);
   L.en('grunt', C1.x0 + 16, 66); L.pk('hp', C1.x0 + 8, 64); decorRoof(L, R, C1.x0, C1.w, C1.top, { dens: .5, padL: 10 });
   L.hint(C1.x0, 6, 58, 10, 'ECHO', 'Bewaffnete Patrouille. Die schießen zurück. Bleib in Bewegung, weich aus und schieß.');
   chips(L, B.x1 - 3, 66, C1.x0 + 4, 62, 5, 6);
   gap(22); const D = roof(32, 70); L.cp(D.x0 + 5, 70, 'KONTROLLPUNKT 01');
-  L.hint(C1.x1 - 14, 12, 58, 12, 'ECHO', 'Zu breit für einen sauberen Sprung. Spring und drück in der Luft SHIFT, um hinüberzudashen.');
+  L.hint(C1.x1 - 14, 12, 58, 12, 'ECHO', TX('Zu breit für einen sauberen Sprung. Spring und drück in der Luft SHIFT, um hinüberzudashen.', 'Zu breit für einen sauberen Sprung. Spring und tipp in der Luft DASH, um hinüberzudashen.'));
   chips(L, C1.x1 - 2, 62, D.x0 + 3, 66, 7, 5); arrows(C1);
   L.en('drone', D.x0 - 10, 56, { home: { x: D.x0 - 10, y: 56 } });
   decorRoof(L, R, D.x0, D.w, D.top, { dens: .7, padL: 12 });
   /* gantry gap */
   gap(38); const E = roof(36, 68);
   gantry(L, D.x1 - 5, E.x0 + 5, D.top - 17, [D.x1 - 9, E.x0 + 8], D.top);
-  L.hint(D.x1 - 22, 16, 60, 12, 'ECHO', 'Schiene über dir. Ziel auf den Träger, halte Rechtsklick für das Seil und schwing. Mit einem Sprung lässt du mit Schwung los.');
+  L.hint(D.x1 - 22, 16, 60, 12, 'ECHO', TX('Schiene über dir. Ziel auf den Träger, halte Rechtsklick für das Seil und schwing. Mit einem Sprung lässt du mit Schwung los.', 'Schiene über dir. Tipp HAKEN, das Seil sucht sich den Träger. Schwing, mit einem Sprung lässt du mit Schwung los.'));
   chips(L, D.x1 + 1, D.top - 8, E.x0 + 3, E.top - 10, 8, 8);
   decorRoof(L, R, E.x0, E.w, E.top, { dens: .6, padL: 10 }); L.en('grunt', E.x0 + 22, 68);
   /* tower shaft */
@@ -2831,19 +3074,27 @@ function drawTitle(t) {
   // stage select
   const sy = Math.max(top + 17, ROWS - 12), st = STAGES[G.sel], bw = 54;
   panel(Math.round((COLS - bw) / 2), sy - 1, bw, 6, '#19f0ff', 'SEKTOR WÄHLEN', .66);
+  G.titleHit = { x: Math.round((COLS - bw) / 2) * CW, y: (sy - 1) * CH, w: bw * CW, h: 6 * CH };
   const wob = Math.floor(t * 2.5) % 2;
   txtC('◄', COLS / 2 - bw / 2 + 4 - wob * .4, sy + 1.3, '#19f0ff'); txtC('►', COLS / 2 + bw / 2 - 4 + wob * .4, sy + 1.3, '#19f0ff');
   txtC('S E K T O R   0' + (G.sel + 1), COLS / 2, sy + .2, '#8a96c4');
   txtC(st.name.split('').join(' '), COLS / 2, sy + 1.3, '#eaf6ff'); txtC(st.sub, COLS / 2, sy + 2.4, '#ff2fb9');
   for (let i = 0; i < STAGES.length; i++) gl(i === G.sel ? '◆' : '◇', Math.round((COLS / 2 - STAGES.length * 1.5 + i * 3 + .5) * CW), Math.round((sy + 3.6) * CH), i === G.sel ? '#ffe45e' : '#3d4676');
   const bl = Math.floor(t * 1.8) % 2 === 0;
-  if (bl) txtC('[ ENTER DRÜCKEN ODER KLICKEN ZUM EINSTEIGEN ]', COLS / 2, sy + 6.2, '#5dffb0');
+  if (bl) txtC(TC.on ? '[ TIPPEN ZUM EINSTEIGEN ]' : '[ ENTER DRÜCKEN ODER KLICKEN ZUM EINSTEIGEN ]', COLS / 2, sy + 6.2, '#5dffb0');
   // controls
-  const cy = ROWS - 4.1;
-  txtC('A D  LAUFEN     LEERTASTE  SPRINGEN     F  FLIEGEN     SHIFT  DASH', COLS / 2, cy, '#7384c8');
-  txtC('MAUS  ZIELEN     LINKSKLICK  SCHIESSEN     RECHTSKLICK  ENTERHAKEN     1 2 3  WAFFE', COLS / 2, cy + 1.3, '#7384c8');
-  txtC('M  TON     P  PAUSE     R  NEUSTART          häng dich an alles. schwing. lass los. flieg.', COLS / 2, cy + 2.6, '#4d5a96');
-  if (MOUSE.touch) txtC('TASTATUR + MAUS ERFORDERLICH', COLS / 2, 1, '#ff3b4d');
+  const cy = Math.min(ROWS, Math.floor(H / CH)) - 4.4;
+  if (TC.on) {
+    txtC('LINKER STICK  LAUFEN, HOCH = SPRINGEN        RECHTER STICK  ZIELEN + FEUER', COLS / 2, cy, '#7384c8');
+    txtC('HAKEN  SEILSCHWUNG     FLUG  FLIEGEN     DASH  SPRINT     SPRUNG  SPRINGEN', COLS / 2, cy + 1.3, '#7384c8');
+    txtC('häng dich an alles. schwing. lass los. flieg.', COLS / 2, cy + 2.6, '#4d5a96');
+    if (IS_IOS && !isStandalone()) txtC('TIPP: TEILEN > ZUM HOME-BILDSCHIRM = VOLLBILD', COLS / 2, 1.6, '#ffb347');
+    else if (!fsEl() && fsCan() && TC.fsDone) txtC('TIPP: AUF <> TIPPEN FÜR VOLLBILD', COLS / 2, 1.6, '#ffb347');
+  } else {
+    txtC('A D  LAUFEN     LEERTASTE  SPRINGEN     F  FLIEGEN     SHIFT  DASH', COLS / 2, cy, '#7384c8');
+    txtC('MAUS  ZIELEN     LINKSKLICK  SCHIESSEN     RECHTSKLICK  ENTERHAKEN     1 2 3  WAFFE', COLS / 2, cy + 1.3, '#7384c8');
+    txtC('M  TON     P  PAUSE     R  NEUSTART          häng dich an alles. schwing. lass los. flieg.', COLS / 2, cy + 2.6, '#4d5a96');
+  }
 }
 
 /* ---------------- intro / clear / ending / pause ---------------- */
@@ -2867,7 +3118,7 @@ function drawClear(t) {
   const rows = [['ZEIT', String(s.t / 60 | 0).padStart(2, '0') + ':' + String(Math.floor(s.t % 60)).padStart(2, '0') + '   (SOLL ' + String(STAGES[G.stage].par / 60 | 0) + ':' + String(STAGES[G.stage].par % 60).padStart(2, '0') + ')'], ['GEGNER', String(s.k)], ['DATENCHIPS', '◊ ' + String(s.c)], ['TODE', String(s.d)], ['BONUS', '+' + s.bonus], ['GESAMTPUNKTE', String(s.score).padStart(6, '0')]];
   rows.forEach((r, i) => { const on = clamp((k - .3 - i * .28) * 4, 0, 1); if (on <= 0) return; g.globalAlpha = on; txtPx(r[0], Math.round((x + 8) * CW), Math.round((y + 5 + i * 1.5) * CH), '#8a96c4'); txtPx(r[1], Math.round((x + 30) * CW), Math.round((y + 5 + i * 1.5) * CH), i === 5 ? '#ffe45e' : '#eaf6ff'); g.globalAlpha = 1; });
   const rk = clamp((k - 2.2) * 3, 0, 1); if (rk > 0) { g.globalAlpha = rk; const col = { S: '#ffe45e', A: '#5dffb0', B: '#19f0ff', C: '#8a96c4' }[s.rank]; txtC('R A N G', COLS / 2, y + 15.2, '#8a96c4'); const gx = Math.round(COLS / 2 - 3); bigText(s.rank, gx, y + 16.4, 1, [col, col, col, col, col], '#0a0a20', rk, 0); g.globalAlpha = 1; }
-  if (k > 3 && Math.floor(k * 1.8) % 2 === 0) txtC(G.stage < STAGES.length - 1 ? '[ ENTER :: NÄCHSTER SEKTOR ]' : '[ ENTER ]', COLS / 2, y + 24.2, '#5dffb0');
+  if (k > 3 && Math.floor(k * 1.8) % 2 === 0) txtC(G.stage < STAGES.length - 1 ? (TC.on ? '[ TIPPEN :: NÄCHSTER SEKTOR ]' : '[ ENTER :: NÄCHSTER SEKTOR ]') : (TC.on ? '[ TIPPEN ]' : '[ ENTER ]'), COLS / 2, y + 24.2, '#5dffb0');
 }
 const END_LINES = [
   ['ECHO', 'Archon ist erledigt. Das ganze Netz hat gerade ausgeatmet.'],
@@ -2891,11 +3142,20 @@ function drawEnding(t) {
   const st = G.stats, sy = ly + 7.6; if (k > 11) {
     const aa = clamp((k - 11) * 2, 0, 1); g.globalAlpha = aa;
     const t0 = S.stageT | 0; txtC('PUNKTE ' + String(st.score).padStart(6, '0') + '     TODE ' + S.deaths + '     CHIPS ◊ ' + S.chips + '     GEGNER ' + S.kills, COLS / 2, sy, '#ffe45e');
-    if (Math.floor(k * 1.8) % 2 === 0) txtC('[ ENTER :: ZUM TITEL ]', COLS / 2, sy + 2.4, '#5dffb0'); g.globalAlpha = 1;
+    if (Math.floor(k * 1.8) % 2 === 0) txtC(TC.on ? '[ TIPPEN :: ZUM TITEL ]' : '[ ENTER :: ZUM TITEL ]', COLS / 2, sy + 2.4, '#5dffb0'); g.globalAlpha = 1;
   }
 }
 function drawPause(t) {
   drawWorld(t); drawBand(0, ROWS, .82);
+  if (TC.on) {   // touch: big tap rows instead of the key list
+    const pw = 50, x = Math.round((COLS - pw) / 2), y = Math.max(1, Math.round(ROWS * .1)), ph = 20, sp = 2.9;
+    panel(x, y, pw, ph, '#19f0ff', 'PAUSE', .92);
+    const items = ['WEITER', 'SEKTOR NEU STARTEN', 'ZUM TITEL', AU.muted ? 'TON: AUS' : 'TON: AN'];
+    G.pauseRows = []; G.pauseRect = { x: x * CW, y: y * CH, w: pw * CW, h: ph * CH };
+    items.forEach((s, i) => { const on = i === G.pauseSel, ry = y + 2.6 + i * sp; if (on) rectPx((x + 3) * CW, Math.round((ry - .75) * CH), (pw - 6) * CW, Math.round(2.4 * CH), '#19f0ff', .12); txtC((on ? '► ' : '  ') + s + (on ? ' ◄' : '  '), COLS / 2, ry, on ? '#5dffb0' : '#c8d4ff'); G.pauseRows.push([Math.round((ry - .8) * CH), Math.round((ry + 1.6) * CH)]); });
+    txtC('LINKS: LAUFEN, HOCH = SPRINGEN', COLS / 2, y + 15.4, '#5a6aa8'); txtC('RECHTS: ZIELEN + FEUER', COLS / 2, y + 16.6, '#5a6aa8');
+    return;
+  }
   const pw = 66, x = Math.round((COLS - pw) / 2), y = Math.max(1, Math.round(ROWS * .12));
   panel(x, y, pw, 22, '#19f0ff', 'PAUSE', .92);
   const items = ['WEITER', 'SEKTOR NEU STARTEN', 'ZUM TITEL', AU.muted ? 'TON: AUS' : 'TON: AN'];
@@ -2965,11 +3225,15 @@ function render(t) {
     case 'boot': break;
     default: drawWorld(t); drawHud(t);
   }
+  if (TC.on) drawTouch(t);
   if (G.fade > 0) { rectPx(0, 0, W, H, '#02030a', G.fade); }
+  if (portraitNow()) drawRotate(t);
   present(G.scene === 'title' ? 1.05 : 1);
 }
 function tick(dt) {
   if (G.scene === 'boot') return;
+  if (portraitNow()) { acc = 0; return; }   // phone held upright: wait for landscape
+  touchApply(dt);
   if (G.scene === 'play' || G.scene === 'clearing') {
     acc += dt; let n = 0;
     if (pressed('KeyM')) { auMute(!AU.muted); KP.KeyM = false; }
