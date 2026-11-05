@@ -22,6 +22,7 @@ Space-Invaders-Minispiel und ein Held, der wie Superman fliegen kann.
 | `S` + Sprung | durch dünne Plattformen fallen |
 | `R` | Neustart am letzten Kontrollpunkt |
 | `P` / `Esc` | Pause. `M` schaltet den Ton aus |
+| `H` | im Titel: die Bestenliste öffnen |
 
 ## Sektoren
 
@@ -92,6 +93,45 @@ Vollbildmodus im Browser: Teilen > "Zum Home-Bildschirm" legt das Spiel als App 
 
 Am Computer sind Tastatur und Maus nötig.
 
+## Bestenliste
+
+Wer alle acht Sektoren **in einem Lauf** schafft und mit **Sektor 1** angefangen hat, kann sich nach dem
+Abspann mit Namen eintragen (2 bis 12 Zeichen: Buchstaben, Zahlen, Leerzeichen, `-` `_` `!`). Wer mitten drin
+einsteigt, sieht das Ende, bekommt aber keinen Eintrag. Die Liste ist für alle gleich und im Titel mit `H`
+oder dem Knopf `BESTENLISTE` zu öffnen.
+
+- **Wertung:** zuerst die Punkte, bei Gleichstand die schnellere Zeit. Die Zeit ist die Summe der geschafften
+  Sektor-Versuche. Angezeigt werden die ersten 100.
+- **Wo sie liegt:** auf einem kleinen Cloudflare Worker mit einer D1-Datenbank (`worker/`), nicht in der Seite.
+  Die Seite bleibt eine einzige Datei. Ohne Netz zeigt das Spiel nur einen Hinweis. Die Liste lesen kann man von
+  überall, eintragen geht nur von `https://veste-software.github.io`.
+- **Was gespeichert wird:** Name, Punkte, Zeit, Tode, Gegner, Chips und der Zeitpunkt. Die IP-Adresse wird nie
+  gespeichert, für die Begrenzung der Einträge nur ein gesalzener Hash. Hashes, die älter als 24 Stunden sind,
+  löscht der Worker bei jedem neuen Eintrag. Der Name ist öffentlich.
+- **Schutz vor Unsinn, nicht vor Betrug:** Der Server kann nicht beweisen, dass ein Lauf ehrlich war. Er lehnt
+  unmögliche Werte ab (Punkte über 300 000, unter 5 Minuten Spielzeit, weniger als 30 Punkte pro Chip), filtert
+  Schimpfwörter im Namen (einfache Liste, auch mit Zahlen statt Buchstaben), erlaubt pro Adresse 3 Einträge in
+  10 Minuten und 10 am Tag und insgesamt 200 pro Stunde. Wer die Schnittstelle direkt anspricht, kann trotzdem
+  einen Wert erfinden, der plausibel aussieht.
+- **Einträge entfernen:** im Cloudflare-Dashboard unter D1 > `super-sam-scores` > Console, zum Beispiel
+  `DELETE FROM scores WHERE name = 'XYZ';`.
+
+### Den Worker einrichten
+
+```sh
+cd worker
+npx wrangler d1 create super-sam-scores          # die database_id in wrangler.toml eintragen
+npx wrangler d1 execute super-sam-scores --remote --file=schema.sql
+npx wrangler secret put SALT                      # ein langer Zufallsstring, nur für den IP-Hash
+npx wrangler deploy
+```
+
+Die Adresse steht in `src/58_scores.js` (`HS.api`). Tests (Node 22 oder neuer, die D1 wird mit `node:sqlite` nachgebaut):
+
+```sh
+node --test worker/test/worker.test.mjs
+```
+
 ## Bauen
 
 Keine Abhängigkeiten, nur Node.js.
@@ -120,4 +160,6 @@ Der Branch `gh-pages` enthält genau diese Datei.
 | `src/4a_zenith.js` | Endgegner ZENITH: Orb-Schild, Kern, Laser-Säulen, schwankende Schwerkraft |
 | `src/45_touch.js` | Touch-Steuerung (Sticks, Knöpfe, Menüs per Tippen), Vollbild |
 | `src/46_vehicles.js` | Fahrzeuge: Hubschrauber, Auto, Hover-Wagen, Bordwaffen, Raketen, Gegner-Fahrzeuge |
+| `src/58_scores.js` | Bestenliste: Lauf-Wertung, Anfragen an den Worker, das Overlay mit Namensfeld und Liste |
 | `src/60_main.js` | Titel, Intro, Abschluss- und Endbildschirm, Hauptschleife |
+| `worker/` | der Bestenlisten-Worker (Cloudflare Worker + D1): `index.js`, `schema.sql`, `wrangler.toml`, Tests |

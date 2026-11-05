@@ -13,7 +13,7 @@ const STAGES = [
   { build: buildStage7, name: 'ARCADE ORBIT', sub: 'LIFTSTATION // SPIEL ODER STIRB', par: 300 },
   { build: buildStage8, name: 'ZENITH', sub: 'ORBITALSTATION // SCHWERELOS', par: 330 },
 ];
-const G = { scene: 'boot', t: 0, sel: 0, stage: 0, introT: 0, clearT: 0, endT: 0, pauseSel: 0, base: null, stats: null, fade: 1, started: false, titleL: null, camGY: 40 };
+const G = { scene: 'boot', t: 0, sel: 0, stage: 0, introT: 0, clearT: 0, endT: 0, pauseSel: 0, base: null, stats: null, run: null, fade: 1, started: false, titleL: null, camGY: 40 };
 const STEP = 1 / 60;
 
 function resetRun() { S.score = 0; S.chips = 0; S.kills = 0; S.deaths = 0; }
@@ -46,7 +46,7 @@ function rankFor(t, d, par) { return d === 0 && t < par ? 'S' : d <= 1 && t < pa
 function computeStats() {
   const st = STAGES[G.stage], t = S.stageT, d = S.deaths - G.base.deaths, rank = rankFor(t, d, st.par);
   const bonus = Math.max(0, Math.round((st.par - t) * 10)) + (d === 0 ? 500 : 0) + (S.chips - G.base.chips) * 10;
-  S.score += bonus;
+  S.score += bonus; if (G.run) G.run.t += t;   // the run's clock: only the sector attempts that were finished
   G.stats = { t, d, k: S.kills - G.base.kills, c: S.chips - G.base.chips, bonus, rank, score: S.score };
 }
 
@@ -82,7 +82,7 @@ function stepPlay(dt) {
   if (S.mode === 'bossdie') bossDieStep(dt);
   const sdt = dt * (S.slow || 1);
   updWorld(sdt); updCam(sdt);
-  if (S.mode === 'play' && S.bossFinal) { S.endTimer = (S.endTimer || 0) + dt; if (S.endTimer > 3.2) { S.bossFinal = false; if (G.stage < STAGES.length - 1) stageClear(); else { G.scene = 'ending'; G.endT = 0; computeStats(); musPlay('title'); } } }
+  if (S.mode === 'play' && S.bossFinal) { S.endTimer = (S.endTimer || 0) + dt; if (S.endTimer > 3.2) { S.bossFinal = false; if (G.stage < STAGES.length - 1) stageClear(); else { G.scene = 'ending'; G.endT = 0; computeStats(); HS.begin(); musPlay('title'); } } }
 }
 
 /* ---------------- title ---------------- */
@@ -197,6 +197,7 @@ function drawEnding(t) {
   const st = G.stats, sy = ly + 7.6; if (k > 11) {
     const aa = clamp((k - 11) * 2, 0, 1); g.globalAlpha = aa;
     const t0 = S.stageT | 0; txtC('PUNKTE ' + String(st.score).padStart(6, '0') + '     TODE ' + S.deaths + '     CHIPS ◊ ' + S.chips + '     GEGNER ' + S.kills, COLS / 2, sy, '#ffe45e');
+    if (!HS.run) txtC('KEIN EINTRAG IN DIE BESTENLISTE: DER LAUF BEGANN NICHT BEI SEKTOR 1', COLS / 2, sy + 1.15, '#8a96c4');
     if (Math.floor(k * 1.8) % 2 === 0) txtC(TC.on ? '[ TIPPEN :: ZUM TITEL ]' : '[ ENTER :: ZUM TITEL ]', COLS / 2, sy + 2.4, '#5dffb0'); g.globalAlpha = 1;
   }
 }
@@ -221,7 +222,7 @@ function drawPause(t) {
 
 /* ---------------- frame ---------------- */
 let last = 0, acc = 0;
-function goTitle() { resetRun(); setupTitle(); G.scene = 'title'; G.t = 0; musPlay('title'); }
+function goTitle() { G.run = null; resetRun(); setupTitle(); G.scene = 'title'; G.t = 0; musPlay('title'); }
 function beginStage(i) { loadStage(i, G.carry); G.carry = null; G.scene = 'intro'; G.introT = 0; musStop(); }
 function startPlaying() { G.scene = 'play'; S.P.spawnT = 1.1; S.P.inv = 1.2; sfx('boot', .7); glitchAmt = .7; const L = S.L; musPlay(L.th.track); L.intro.lines.forEach(s => { const m = /^([A-Z]+):\s*(.*)$/.exec(s); if (m) say(m[1], m[2]); }); }
 function confirmKey() { return pressed('Enter') || pressed('Space') || pressed('NumpadEnter') || MOUSE.lp; }
@@ -236,15 +237,17 @@ function resetStageStats() { if (G.base) { S.score = G.base.score; S.kills = G.b
 window.onGameBlur = () => { if (G.scene === 'play') { G.scene = 'pause'; G.pauseSel = 0; } };
 
 function update(dt) {
-  G.t += dt;
+  G.t += dt; HS.sync();
   // global keys
   if (pressed('KeyM')) { auMute(!AU.muted); KP.KeyM = false; }
   if (KP.Enter || KP.Space || MOUSE.lp || KP.KeyW || KP.KeyD) activateAudio();
   if (G.scene === 'title') {
+    if (HS.open) { updTitle(dt); musPlay('title'); endFrameInput(); return; }   // the highscore overlay is up: the title waits behind it
+    if (pressed('KeyH')) { HS.after = null; HS.show('list'); endFrameInput(); return; }
     if (pressed('ArrowRight') || pressed('KeyD')) { G.sel = (G.sel + 1) % STAGES.length; sfx('select'); }
     if (pressed('ArrowLeft') || pressed('KeyA')) { G.sel = (G.sel + STAGES.length - 1) % STAGES.length; sfx('select'); }
     if ([1, 2, 3, 4, 5, 6, 7, 8].some(i => pressed('Digit' + i))) { for (let i = 1; i <= 8; i++) if (pressed('Digit' + i)) G.sel = i - 1; sfx('select'); }
-    if (pressed('Enter') || pressed('Space') || pressed('NumpadEnter') || MOUSE.lp) { activateAudio(); resetRun(); G.carry = null; sfx('pick'); beginStage(G.sel); endFrameInput(); return; }
+    if (pressed('Enter') || pressed('Space') || pressed('NumpadEnter') || MOUSE.lp) { activateAudio(); resetRun(); G.run = { from: G.sel, t: 0 }; G.carry = null; sfx('pick'); beginStage(G.sel); endFrameInput(); return; }
     updTitle(dt); musPlay('title'); endFrameInput(); return;
   }
   if (G.scene === 'intro') {
@@ -264,6 +267,8 @@ function update(dt) {
   }
   if (G.scene === 'ending') {
     G.endT += dt; S.t += dt; updDecorFx(dt); updParts(dt);
+    if (HS.open) { endFrameInput(); return; }
+    if (G.endT > 11.5 && HS.run && !HS.opened) { HS.opened = true; HS.after = goTitle; HS.show('submit'); endFrameInput(); return; }   // a full run: name entry
     if (G.endT > 11.5 && (pressed('Enter') || pressed('Space') || MOUSE.lp)) goTitle();
     endFrameInput(); return;
   }
@@ -319,7 +324,7 @@ function boot() {
   try { window.focus(); cv.focus(); } catch (e) { }
   resize(); goTitle(); G.scene = 'title'; G.fade = 1; requestAnimationFrame(frame);
   window.__G = G; window.__S = S;
-  window.__warp = (i, x, y) => { resetRun(); loadStage(i, [true, true, true]); G.scene = 'play'; S.P.spawnT = 0; if (x !== undefined) { S.P.x = x; S.P.y = y; S.respawn = { x, y }; updCam(.016, true); } };
+  window.__warp = (i, x, y) => { resetRun(); G.run = { from: i, t: 0 }; loadStage(i, [true, true, true]); G.scene = 'play'; S.P.spawnT = 0; if (x !== undefined) { S.P.x = x; S.P.y = y; S.respawn = { x, y }; updCam(.016, true); } };
 }
 (function () {
   let done = false; const go = () => { if (done) return; done = true; boot(); };
