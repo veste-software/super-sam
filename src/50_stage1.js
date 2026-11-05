@@ -70,7 +70,7 @@ function buildStage1() {
   L.dec('sign', 22, 58, { text: 'RAINLINE', col: '#19f0ff', frame: true, flick: false });
   L.hint(A.x0 + 3, 8, 62, 10, 'ECHO', TX('Sam, du bist live über dem Sprawl. A und D zum Laufen, LEERTASTE zum Springen. Halt sie gedrückt für mehr Höhe.', 'Sam, du bist live über dem Sprawl. Linker Stick zum Laufen, Stick hoch oder SPRUNG zum Springen. Halt ihn für mehr Höhe.'));
   L.hint(A.x0 + 32, 8, 62, 10, 'ECHO', TX('Die Maus zielt. Linksklick feuert. Rechtsklick wirft das Greifseil. Halte die Taste, um dich festzuhalten.', 'Der rechte Stick zielt und feuert. HAKEN wirft das Greifseil. Tipp noch einmal, um loszulassen.'));
-  L.hint(A.x0 + 50, 6, 62, 10, 'ECHO', 'Lücke voraus. Anlauf und Sprung. Schau nicht nach unten.');
+  L.hint(A.x0 + 50, 6, 62, 10, 'ECHO', TX('Lücke voraus. Anlauf und Sprung. Zu kurz? Drück in der Luft noch einmal Sprung: Doppelsprung mit Salto.', 'Lücke voraus. Anlauf und SPRUNG. Zu kurz? Tipp in der Luft noch einmal SPRUNG: Doppelsprung mit Salto.'));
   arrows(A);
   gap(8); const B = roof(30, 70); link(A, B);
   L.en('drone', B.x0 + 20, 57); decorRoof(L, R, B.x0, B.w, B.top, { dens: .6 });

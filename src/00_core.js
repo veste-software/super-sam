@@ -259,6 +259,7 @@ function sfx(n, v) {
     case 'rail': tone('sawtooth', 2400, 50, .5, .22 * v, 0, null, { lp: 6000, lp2: 200 }); tone('sine', 90, 30, .5, .5 * v); nz(.4, .3 * v, 'bandpass', 5000, 300, 0, null, 2); break;
     case 'jump': tone('sine', 260, 560, .13, .22 * v); break;
     case 'djump': tone('triangle', 400, 900, .12, .2 * v); nz(.1, .1 * v, 'highpass', 4000); break;
+    case 'flip': tone('triangle', 330, 1180, .17, .22 * v); tone('sine', 660, 1500, .13, .09 * v, .05); nz(.16, .12 * v, 'highpass', 3500); break;
     case 'land': nz(.09, .35 * v, 'lowpass', 600, 120); tone('sine', 90, 45, .09, .3 * v); break;
     case 'dash': nz(.22, .4 * v, 'bandpass', 600, 4200, 0, null, 3); tone('sawtooth', 200, 700, .15, .08 * v, 0, null, { lp: 1800 }); break;
     case 'hook': tone('sawtooth', 300, 1500, .07, .14 * v); nz(.05, .15 * v, 'highpass', 5000); break;

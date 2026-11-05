@@ -42,7 +42,7 @@ function vehHint(v) {
 function boardVeh(v) {
   const p = S.P; if (p.veh || v.dead || v.driver || p.dead) return;
   KP.KeyV = false; detachHook(true); stopFly(p, true);
-  p.veh = v; v.driver = true; p.dashT = 0; p.vx = p.vy = 0; p.w = v.w; p.h = v.h; p.inv = 0; p.fly = false; p.trail.length = 0;
+  p.veh = v; v.driver = true; p.flip = 0; p.dashT = 0; p.vx = p.vy = 0; p.w = v.w; p.h = v.h; p.inv = 0; p.fly = false; p.trail.length = 0;
   v.face = p.face || 1; v.rktCd = Math.max(v.rktCd, .4);
   sfx('board'); ring(v.x, v.y - v.h / 2, 8, .5, PAL[C.cyan]); ring(v.x, v.y - v.h / 2, 12, .7, PAL[C.mag], ['.', '·']);
   for (let i = 0; i < 12; i++) pt(v.x + rr(-4, 4), v.y - rr(0, v.h), rr(-8, 8), rr(-14, -2), rr(.3, .7), ['*', '+', '·'], PAL[C.cyan], { drag: 2 });

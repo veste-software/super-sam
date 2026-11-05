@@ -211,7 +211,7 @@ function drawPause(t) {
   panel(x, y, pw, 24, '#19f0ff', 'PAUSE', .92);
   const items = ['WEITER', 'SEKTOR NEU STARTEN', 'ZUM TITEL', AU.muted ? 'TON: AUS' : 'TON: AN'];
   items.forEach((s, i) => { const on = i === G.pauseSel; txtC((on ? '► ' : '  ') + s + (on ? ' ◄' : '  '), COLS / 2, y + 2.5 + i * 1.5, on ? '#5dffb0' : '#8a96c4'); });
-  const cs = [['A D  /  ← →', 'LAUFEN'], ['LEERTASTE  /  W', 'SPRINGEN  (an Wänden abspringen)'], ['SHIFT', 'DASH  (dabei unverwundbar)'], ['F', 'FLIEGEN  (WASD lenkt, Boden tankt)'], ['V', 'FAHRZEUG EIN / AUS  (SHIFT TURBO)'], ['MAUS', 'ZIELEN'], ['LINKSKLICK', 'SCHIESSEN'], ['RECHTSKLICK / E / K', 'HAKEN: halten = schwingen'], ['LEERTASTE (am Haken)', 'MIT SCHWUNG LOSLASSEN'], ['1 2 3  /  Q  /  RAD', 'WAFFE WECHSELN'], ['S  /  ↓', 'DURCH DÜNNE PLATTFORMEN'], ['R', 'NEUSTART AM KONTROLLPUNKT'], ['M  /  P  oder  ESC', 'TON  /  PAUSE']];
+  const cs = [['A D  /  ← →', 'LAUFEN'], ['LEERTASTE  /  W', 'SPRINGEN  (an Wänden abspringen)'], ['NOCHMAL IN DER LUFT', 'DOPPELSPRUNG MIT SALTO'], ['SHIFT', 'DASH  (dabei unverwundbar)'], ['F', 'FLIEGEN  (WASD lenkt, Boden tankt)'], ['V', 'FAHRZEUG EIN / AUS  (SHIFT TURBO)'], ['MAUS', 'ZIELEN'], ['LINKSKLICK', 'SCHIESSEN'], ['RECHTSKLICK / E / K', 'HAKEN: halten = schwingen'], ['LEERTASTE (am Haken)', 'MIT SCHWUNG LOSLASSEN'], ['1 2 3  /  Q  /  RAD', 'WAFFE WECHSELN'], ['S  /  ↓', 'DURCH DÜNNE PLATTFORMEN'], ['R', 'NEUSTART AM KONTROLLPUNKT'], ['M  /  P  oder  ESC', 'TON  /  PAUSE']];
   cs.forEach((r, i) => { txtPx(r[0], Math.round((x + 4) * CW), Math.round((y + 9.2 + i) * CH), '#7f8fd8'); txtPx(r[1], Math.round((x + 28) * CW), Math.round((y + 9.2 + i) * CH), '#5a6aa8'); });
 }
 

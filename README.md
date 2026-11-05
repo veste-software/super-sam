@@ -10,7 +10,7 @@ Sprünge über Hochhausdächer, ein Enterhaken, Fahrzeuge zum Kapern und ein Hel
 | Taste | Aktion |
 | --- | --- |
 | `A` `D` / Pfeiltasten | laufen |
-| `Leertaste` / `W` | springen (an Wänden rutschen und abspringen). |
+| `Leertaste` / `W` | springen (an Wänden rutschen und abspringen). In der Luft noch einmal drücken: **Doppelsprung mit Salto**. Boden, Wand und Seil laden ihn wieder auf |
 | `F` | fliegen (an/aus). Mit `A` `D` `W` `S` lenken. Der Tank füllt sich am Boden schnell wieder auf |
 | `Shift` / `L` | Dash (währenddessen kannst du nicht getroffen werden) |
 | Maus | zielen |
@@ -57,7 +57,7 @@ Vollbildmodus jederzeit ein- und ausschalten. Am Computer gibt es dafür unten r
 | --- | --- |
 | Linker Stick (links auf dem Bildschirm) | laufen. Stick nach oben = springen (beim Fliegen: steigen), nach unten = fallen lassen |
 | Rechter Stick (rechte Bildschirmhälfte) | zielen und dabei automatisch feuern |
-| `SPRUNG` | springen |
+| `SPRUNG` | springen. In der Luft noch einmal tippen: Doppelsprung mit Salto |
 | `DASH` | Dash (währenddessen unverwundbar) |
 | `HAKEN` | Enterhaken: antippen wirft ihn (er sucht sich selbst einen Ankerpunkt, oder du zielst vorher mit dem rechten Stick), noch einmal antippen lässt los |
 | `FLUG` | fliegen an/aus (der Ring zeigt den Tank) |

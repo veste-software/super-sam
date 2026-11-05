@@ -98,7 +98,7 @@ function moveEnt(o, dt, drop) {
    ========================================================================= */
 function newPlayer(x, y) {
   return {
-    x, y, vx: 0, vy: 0, w: 1.6, h: 2.9, face: 1, ground: false, mv: null, coyote: 0, jbuf: 0, wall: 0, wallT: 0, wallLock: 0, dashT: 0, dashCd: 0, dashDir: 1, airDash: false,
+    x, y, vx: 0, vy: 0, w: 1.6, h: 2.9, face: 1, ground: false, mv: null, coyote: 0, jbuf: 0, wall: 0, wallT: 0, wallLock: 0, dashT: 0, dashCd: 0, dashDir: 1, airDash: false, djump: 1, flip: 0, flipDir: 1,
     hp: 100, inv: 0, hurtT: 0, dead: false, deadT: 0, fireCd: 0, wpn: 0, wpns: [true, false, false], aim: { x: 1, y: 0, a: 0, d: 0, cx: 1, cy: 0 }, run: 0, landT: 0, jumpCut: false, drop: 0, flashT: 0, spawnT: 0, muzzle: 0, recoil: 0, step: false,
     hook: { st: 0, x: 0, y: 0, ax: 0, ay: 0, tx: 0, ty: 0, len: 0, tgt: null, dist: 0, dx: 0, dy: 0, rt: 0, pull: 0 }, trail: [], lastGround: { x, y }, lean: 0, swing: 0,
     fly: false, fuel: 1, hitT: 99, flyHint: 0,
@@ -130,7 +130,7 @@ function hurtPlayer(dmg, fromX, fromY) {
 function killPlayer() {
   const p = S.P; if (p.dead) return;
   if (p.veh) { p.veh.driver = false; p.veh = null; p.w = 1.6; p.h = 2.9; }
-  p.dead = true; p.deadT = 0; p.hp = 0; S.deaths++; detachHook(true); sfx('die');
+  p.flip = 0; p.dead = true; p.deadT = 0; p.hp = 0; S.deaths++; detachHook(true); sfx('die');
   S.slow = .25; glitchAmt = 1.2; shake(1.2);
   for (let i = 0; i < 46; i++) pt(p.x + rr(-1, 1), p.y - rr(.2, 2.8), rr(-10, 10), rr(-26, -4), rr(.8, 2), ['0', '1', '#', '$', '%', '▒', '░', '▪'], PAL[pick([C.cyan, C.mag, C.white, C.vio])], { g: -6, drag: .8, glow: 1 });
   ring(p.x, p.y - 1.5, 14, .9, PAL[C.cyan]); ring(p.x, p.y - 1.5, 22, 1.3, PAL[C.mag], ['.', '·']);
@@ -144,7 +144,7 @@ function respawnPlayer() {
 }
 
 function startFly(p) {
-  p.fly = true; p.ground = false; p.mv = null; p.vy = Math.min(p.vy, -9); p.wall = 0; p.wallT = 0; if (p.hook.st) detachHook(true);
+  p.fly = true; p.flip = 0; p.ground = false; p.mv = null; p.vy = Math.min(p.vy, -9); p.wall = 0; p.wallT = 0; if (p.hook.st) detachHook(true);
   sfx('dash', .8); ring(p.x, p.y - 1.4, 7, .4, PAL[C.cyan]); for (let i = 0; i < 12; i++) pt(p.x + rr(-1, 1), p.y - rr(.2, 2.6), rr(-14, 14), rr(-4, 12), rr(.25, .6), ['*', '·', '+', '░'], PAL[pick([C.cyan, C.white, C.mag])], { drag: 2 });
 }
 function stopFly(p, silent) { if (!p.fly) return; p.fly = false; if (!silent) sfx('release', .7); }
@@ -204,6 +204,13 @@ function updPlayer(dt) {
   p.wallT = Math.max(0, p.wallT - dt);
   if (!(KEY.Space || KEY.KeyW || KEY.ArrowUp) && p.vy < -12 && !p.jumpCut && h.st !== 2 && !p.fly) { p.vy *= .5; p.jumpCut = true; }
   if (p.ground) p.jumpCut = false;
+  /* double jump: one extra jump per flight; ground, wall and rope refresh it. The somersault is cosmetic and runs 0.5 s */
+  if (p.ground || h.st === 2 || (p.wall && p.wallT > 0)) p.djump = 1;
+  if (p.flip > 0) {
+    p.flip += dt / .5 * (p.ground ? 4 : 1);
+    if (p.flip >= 1 || p.fly || h.st === 2 || p.dashT > 0 || (p.wall && p.wallT > 0 && p.vy > 0)) p.flip = 0;
+    else if (Math.random() < .55) pt(p.x - p.flipDir * rr(.2, .9), p.y - 1.45 + rr(-1.3, 1.3), -p.vx * .12 + rr(-3, 3), rr(-3, 3), rr(.15, .32), ['·', '*', '°'], PAL[C.cyan], { drag: 3 });
+  }
   // facing: toward aim when aiming, else movement
   const aimFresh = MOUSE.moved > 0;
   if (aimFresh && p.wallT <= 0) p.face = aim.x >= 0 ? 1 : -1; else if (dir) p.face = dir;
@@ -224,7 +231,7 @@ function updPlayer(dt) {
 
   /* ---- dash ---- */
   if (dashP && p.dashCd <= 0 && (!p.airDash || p.ground || p.fly) && p.dashT <= 0) {
-    p.dashT = .17; p.dashCd = EASY.dashCd; p.dashDir = dir || p.face; p.airDash = !p.ground; sfx('dash'); p.inv = Math.max(p.inv, .2); p.face = p.dashDir;
+    p.flip = 0; p.dashT = .17; p.dashCd = EASY.dashCd; p.dashDir = dir || p.face; p.airDash = !p.ground; sfx('dash'); p.inv = Math.max(p.inv, .2); p.face = p.dashDir;
     if (h.st === 2) detachHook(true);
     for (let i = 0; i < 10; i++) pt(p.x, p.y - rr(.3, 2.6), -p.dashDir * rr(4, 20), rr(-3, 3), rr(.2, .5), ['─', '═', '-', '·'], PAL[C.cyan], { drag: 3 });
   }
@@ -269,6 +276,13 @@ function updPlayer(dt) {
     if (p.jbuf > 0) {
       if (p.ground || p.coyote > 0) { p.vy = -PH.jump; p.jbuf = 0; p.coyote = 0; p.ground = false; p.mv = null; sfx('jump'); p.jumpCut = false; p.landT = 0; p.stretch = .12; for (let i = 0; i < 6; i++) pt(p.x + rr(-1, 1), p.y, rr(-8, 8), rr(-3, 0), rr(.2, .5), ['·', '.', '░'], PAL[C.grey], { drag: 3 }); }
       else if (p.wall && p.wallT > 0 && h.st !== 2) { p.vy = -PH.jump * .96; p.vx = -p.wall * 21; p.wallLock = .17; p.face = -p.wall; p.jbuf = 0; p.wallT = 0; p.jumpCut = false; sfx('djump'); sparks(p.x + p.wall * .8, p.y - 1.5, 10, -p.wall, 0, PAL[C.cyan], 26); p.wall = 0; }
+      else if (jumpP && p.djump > 0 && h.st !== 2 && !(p.vy > 0 && collides(p, p.x, p.y + Math.min(3, .9 + p.vy * .07)))) {
+        /* a fresh press in mid-air; skipped when the ground is about to arrive, so the buffered landing jump still works */
+        p.djump = 0; p.vy = -PH.jump * .9; p.jbuf = 0; p.jumpCut = false; p.stretch = .12; p.flip = .001; p.flipDir = dir || p.face; p.landT = 0;
+        if (dir) p.vx = dir * Math.max(run * .8, sign(p.vx) === dir ? Math.min(run * 1.1, Math.abs(p.vx) + 4) : 0);
+        sfx('flip'); ring(p.x, p.y - .6, 6, .32, PAL[C.cyan]); ring(p.x, p.y - .6, 9, .45, PAL[C.mag], ['.', '·']); sparks(p.x, p.y - .4, 10, 0, 1, PAL[C.cyan], 24);
+        for (let i = 0; i < 8; i++) pt(p.x + rr(-1, 1), p.y - .2, rr(-9, 9), rr(2, 9), rr(.2, .45), ['·', '.', '░', '*'], PAL[C.white], { drag: 3 });
+      }
     }
     /* grapple physics */
     if (h.st === 2) {

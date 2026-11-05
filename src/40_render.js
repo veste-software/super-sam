@@ -282,6 +282,7 @@ function drawPlayer(t) {
     drawPlayerBody(p, p.x, p.y, p.face, al, false); g.restore();
     const sy = (p.y - 3 + 3 * clamp(k * 1.4, 0, 1)); for (let i = -2; i < 3; i++) wgl('═', p.x - 1.5 + i * .5 + .5, sy, '#19f0ff', .8); glow(p.x, sy, 5, '#19f0ff', .4); return;
   }
+  if (p.flip > 0 && !p.fly) { drawPlayerFlip(p, al, flash); glow(p.x, p.y - 1.5, 6, '#19f0ff', .34); return; }
   drawPlayerBody(p, p.x, p.y, p.face, al, flash, false, true);
   glow(p.x, p.y - 1.6, 5, '#19f0ff', .2);
 }

@@ -142,6 +142,18 @@ function samDrawFly(p, x, y, face, al, mode, tint, withGun, blink, wink) {
   if (withGun) samArm(p, bx, by, ux, 0, al, mode, 1, SAM_CTX_FLY, face);
 }
 let samLastT = 0;
+/* somersault: Sam is drawn upright into a small canvas, which is then turned around his middle with hard pixel edges */
+let flipCv = null, flipCx = null;
+function drawPlayerFlip(p, al, flash) {
+  const side = Math.ceil(CH * 9), k = clamp(p.flip, 0, 1);
+  if (!flipCv) { flipCv = document.createElement('canvas'); flipCx = flipCv.getContext('2d'); }
+  if (flipCv.width !== side) flipCv.width = flipCv.height = side; else flipCx.clearRect(0, 0, side, side);
+  const prev = g; target(flipCx);
+  drawPlayerBody(p, (side / 2 + CXp) / CW, (side / 2 + 1.45 * CH + CYp) / CH, p.face, 1, flash, false, k < .12 || k > .88);
+  target(prev);
+  const cx = Math.round(p.x * CW - CXp), cy = Math.round((p.y - 1.45) * CH - CYp), ease = 1 - Math.pow(1 - k, 1.7);
+  g.save(); g.imageSmoothingEnabled = false; g.globalAlpha = al; g.translate(cx, cy); g.rotate(p.flipDir * ease * PI * 2); g.drawImage(flipCv, -side / 2, -side / 2); g.restore();
+}
 function drawPlayerBody(p, x, y, face, al, flash, tint, withGun) {
   const spd = Math.abs(p.vx), mode = tint ? 2 : flash ? 1 : 0;
   let pose;
