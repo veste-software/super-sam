@@ -16,7 +16,7 @@ class Level {
     this.ents = []; this.pks = []; this.cps = []; this.zones = []; this.movers = []; this.doors = []; this.decor = []; this.arenas = [];
     this.start = { x: 8, y: 20 }; this.exit = null; this.deathY = H + 6; this.nb = 1;
     this.camBox = null; this.intro = { title: 'SEKTOR', sub: '', lines: [] };
-    this.wet = null; this.wind = 0; this.lasers = []; this.blades = []; this.camRef = 50; this.vehs = [];
+    this.wet = null; this.wind = 0; this.lasers = []; this.blades = []; this.camRef = 50; this.vehs = []; this.gmul = 1; this.brk = null; this.race = null; this.inv = null;
   }
   idx(x, y) { return y * this.W + x; }
   inb(x, y) { return x >= 0 && y >= 0 && x < this.W && y < this.H; }
@@ -69,6 +69,8 @@ class Level {
   laser(x, y0, y1, per, on, ph, o) { const l = Object.assign({ x, y0, y1, per, on, tele: .55, ph: ph || 0 }, o || {}); this.lasers.push(l); return l; }
   blade(cx, cy, ax, ay, sp, ph, r) { this.blades.push({ cx, cy, ax, ay, sp, ph: ph || 0, r: r || 2.4, x: cx, y: cy }); }
   mv(o) { this.movers.push(o); return o; }
+  /* bunker: solid blocks that crumble under fire */
+  brkRect(x, y, w, h, style) { this.rect(x, y, w, h, style); if (!this.brk) this.brk = new Uint8Array(this.W * this.H); for (let yy = y; yy < y + h; yy++) for (let xx = x; xx < x + w; xx++) if (this.inb(xx, yy)) this.brk[yy * this.W + xx] = 1; }
   hint(x, w, y, h, who, text) { this.zone(x, y, w, h, { once: true, say: [who, text] }); }
 }
 function doorTiles(L, d) { const rows = Math.ceil(d.h * (1 - d.open) - 1e-6); for (let r = 0; r < d.h; r++) for (let c = 0; c < d.w; c++) { const i = L.idx(d.x + c, d.y + r); L.t[i] = r < rows ? T.SOL : T.AIR; L.ch[i] = 0; L.bg[i] = 0; L.an[i] = 0; L.sty[i] = CUSTOM; } }
@@ -202,6 +204,55 @@ const THEMES = {
     layers: [
       { f: .05, fy: .05, base: .74, minH: 12, maxH: 28, minW: 10, maxW: 22, body: '#1e0a3a', edge: '#4a1a7a', win: '#8a4fc0', winP: .2, detail: 0, period: 220, seed: 61, fogK: .5 },
       { f: .1, fy: .1, base: .9, minH: 14, maxH: 34, minW: 10, maxW: 22, body: '#130828', edge: '#6a2a9a', win: '#a04ab8', winP: .25, detail: 1, period: 240, seed: 71, fogK: .35 },
+    ],
+    traffic: false, blimp: false, beams: false,
+  },
+  /* sector 5 :: the grand prix, a sunset highway */
+  speed: {
+    name: 'speed', sky: ['#07011a', '#1f0846', '#5a0f6e', '#b21e72', '#ff5a52', '#ffc060'], fog: '#c0306a', fogA: .5, stars: .45,
+    moon: { x: .62, y: .5, r: 15, tint: ['#5a0a30', '#ff7a4a', '#fff0b0'], glow: '#ff7a4a' },
+    body: [C.i0, C.i1, C.i2], edge: C.mag, edgeD: C.magD, accent: [C.mag, C.amber, C.cyan], win: [C.amber, C.mag, C.yel],
+    rain: null, track: 'speed', amb: '#ff2fb9', lightning: false, veil: { desat: .3, dark: .38 },
+    layers: [
+      { f: .05, fy: .06, base: .66, minH: 10, maxH: 24, minW: 10, maxW: 22, body: '#3a0f52', edge: '#8a2a8a', win: '#ff9ad0', winP: .2, detail: 0, period: 220, seed: 81, fogK: .55 },
+      { f: .13, fy: .1, base: .82, minH: 12, maxH: 30, minW: 9, maxW: 20, body: '#240a3c', edge: '#ff2fb9', win: '#ffd05a', winP: .28, detail: 1, period: 240, seed: 82, fogK: .35 },
+      { f: .26, fy: .16, base: .98, minH: 14, maxH: 34, minW: 10, maxW: 22, body: '#12072a', edge: '#19f0ff', win: '#ffb347', winP: .3, detail: 2, period: 260, seed: 83, fogK: .12 },
+    ],
+    traffic: true, blimp: false, beams: true,
+  },
+  /* sector 6 :: a glass megatower above the clouds */
+  glass: {
+    name: 'glass', sky: ['#010308', '#05102a', '#0c2a5a', '#1c5a96', '#5aa8d0', '#d8f0ff'], fog: '#5a9ac0', fogA: .6, stars: .9,
+    moon: { x: .78, y: .22, r: 9, tint: ['#06203a', '#a8e8ff', '#ffffff'], glow: '#7ad8ff' },
+    body: [C.i0, C.i1, C.i2], edge: C.cyan, edgeD: C.cyanD, accent: [C.cyan, C.ice, C.amber], win: [C.cyan, C.ice, C.amber],
+    rain: null, track: 'glass', amb: '#7ad8ff', lightning: false, veil: { desat: .35, dark: .4 },
+    layers: [
+      { f: .04, fy: .05, base: .8, minH: 24, maxH: 48, minW: 8, maxW: 14, body: '#0a2a4a', edge: '#2a6aa0', win: '#8ad8ff', winP: .22, detail: 0, period: 230, seed: 91, fogK: .6 },
+      { f: .1, fy: .09, base: .96, minH: 26, maxH: 56, minW: 8, maxW: 16, body: '#061a30', edge: '#4ab0e0', win: '#c8f4ff', winP: .3, detail: 1, period: 250, seed: 92, fogK: .4 },
+    ],
+    traffic: true, blimp: false, beams: true,
+  },
+  /* sector 7 :: inside the arcade machine */
+  arcade: {
+    name: 'arcade', sky: ['#04010c', '#0c0522', '#1a0838', '#2c0a58', '#46086e', '#6a0a80'], fog: '#5a1a8a', fogA: .4, stars: .55,
+    moon: { x: .5, y: .34, r: 12, tint: ['#30063a', '#ff2fb9', '#ffe45e'], glow: '#ff2fb9' },
+    body: [C.i0, C.i1, C.i2], edge: C.mint, edgeD: C.mintD, accent: [C.mint, C.mag, C.yel], win: [C.mint, C.mag, C.yel],
+    signs: ['1UP', 'HI-SCORE', 'COIN', 'READY', 'LEVEL 7', 'GAME', 'BONUS', 'PLAYER 1', 'PIXEL', 'x3000'],
+    rain: null, track: 'arcade', amb: '#5dffb0', lightning: false, veil: { desat: .2, dark: .42, col: '#02040a' },
+    layers: [
+      { f: .06, fy: .06, base: .7, minH: 8, maxH: 18, minW: 8, maxW: 14, body: '#1a0a40', edge: '#5dffb0', win: '#ff2fb9', winP: .3, detail: 1, period: 200, seed: 101, fogK: .5 },
+      { f: .16, fy: .12, base: .9, minH: 10, maxH: 24, minW: 8, maxW: 16, body: '#0e0628', edge: '#ff2fb9', win: '#ffe45e', winP: .35, detail: 2, period: 240, seed: 102, fogK: .25 },
+    ],
+    traffic: false, blimp: false, beams: false,
+  },
+  /* sector 8 :: the orbital station, Earth below */
+  orbit: {
+    name: 'orbit', sky: ['#000004', '#01010a', '#02031a', '#040628', '#060a3a', '#0a1252'], fog: '#102a6a', fogA: .25, stars: 1,
+    moon: { x: .3, y: .78, r: 30, tint: ['#020a1e', '#2a78ff', '#eaf8ff'], glow: '#4a9aff' },
+    body: [C.hull0, C.hull1, C.b2], edge: C.hullL, edgeD: C.greyD, accent: [C.cyan, C.mag, C.amber], win: [C.cyan, C.ice, C.amber],
+    rain: null, track: 'orbit', amb: '#4a9aff', lightning: false, veil: { desat: .3, dark: .34, col: '#02030c' },
+    layers: [
+      { f: .03, fy: .04, base: .9, minH: 10, maxH: 28, minW: 3, maxW: 7, body: '#0a1030', edge: '#2a4a9a', win: '#8ad8ff', winP: .15, detail: 0, period: 240, seed: 111, fogK: .4 },
     ],
     traffic: false, blimp: false, beams: false,
   },

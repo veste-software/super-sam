@@ -141,6 +141,7 @@ function respawnPlayer() {
   S.cam.x = clamp(r.x - COLS / 2, 0, Math.max(0, S.L.W - COLS)); S.cam.y = clamp(r.y - ROWS * .6, 0, Math.max(0, S.L.H - ROWS));
   ring(r.x, r.y - 1.5, 10, .8, PAL[C.cyan]); sfx('boot', .7); glitchAmt = .8;
   resetVehicles();   // every ride is back in its bay
+  if (S.race) retryRace(); if (S.inv) resetInvaders(true);
 }
 
 function startFly(p) {
@@ -185,7 +186,7 @@ function fireHook() {
 function hookStrike(e) {
   const p = S.P; detachHook(true);
   p.vx = sign(e.x - p.x) * 8; p.vy = -27; p.airDash = false; p.dashCd = 0; p.inv = Math.max(p.inv, .5);
-  const dmg = e.k === 'warden' ? 7 : e.k === 'boss' ? 9 : 99; damageEnemy(e, dmg, sign(e.x - p.x), -.3, true);
+  const dmg = (ENEMY[e.k] && ENEMY[e.k].strike) || (e.k === 'warden' ? 7 : e.k === 'boss' ? 9 : 99); damageEnemy(e, dmg, sign(e.x - p.x), -.3, true);
   sparks(e.x, e.y - e.h / 2, 24, 0, -1, PAL[C.mint], 46); ring(e.x, e.y - e.h / 2, 9, .4, PAL[C.mint]); S.freeze = .08; shake(.5); sfx('hit'); sfx('boom', .5);
 }
 
@@ -258,7 +259,7 @@ function updPlayer(dt) {
       if (!p.ground && Math.abs(p.vx) > run && !dir) p.vx -= p.vx * Math.min(1, .3 * dt);
     }
     /* gravity */
-    let g = PH.grav;
+    let g = PH.grav * (L.gmul || 1);
     if (Math.abs(p.vy) < 7 && (KEY.Space || KEY.KeyW || KEY.ArrowUp) && p.vy < 0) g *= .62;
     if (p.vy > 0) g *= 1.12;
     p.vy = Math.min(PH.maxFall, p.vy + g * dt);
@@ -387,7 +388,7 @@ function spawnEnemy(sp) {
 }
 function damageEnemy(e, dmg, dx, dy, strike) {
   if (e.dead || e.inv > 0) return; e.hp -= dmg; e.flash = .09; e.hitT = .2;
-  if (e.k !== 'turret' && e.k !== 'boss') { e.vx += dx * (e.k === 'warden' ? 1 : 5); }
+  if (e.k !== 'turret' && e.k !== 'boss' && !(ENEMY[e.k] && ENEMY[e.k].heavy)) { e.vx += dx * (e.k === 'warden' ? 1 : 5); }
   if (e.k === 'warden' && dmg >= 5) { e.stun = .9; }
   sparks(e.x, e.y - e.h / 2, 5, dx, dy, PAL[C.white], 30); sfx('hit', .8);
   if (e.k === 'boss') { S.bossHit = (S.bossHit || 0) + 1; }
@@ -397,11 +398,13 @@ function killEnemy(e) {
   e.dead = true; S.kills++; S.score += e.score;
   const cx = e.x, cy = e.y - e.h / 2;
   if (e.k === 'boss') { bossDie(e); return; }
-  const big = e.k === 'warden' || e.k === 'gunship'; boom(cx, cy, big ? 2.2 : e.k === 'turret' || e.k === 'raider' ? 1.4 : 1); sfx(big ? 'bigboom' : 'boom'); S.freeze = big ? .12 : .045;
+  const FD = ENEMY[e.k] || {}; if (e.onKill) e.onKill(e);
+  if (FD.die) { FD.die(e); if (e.arena) e.arena.alive = Math.max(0, e.arena.alive - 1); return; }
+  const big = e.k === 'warden' || e.k === 'gunship' || !!FD.big; boom(cx, cy, big ? 2.2 : e.k === 'turret' || e.k === 'raider' ? 1.4 : 1); sfx(big ? 'bigboom' : 'boom'); S.freeze = big ? .12 : .045;
   if (e.k === 'seeker') blast(cx, cy, 4, 0);
   const letters = '01#$%&@'.split(''); for (let i = 0; i < 6; i++) pt(cx, cy, rr(-20, 20), rr(-20, 4), rr(.6, 1.2), letters, PAL[C.red], { g: 40, bounce: .4, col: true });
-  if (Math.random() < (e.k === 'grunt' ? .25 : e.k === 'warden' || e.k === 'gunship' ? 1 : e.k === 'raider' ? .4 : .12) * EASY.hpDrop) S.pks.push({ k: 'hp', x: cx, y: cy, t: 0, vy: -10, drop: true });
-  for (let i = 0; i < (e.k === 'warden' || e.k === 'gunship' ? 8 : e.k === 'raider' ? 4 : 2); i++) S.pks.push({ k: 'chip', x: cx + rr(-1, 1), y: cy, t: 0, vy: rr(-22, -8), vx: rr(-10, 10), drop: true });
+  if (Math.random() < (FD.hpc !== undefined ? FD.hpc : e.k === 'grunt' ? .25 : e.k === 'warden' || e.k === 'gunship' ? 1 : e.k === 'raider' ? .4 : .12) * EASY.hpDrop) S.pks.push({ k: 'hp', x: cx, y: cy, t: 0, vy: -10, drop: true });
+  for (let i = 0; i < (FD.chips !== undefined ? FD.chips : e.k === 'warden' || e.k === 'gunship' ? 8 : e.k === 'raider' ? 4 : 2); i++) S.pks.push({ k: 'chip', x: cx + rr(-1, 1), y: cy, t: 0, vy: rr(-22, -8), vx: rr(-10, 10), drop: true });
   if (e.arena) { e.arena.alive = Math.max(0, e.arena.alive - 1); }
 }
 function blast(x, y, r, dmgP) {
@@ -409,13 +412,14 @@ function blast(x, y, r, dmgP) {
 }
 function ebullet(x, y, ang, spd, dmg, o) { spd *= EASY.ebulSpd; S.ebul.push(Object.assign({ x, y, vx: Math.cos(ang) * spd, vy: Math.sin(ang) * spd * .5, life: 5, dmg: dmg || 10, a: ang }, o || {})); }
 
+const AIK = {};   // AI for the enemy kinds added in 47_foes.js and later
 function updEnemies(dt) {
   const p = S.P, L = S.L;
   for (const e of S.en) {
     if (e.dead) continue;
     e.t += dt; e.flash = Math.max(0, e.flash - dt); e.hitT = Math.max(0, e.hitT - dt);
     const dxp = p.x - e.x, dyp = (p.y - 1.5) - (e.y - e.h / 2), dist = Math.hypot(dxp, dyp);
-    e.active = dist < 95 || e.k === 'boss';
+    e.active = dist < 95 || e.k === 'boss' || !!e.always;
     if (!e.active) continue;
     if (e.stun > 0) { e.stun -= dt; e.vx *= .9; if (e.k === 'warden') { e.vy += PH.grav * dt; moveEnt(e, dt); continue; } }
     e.lostT = (e.lostT || 0) - dt; if (e.lostT <= 0) { e.lostT = .18 + Math.random() * .1; e.see = !p.dead && dist < (e.range || 56) && los(e.x, e.y - e.h * .6, p.x, p.y - 1.5); }
@@ -428,9 +432,11 @@ function updEnemies(dt) {
       case 'gunship': aiGunship(e, dt, dxp, dyp, dist); break;
       case 'raider': aiRaider(e, dt, dxp, dyp, dist); break;
       case 'boss': aiBoss(e, dt, dxp, dyp, dist); break;
+      default: if (AIK[e.k]) AIK[e.k](e, dt, dxp, dyp, dist);
     }
     /* touch damage */
-    if (!p.dead && e.k !== 'boss' && e.k !== 'turret' && e.k !== 'gunship' && Math.abs(dxp) < e.w / 2 + p.w / 2 - .2 && p.y > e.y - e.h && p.y - p.h < e.y && e.k !== 'drone') hurtPlayer(e.k === 'warden' ? 22 : 12, e.x, e.y);
+    const td = (ENEMY[e.k] || {}).tdmg;
+    if (!p.dead && td !== 0 && e.k !== 'boss' && e.k !== 'turret' && e.k !== 'gunship' && Math.abs(dxp) < e.w / 2 + p.w / 2 - .2 && p.y > e.y - e.h && p.y - p.h < e.y && e.k !== 'drone') hurtPlayer(td || (e.k === 'warden' ? 22 : 12), e.x, e.y);
   }
   S.en = S.en.filter(e => !e.dead);
 }
@@ -505,10 +511,12 @@ function aiSeeker(e, dt, dxp, dyp, dist) {
 /* =========================================================================
    boss : ARCHON
    ========================================================================= */
-function spawnBoss(x, y, arena) {
-  const e = spawnEnemy({ k: 'boss', x, y }); e.arena = null; e.ph = 1; e.atk = 0; e.fire = 2.4; e.cx = x; e.cy = y; e.laser = null; e.intro = 2.6; e.rot = 0; e.noHit = false; e.bounds = arena; S.boss = e; return e;
+function spawnBoss(x, y, arena, kind) {
+  const bh = kind && BOSSHP[kind], e = spawnEnemy(bh ? { k: 'boss', x, y, hp: bh, maxhp: bh, kind } : { k: 'boss', x, y, kind: 'archon' }); e.arena = null; e.ph = 1; e.atk = 0; e.fire = 2.4; e.cx = x; e.cy = y; e.laser = null; e.intro = 2.6; e.rot = 0; e.noHit = false; e.bounds = arena; S.boss = e; return e;
 }
+const BOSSHP = {}, AIBOSS = {};
 function aiBoss(e, dt, dxp, dyp, dist) {
+  if (e.kind !== 'archon') return AIBOSS[e.kind](e, dt, dxp, dyp, dist);
   const B = e.bounds, p = S.P; e.rot += dt;
   const frac = e.hp / e.maxhp; const ph = frac > .66 ? 1 : frac > .33 ? 2 : 3;
   if (ph !== e.ph) { e.ph = ph; e.fire = 2.5; e.tele = 0; e.laser = null; banner('ARCHON // PHASE ' + ph, ph === 2 ? 'LASERFELD AKTIV' : 'KERN FREIGELEGT. ÜBERTAKTUNG.', C.red); shake(1.2); ring(e.x, e.y - 5, 30, 1, PAL[C.red]); sfx('bigboom', .8); glitchAmt = 1.2; S.flash = .4; S.flashCol = '#ff3b4d'; if (ph === 3) { S.phase3 = true; } }
@@ -552,12 +560,22 @@ function bossDie(e) {
 /* =========================================================================
    bullets, waves, particles, pickups, doors, movers, zones
    ========================================================================= */
+/* bunker blocks (Level.brk) crumble when a bullet hits them */
+function hitBrk(x, y) {
+  const L = S.L; if (!L.brk) return false; const tx = Math.floor(x), ty = Math.floor(y), i = ty * L.W + tx; if (!L.inb(tx, ty) || !L.brk[i]) return false;
+  for (const [ox, oy] of [[0, 0], [1, 0], [-1, 0], [0, 1], [0, -1]]) {
+    if (ox && oy === 0 && Math.random() < .55) continue; if (oy && Math.random() < .4) continue;
+    const xx = tx + ox, yy = ty + oy; if (!L.inb(xx, yy)) continue; const j = yy * L.W + xx; if (!L.brk[j]) continue;
+    L.brk[j] = 0; L.t[j] = 0; L.ch[j] = 0; L.bg[j] = 0; L.an[j] = 0; L.sty[j] = 0; for (let k = 0; k < 2; k++) pt(xx + .5, yy + .5, rr(-8, 8), rr(-10, 2), rr(.3, .6), ['▒', '░', '▪', '·'], PAL[C.mint], { g: 40 });
+  }
+  sfx('step', .5); return true;
+}
 function updBullets(dt) {
   const p = S.P, L = S.L;
   for (const b of S.bul) {
     const steps = 2; for (let s = 0; s < steps; s++) {
       b.x += b.vx * dt / steps; b.y += b.vy * dt / steps;
-      if (solidAt(b.x, b.y)) { b.life = 0; sparks(b.x, b.y, 5, -b.vx, -b.vy, b.col, 24); pt(b.x, b.y, 0, 0, .15, ['*'], b.col, {}); if (Math.random() < .3) sfx('step', .4); break; }
+      if (solidAt(b.x, b.y)) { hitBrk(b.x, b.y); b.life = 0; sparks(b.x, b.y, 5, -b.vx, -b.vy, b.col, 24); pt(b.x, b.y, 0, 0, .15, ['*'], b.col, {}); if (Math.random() < .3) sfx('step', .4); break; }
       for (const e of S.en) {
         if (e.dead || e.noHit) continue;
         if (Math.abs(b.x - e.x) < e.w / 2 + .3 && b.y > e.y - e.h - .3 && b.y < e.y + .3 && !b.hit.includes(e)) {
@@ -578,7 +596,7 @@ function updBullets(dt) {
       for (const q of S.bul) if (q.life > 0 && Math.abs(q.x - b.x) < 1.5 && Math.abs(q.y - b.y) < 1.2) { q.life = 0; b.hp = (b.hp === undefined ? 2 : b.hp) - 1; if (b.hp <= 0) { b.life = 0; boom(b.x, b.y, .8); sfx('boom', .4); } }
     }
     b.x += b.vx * dt; b.y += b.vy * dt; b.life -= dt;
-    if (solidAt(b.x, b.y)) { b.life = 0; sparks(b.x, b.y, 3, -b.vx, -b.vy, PAL[C.red], 20); continue; }
+    if (solidAt(b.x, b.y)) { hitBrk(b.x, b.y); b.life = 0; sparks(b.x, b.y, 3, -b.vx, -b.vy, PAL[C.red], 20); continue; }
     if (!p.dead && Math.abs(b.x - p.x) < p.w / 2 + .5 && b.y > p.y - p.h - .2 && b.y < p.y + .2) { if (hurtPlayer(b.dmg, b.x - b.vx * .1, b.y)) b.life = 0; }
     if (Math.random() < .35) pt(b.x, b.y, 0, 0, .2, ['·'], PAL[C.red], {});
   }
@@ -720,6 +738,7 @@ function updWorld(dt) {
   updMovers(dt);
   updPlayer(dt);
   updVehicles(dt);
+  if (S.race) updRace(dt); if (S.inv) updInvaders(dt);
   // hook flight / retract
   const p = S.P, h = p.hook;
   if (h.st === 1) {

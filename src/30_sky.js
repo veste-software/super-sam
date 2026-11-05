@@ -96,7 +96,7 @@ function makeLayer(d, th) {
         // neon vertical sign + accent strip
         const acc = th.accent[id % th.accent.length], accHex = PAL[acc];
         if (R() < .6) { const sx = bx + R.i(2, w - 3); for (let j = top + 3; j < top + 3 + R.i(5, 12) && j < baseRow; j++) gl('║', sx * CW, j * CH, accHex, .85); }
-        if (R() < .65) { const pool = SKY.kana ? SIGNS_KANA.concat(SIGNS_ASCII.slice(0, 5)) : SIGNS_ASCII; const txt = R.pick(pool); const vert = R() < .5; signs.push({ x: (bx + R.i(1, Math.max(1, w - (vert ? 3 : txt.length + 1)))), y: top + R.i(3, 8), txt, col: accHex, vert, ph: R() * 9, flick: R() < .4 }); }
+        if (R() < .65) { const pool = th.signs || (SKY.kana ? SIGNS_KANA.concat(SIGNS_ASCII.slice(0, 5)) : SIGNS_ASCII); const txt = R.pick(pool); const vert = R() < .5; signs.push({ x: (bx + R.i(1, Math.max(1, w - (vert ? 3 : txt.length + 1)))), y: top + R.i(3, 8), txt, col: accHex, vert, ph: R() * 9, flick: R() < .4 }); }
         // rooftop ac boxes
         for (let i = bx + 1; i < bx + w - 3; i += R.i(3, 6)) { if (R() < .5) { gl('▄', i * CW, (top - 1) * CH + CH / 2, edge, .6); gl('▄', (i + 1) * CW, (top - 1) * CH + CH / 2, edge, .6); } }
       }

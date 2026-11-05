@@ -226,6 +226,7 @@ function drawDecor(t, layer) {
       }
       case 'flyer': if (layer === (d.front ? 1 : 0)) drawFlyer(d, t); break;
       case 'vent': break;
+      case 'custom': if (layer === (d.front ? 1 : 0) && onScr(d.x + (d.w || 0) / 2, d.y, d.vis || 40)) d.draw(d, t); break;
     }
   }
 }
@@ -337,9 +338,12 @@ function drawEnemy(e, t) {
   } else if (e.k === 'seeker') {
     const p = .6 + .4 * Math.sin(t * 14 + e.seed), c = fl ? '#fff' : '#ff3b4d'; wgl('▟', e.x - 1, e.y - 2, c, p); wgl('▙', e.x, e.y - 2, c, p); wgl('▜', e.x - 1, e.y - 1, c, p); wgl('▛', e.x, e.y - 1, c, p); glow(e.x, e.y - 1, 4, '#ff3b4d', .4 * p);
   } else if (e.k === 'gunship' || e.k === 'raider') drawEnemyVeh(e, t);
+  else if (FOE_DRAW[e.k]) FOE_DRAW[e.k](e, t);
   else if (e.k === 'boss') drawBoss(e, t);
 }
+const FOE_DRAW = {}, BOSS_DRAW = {}, BOSS_TITLE = { archon: ['A R C H O N', 'A R C H O N   //   W Ä C H T E R   D E R   S P I T Z E'] };
 function drawBoss(e, t) {
+  if (e.kind && e.kind !== 'archon') return BOSS_DRAW[e.kind](e, t);
   const cx = e.x, cy = e.y - 5, fl = e.flash > 0, ph = e.ph, P = S.P;
   const rx = 12, ry = 6, ex = clamp((P.x - cx) / 40, -1, 1), ey = clamp((P.y - cy) / 24, -1, 1);
   const hot = ph === 1 ? ['#3a0a30', '#ff2fb9', '#ffd0f0'] : ph === 2 ? ['#3a0a1a', '#ff3b4d', '#ffe0c0'] : ['#400808', '#ff5a2d', '#fff4d0'];
@@ -389,7 +393,7 @@ function drawCheckpoints(t) {
 }
 function drawBullets(t) {
   for (const b of S.bul) { if (!onScr(b.x, b.y)) continue; const bgl = gunGlyph(b.a), gch = bgl === '▬' ? '═' : bgl; wgl(gch, b.x - .5, b.y - .5, '#ffffff'); wgl(gch, b.x - b.vx * .014 - .5, b.y - b.vy * .014 - .5, b.col, .8); glow(b.x, b.y, 3, b.col, .3); }
-  for (const b of S.ebul) { if (!onScr(b.x, b.y)) continue; wgl(b.big ? '●' : '•', b.x - .5, b.y - .5, '#ff7a6a'); wgl(b.big ? 'o' : '·', b.x - .5, b.y - .5, '#ffffff', .0); glow(b.x, b.y, b.big ? 4 : 3, '#ff3b4d', .4); }
+  for (const b of S.ebul) { if (!onScr(b.x, b.y)) continue; if (b.inv) { wgl(Math.floor(S.t * 14 + b.x) % 2 ? '╪' : '╫', b.x - .5, b.y - .5, '#ffe45e'); glow(b.x, b.y, 3, '#ffe45e', .35); continue; } wgl(b.big ? '●' : '•', b.x - .5, b.y - .5, '#ff7a6a'); wgl(b.big ? 'o' : '·', b.x - .5, b.y - .5, '#ffffff', .0); glow(b.x, b.y, b.big ? 4 : 3, '#ff3b4d', .4); }
   for (const w of S.waves) { for (let k = 0; k < 3; k++) wgl(k === 0 ? '▌' : '▒', w.x - w.dir * k - .5, w.y - 1, '#ffb347', 1 - k * .3), wgl(k === 0 ? '▌' : '▒', w.x - w.dir * k - .5, w.y - 2, '#ffb347', .6 - k * .15); glow(w.x, w.y - 1, 5, '#ffb347', .3); }
   for (const b of S.bolts) {
     const k = b.t / b.dur, dx = b.x1 - b.x0, dy = b.y1 - b.y0, n = Math.ceil(Math.hypot(dx, dy * 2) * 1.0), ang = Math.atan2(dy * 2, dx), ch = Math.abs(Math.sin(ang)) < .38 ? '═' : Math.abs(Math.cos(ang)) < .38 ? '║' : (Math.cos(ang) * Math.sin(ang) > 0 ? '╲' : '╱');
@@ -452,7 +456,7 @@ function drawWorld(t) {
   drawMovers(t); drawDoors(t);
   drawDecor(t, 1);
   drawCheckpoints(t); drawPickups(t);
-  for (const e of S.en) { if (e.k !== 'boss' && !e.dead && onScr(e.x, e.y - e.h / 2, 12)) halo(e.x, e.y - e.h / 2, e.k === 'warden' ? 8 : 5, .55); drawEnemy(e, t); }
+  for (const e of S.en) { if (e.k !== 'boss' && !e.dead && onScr(e.x, e.y - e.h / 2, 12)) halo(e.x, e.y - e.h / 2, (ENEMY[e.k] && ENEMY[e.k].halo) || (e.k === 'warden' ? 8 : 5), .55); drawEnemy(e, t); }
   drawLasers(t); drawBlades(t); drawZap(t);
   if (!S.P.dead && S.mode !== 'title') halo(S.P.x, S.P.y - 1.5, 6, .6);
   drawHook(t); drawVehicles(t); if (!S.P.veh) drawPlayer(t);
@@ -502,10 +506,11 @@ function drawHud(t) {
   // boss bar: top centre, between the two panels (drops under them on narrow screens)
   if (S.boss && S.boss.intro <= 0.5) {
     const b = S.boss, free = COLS - 90, wide = free >= 20, bw2 = wide ? Math.min(60, free) : Math.min(60, COLS - 8), by = wide ? 2.6 : 6.8, f = Math.round(bw2 * clamp(b.hp / b.maxhp, 0, 1)), x0 = Math.round((COLS - bw2) / 2);
-    txtC(wide && bw2 < 54 ? 'A R C H O N' : 'A R C H O N   //   W Ä C H T E R   D E R   S P I T Z E', COLS / 2, by - 1.3, '#ff3b4d');
+    { const bt = BOSS_TITLE[b.kind || 'archon']; txtC(wide && bw2 < 54 ? bt[0] : bt[1], COLS / 2, by - 1.3, '#ff3b4d'); }
     for (let i = 0; i < bw2; i++) gl(i < f ? '█' : '░', Math.round((x0 + i) * CW), Math.round(by * CH), i < f ? (b.ph === 3 ? '#ff5a2d' : '#ff3b4d') : '#3a1a30');
     gl('▐', Math.round((x0 - 1) * CW), Math.round(by * CH), '#ff3b4d'); gl('▌', Math.round((x0 + bw2) * CW), Math.round(by * CH), '#ff3b4d');
   }
+  if (S.race) drawRaceHud(t); if (S.inv) drawInvHud(t);
   // comms
   if (S.comms.length) {
     const c = S.comms[0], bwid = TC.on ? Math.min(72, COLS - 44) : Math.min(78, COLS - 8), lines = wrapText(c.text, bwid - 10), shown = Math.floor(c.t * 62), x0 = Math.round((COLS - bwid) / 2), y0 = ROWS - 4 - lines.length - 1;
