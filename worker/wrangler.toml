@@ -1,0 +1,13 @@
+# Neu einrichten: npx wrangler d1 create super-sam-scores   (die neue database_id unten eintragen)
+#         npx wrangler d1 execute super-sam-scores --remote --file=schema.sql
+#         npx wrangler secret put SALT              (beliebiger langer Zufallsstring)
+#         npx wrangler deploy
+name = "super-sam-scores"
+main = "index.js"
+compatibility_date = "2025-09-01"
+workers_dev = true
+
+[[d1_databases]]
+binding = "DB"
+database_name = "super-sam-scores"
+database_id = "ba180644-dfa9-42f4-9277-eece5081666e"
