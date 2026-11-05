@@ -1,4 +1,4 @@
-<!doctype html><html lang="de"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no"><meta name="theme-color" content="#02030a"><meta name="mobile-web-app-capable" content="yes"><meta name="apple-mobile-web-app-capable" content="yes"><meta name="apple-mobile-web-app-status-bar-style" content="black"><meta name="apple-mobile-web-app-title" content="Super Sam"><link rel="manifest" href="manifest.webmanifest"><link rel="apple-touch-icon" href="icon-180.png"><title>Super Sam</title><meta name="description" content="Super Sam: ein Cyberpunk-ASCII-Jump-and-Run mit Ballerei. Flieg, schwing am Enterhaken und kämpf dich durch vier Sektoren."><meta name="robots" content="noindex,nofollow"><link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'%3E%3Crect width='16' height='16' fill='%2302030a'/%3E%3Cpath d='M9 1 3 9h4l-1 6 7-9H9z' fill='%23ffd83d'/%3E%3C/svg%3E"><link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin><link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@700&display=swap" rel="stylesheet"><style>
+<!doctype html><html lang="de"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no"><meta name="theme-color" content="#02030a"><meta name="mobile-web-app-capable" content="yes"><meta name="apple-mobile-web-app-capable" content="yes"><meta name="apple-mobile-web-app-status-bar-style" content="black"><meta name="apple-mobile-web-app-title" content="Super Sam"><link rel="manifest" href="manifest.webmanifest"><link rel="apple-touch-icon" href="icon-180.png"><title>Super Sam</title><meta name="description" content="Super Sam: ein Cyberpunk-ASCII-Jump-and-Run mit Ballerei. Flieg, schwing am Enterhaken und kämpf dich durch acht Sektoren."><meta name="robots" content="noindex,nofollow"><link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'%3E%3Crect width='16' height='16' fill='%2302030a'/%3E%3Cpath d='M9 1 3 9h4l-1 6 7-9H9z' fill='%23ffd83d'/%3E%3C/svg%3E"><link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin><link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@700&display=swap" rel="stylesheet"><style>
 /* Layout: one full-viewport canvas with CSS scanline + vignette overlays. A deliberate single-theme neon-dark page. */
 :root{--bg:#02030a;--ink:#eaf6ff;--scan:rgba(0,0,0,.16);--vig:rgba(0,0,6,.55);color-scheme:dark}
 html,body{height:100%;margin:0;background:var(--bg);color:var(--ink);overflow:hidden;overscroll-behavior:none;touch-action:none;-webkit-touch-callout:none;-webkit-tap-highlight-color:transparent}
@@ -275,6 +275,14 @@ function sfx(n, v) {
     case 'jump': tone('sine', 260, 560, .13, .22 * v); break;
     case 'djump': tone('triangle', 400, 900, .12, .2 * v); nz(.1, .1 * v, 'highpass', 4000); break;
     case 'flip': tone('triangle', 330, 1180, .17, .22 * v); tone('sine', 660, 1500, .13, .09 * v, .05); nz(.16, .12 * v, 'highpass', 3500); break;
+    case 'inv0': tone('square', 98, 96, .09, .22 * v, 0, null, { lp: 700 }); break;
+    case 'inv1': tone('square', 87, 85, .09, .22 * v, 0, null, { lp: 700 }); break;
+    case 'inv2': tone('square', 78, 76, .09, .22 * v, 0, null, { lp: 700 }); break;
+    case 'inv3': tone('square', 73, 71, .09, .22 * v, 0, null, { lp: 700 }); break;
+    case 'ufo': tone('sine', 880, 640, .16, .16 * v); tone('sine', 640, 880, .16, .14 * v, .16); break;
+    case 'beep': tone('square', 440, 440, .14, .24 * v, 0, null, { lp: 2400 }); break;
+    case 'go': tone('square', 880, 880, .45, .26 * v, 0, null, { lp: 3000 }); tone('square', 1320, 1320, .45, .12 * v, 0, null, { lp: 3000 }); break;
+    case 'pad': nz(.3, .3 * v, 'bandpass', 500, 4000, 0, null, 3); tone('sawtooth', 260, 1100, .28, .14 * v, 0, null, { lp: 3000 }); break;
     case 'land': nz(.09, .35 * v, 'lowpass', 600, 120); tone('sine', 90, 45, .09, .3 * v); break;
     case 'dash': nz(.22, .4 * v, 'bandpass', 600, 4200, 0, null, 3); tone('sawtooth', 200, 700, .15, .08 * v, 0, null, { lp: 1800 }); break;
     case 'hook': tone('sawtooth', 300, 1500, .07, .14 * v); nz(.05, .15 * v, 'highpass', 5000); break;
@@ -318,6 +326,11 @@ const TRACKS = {
   tower: { bpm: 118, roots: [40, 40, 36, 38], q: [[0, 3, 7], [0, 3, 7], [0, 4, 7], [0, 4, 7]], arp: [0, 0, 2, 0, 1, 0, 2, 0, 0, 0, 2, 1, 2, 0, 1, 2], bass: [1, 0, 1, 1, 0, 1, 0, 1, 1, 0, 1, 1, 0, 1, 1, 0], kick: [1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1, 0] },
   spire: { bpm: 128, roots: [42, 38, 40, 37], q: [[0, 3, 7], [0, 4, 7], [0, 3, 7], [0, 3, 6]], arp: [0, 1, 2, 1, 2, 1, 0, 1, 0, 1, 2, 1, 2, 1, 2, 1], bass: [1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 1, 0, 1], kick: [1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0] },
   boss: { bpm: 142, roots: [41, 41, 44, 40], q: [[0, 3, 7], [0, 3, 6], [0, 4, 7], [0, 3, 7]], arp: [0, 2, 1, 2, 0, 2, 1, 2, 0, 2, 1, 2, 2, 1, 2, 0], bass: [1, 1, 0, 1, 1, 0, 1, 0, 1, 1, 0, 1, 1, 0, 1, 1], kick: [1, 0, 0, 1, 1, 0, 0, 0, 1, 0, 0, 1, 1, 0, 1, 0] },
+  speed: { bpm: 150, roots: [45, 45, 41, 43], q: [[0, 3, 7], [0, 3, 7], [0, 4, 7], [0, 4, 7]], arp: [0, 2, 1, 2, 0, 2, 1, 2, 2, 1, 2, 1, 0, 1, 2, 1], bass: [1, 0, 1, 1, 1, 0, 1, 1, 1, 0, 1, 1, 1, 0, 1, 0], kick: [1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 1] },
+  glass: { bpm: 112, roots: [43, 40, 38, 36], q: [[0, 4, 7], [0, 3, 7], [0, 4, 7], [0, 3, 7]], arp: [0, 1, 2, 1, 2, 0, 1, 2, 0, 1, 2, 1, 2, 1, 0, 2], bass: [1, 0, 0, 0, 1, 0, 0, 1, 1, 0, 0, 0, 1, 0, 1, 0], kick: [1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0] },
+  arcade: { bpm: 132, roots: [48, 46, 44, 46], q: [[0, 4, 7], [0, 4, 7], [0, 3, 7], [0, 4, 7]], arp: [0, 2, 0, 2, 1, 2, 1, 2, 0, 2, 0, 2, 1, 2, 2, 1], bass: [1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 1], kick: [1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1, 0] },
+  orbit: { bpm: 96, roots: [38, 41, 36, 43], q: [[0, 3, 7], [0, 3, 7], [0, 4, 7], [0, 3, 7]], arp: [0, 1, 2, 1, 0, 1, 2, 1, 2, 1, 0, 1, 2, 1, 2, 1], bass: [1, 0, 0, 0, 0, 0, 1, 0, 1, 0, 0, 0, 0, 1, 0, 0], kick: [1, 0, 0, 0, 0, 0, 1, 0, 1, 0, 0, 0, 0, 0, 0, 0] },
+  boss2: { bpm: 150, roots: [38, 38, 41, 36], q: [[0, 3, 7], [0, 3, 6], [0, 4, 7], [0, 3, 7]], arp: [0, 2, 1, 2, 0, 2, 1, 2, 2, 1, 2, 1, 0, 2, 1, 2], bass: [1, 1, 0, 1, 1, 1, 0, 1, 1, 1, 0, 1, 1, 0, 1, 1], kick: [1, 0, 0, 1, 1, 0, 1, 0, 1, 0, 0, 1, 1, 0, 1, 0] },
   title: { bpm: 84, roots: [45, 41, 43, 40], q: [[0, 3, 7], [0, 4, 7], [0, 4, 7], [0, 3, 7]], arp: [0, 1, 2, 1, 2, 1, 0, 1, 0, 1, 2, 1, 2, 1, 0, 2], bass: [1, 0, 0, 0, 0, 0, 1, 0, 1, 0, 0, 0, 0, 0, 0, 0], kick: [1, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0] },
 };
 function musPlay(name) {
@@ -358,7 +371,7 @@ class Level {
     this.ents = []; this.pks = []; this.cps = []; this.zones = []; this.movers = []; this.doors = []; this.decor = []; this.arenas = [];
     this.start = { x: 8, y: 20 }; this.exit = null; this.deathY = H + 6; this.nb = 1;
     this.camBox = null; this.intro = { title: 'SEKTOR', sub: '', lines: [] };
-    this.wet = null; this.wind = 0; this.lasers = []; this.blades = []; this.camRef = 50; this.vehs = [];
+    this.wet = null; this.wind = 0; this.lasers = []; this.blades = []; this.camRef = 50; this.vehs = []; this.gmul = 1; this.brk = null; this.race = null; this.inv = null;
   }
   idx(x, y) { return y * this.W + x; }
   inb(x, y) { return x >= 0 && y >= 0 && x < this.W && y < this.H; }
@@ -411,6 +424,8 @@ class Level {
   laser(x, y0, y1, per, on, ph, o) { const l = Object.assign({ x, y0, y1, per, on, tele: .55, ph: ph || 0 }, o || {}); this.lasers.push(l); return l; }
   blade(cx, cy, ax, ay, sp, ph, r) { this.blades.push({ cx, cy, ax, ay, sp, ph: ph || 0, r: r || 2.4, x: cx, y: cy }); }
   mv(o) { this.movers.push(o); return o; }
+  /* bunker: solid blocks that crumble under fire */
+  brkRect(x, y, w, h, style) { this.rect(x, y, w, h, style); if (!this.brk) this.brk = new Uint8Array(this.W * this.H); for (let yy = y; yy < y + h; yy++) for (let xx = x; xx < x + w; xx++) if (this.inb(xx, yy)) this.brk[yy * this.W + xx] = 1; }
   hint(x, w, y, h, who, text) { this.zone(x, y, w, h, { once: true, say: [who, text] }); }
 }
 function doorTiles(L, d) { const rows = Math.ceil(d.h * (1 - d.open) - 1e-6); for (let r = 0; r < d.h; r++) for (let c = 0; c < d.w; c++) { const i = L.idx(d.x + c, d.y + r); L.t[i] = r < rows ? T.SOL : T.AIR; L.ch[i] = 0; L.bg[i] = 0; L.an[i] = 0; L.sty[i] = CUSTOM; } }
@@ -544,6 +559,55 @@ const THEMES = {
     layers: [
       { f: .05, fy: .05, base: .74, minH: 12, maxH: 28, minW: 10, maxW: 22, body: '#1e0a3a', edge: '#4a1a7a', win: '#8a4fc0', winP: .2, detail: 0, period: 220, seed: 61, fogK: .5 },
       { f: .1, fy: .1, base: .9, minH: 14, maxH: 34, minW: 10, maxW: 22, body: '#130828', edge: '#6a2a9a', win: '#a04ab8', winP: .25, detail: 1, period: 240, seed: 71, fogK: .35 },
+    ],
+    traffic: false, blimp: false, beams: false,
+  },
+  /* sector 5 :: the grand prix, a sunset highway */
+  speed: {
+    name: 'speed', sky: ['#07011a', '#1f0846', '#5a0f6e', '#b21e72', '#ff5a52', '#ffc060'], fog: '#c0306a', fogA: .5, stars: .45,
+    moon: { x: .62, y: .5, r: 15, tint: ['#5a0a30', '#ff7a4a', '#fff0b0'], glow: '#ff7a4a' },
+    body: [C.i0, C.i1, C.i2], edge: C.mag, edgeD: C.magD, accent: [C.mag, C.amber, C.cyan], win: [C.amber, C.mag, C.yel],
+    rain: null, track: 'speed', amb: '#ff2fb9', lightning: false, veil: { desat: .3, dark: .38 },
+    layers: [
+      { f: .05, fy: .06, base: .66, minH: 10, maxH: 24, minW: 10, maxW: 22, body: '#3a0f52', edge: '#8a2a8a', win: '#ff9ad0', winP: .2, detail: 0, period: 220, seed: 81, fogK: .55 },
+      { f: .13, fy: .1, base: .82, minH: 12, maxH: 30, minW: 9, maxW: 20, body: '#240a3c', edge: '#ff2fb9', win: '#ffd05a', winP: .28, detail: 1, period: 240, seed: 82, fogK: .35 },
+      { f: .26, fy: .16, base: .98, minH: 14, maxH: 34, minW: 10, maxW: 22, body: '#12072a', edge: '#19f0ff', win: '#ffb347', winP: .3, detail: 2, period: 260, seed: 83, fogK: .12 },
+    ],
+    traffic: true, blimp: false, beams: true,
+  },
+  /* sector 6 :: a glass megatower above the clouds */
+  glass: {
+    name: 'glass', sky: ['#010308', '#05102a', '#0c2a5a', '#1c5a96', '#5aa8d0', '#d8f0ff'], fog: '#5a9ac0', fogA: .6, stars: .9,
+    moon: { x: .78, y: .22, r: 9, tint: ['#06203a', '#a8e8ff', '#ffffff'], glow: '#7ad8ff' },
+    body: [C.i0, C.i1, C.i2], edge: C.cyan, edgeD: C.cyanD, accent: [C.cyan, C.ice, C.amber], win: [C.cyan, C.ice, C.amber],
+    rain: null, track: 'glass', amb: '#7ad8ff', lightning: false, veil: { desat: .35, dark: .4 },
+    layers: [
+      { f: .04, fy: .05, base: .8, minH: 24, maxH: 48, minW: 8, maxW: 14, body: '#0a2a4a', edge: '#2a6aa0', win: '#8ad8ff', winP: .22, detail: 0, period: 230, seed: 91, fogK: .6 },
+      { f: .1, fy: .09, base: .96, minH: 26, maxH: 56, minW: 8, maxW: 16, body: '#061a30', edge: '#4ab0e0', win: '#c8f4ff', winP: .3, detail: 1, period: 250, seed: 92, fogK: .4 },
+    ],
+    traffic: true, blimp: false, beams: true,
+  },
+  /* sector 7 :: inside the arcade machine */
+  arcade: {
+    name: 'arcade', sky: ['#04010c', '#0c0522', '#1a0838', '#2c0a58', '#46086e', '#6a0a80'], fog: '#5a1a8a', fogA: .4, stars: .55,
+    moon: { x: .5, y: .34, r: 12, tint: ['#30063a', '#ff2fb9', '#ffe45e'], glow: '#ff2fb9' },
+    body: [C.i0, C.i1, C.i2], edge: C.mint, edgeD: C.mintD, accent: [C.mint, C.mag, C.yel], win: [C.mint, C.mag, C.yel],
+    signs: ['1UP', 'HI-SCORE', 'COIN', 'READY', 'LEVEL 7', 'GAME', 'BONUS', 'PLAYER 1', 'PIXEL', 'x3000'],
+    rain: null, track: 'arcade', amb: '#5dffb0', lightning: false, veil: { desat: .2, dark: .42, col: '#02040a' },
+    layers: [
+      { f: .06, fy: .06, base: .7, minH: 8, maxH: 18, minW: 8, maxW: 14, body: '#1a0a40', edge: '#5dffb0', win: '#ff2fb9', winP: .3, detail: 1, period: 200, seed: 101, fogK: .5 },
+      { f: .16, fy: .12, base: .9, minH: 10, maxH: 24, minW: 8, maxW: 16, body: '#0e0628', edge: '#ff2fb9', win: '#ffe45e', winP: .35, detail: 2, period: 240, seed: 102, fogK: .25 },
+    ],
+    traffic: false, blimp: false, beams: false,
+  },
+  /* sector 8 :: the orbital station, Earth below */
+  orbit: {
+    name: 'orbit', sky: ['#000004', '#01010a', '#02031a', '#040628', '#060a3a', '#0a1252'], fog: '#102a6a', fogA: .25, stars: 1,
+    moon: { x: .3, y: .78, r: 30, tint: ['#020a1e', '#2a78ff', '#eaf8ff'], glow: '#4a9aff' },
+    body: [C.hull0, C.hull1, C.b2], edge: C.hullL, edgeD: C.greyD, accent: [C.cyan, C.mag, C.amber], win: [C.cyan, C.ice, C.amber],
+    rain: null, track: 'orbit', amb: '#4a9aff', lightning: false, veil: { desat: .3, dark: .34, col: '#02030c' },
+    layers: [
+      { f: .03, fy: .04, base: .9, minH: 10, maxH: 28, minW: 3, maxW: 7, body: '#0a1030', edge: '#2a4a9a', win: '#8ad8ff', winP: .15, detail: 0, period: 240, seed: 111, fogK: .4 },
     ],
     traffic: false, blimp: false, beams: false,
   },
@@ -692,6 +756,7 @@ function respawnPlayer() {
   S.cam.x = clamp(r.x - COLS / 2, 0, Math.max(0, S.L.W - COLS)); S.cam.y = clamp(r.y - ROWS * .6, 0, Math.max(0, S.L.H - ROWS));
   ring(r.x, r.y - 1.5, 10, .8, PAL[C.cyan]); sfx('boot', .7); glitchAmt = .8;
   resetVehicles();   // every ride is back in its bay
+  if (S.race) retryRace(); if (S.inv) resetInvaders(true);
 }
 
 function startFly(p) {
@@ -736,7 +801,7 @@ function fireHook() {
 function hookStrike(e) {
   const p = S.P; detachHook(true);
   p.vx = sign(e.x - p.x) * 8; p.vy = -27; p.airDash = false; p.dashCd = 0; p.inv = Math.max(p.inv, .5);
-  const dmg = e.k === 'warden' ? 7 : e.k === 'boss' ? 9 : 99; damageEnemy(e, dmg, sign(e.x - p.x), -.3, true);
+  const dmg = (ENEMY[e.k] && ENEMY[e.k].strike) || (e.k === 'warden' ? 7 : e.k === 'boss' ? 9 : 99); damageEnemy(e, dmg, sign(e.x - p.x), -.3, true);
   sparks(e.x, e.y - e.h / 2, 24, 0, -1, PAL[C.mint], 46); ring(e.x, e.y - e.h / 2, 9, .4, PAL[C.mint]); S.freeze = .08; shake(.5); sfx('hit'); sfx('boom', .5);
 }
 
@@ -809,7 +874,7 @@ function updPlayer(dt) {
       if (!p.ground && Math.abs(p.vx) > run && !dir) p.vx -= p.vx * Math.min(1, .3 * dt);
     }
     /* gravity */
-    let g = PH.grav;
+    let g = PH.grav * (L.gmul || 1);
     if (Math.abs(p.vy) < 7 && (KEY.Space || KEY.KeyW || KEY.ArrowUp) && p.vy < 0) g *= .62;
     if (p.vy > 0) g *= 1.12;
     p.vy = Math.min(PH.maxFall, p.vy + g * dt);
@@ -938,7 +1003,7 @@ function spawnEnemy(sp) {
 }
 function damageEnemy(e, dmg, dx, dy, strike) {
   if (e.dead || e.inv > 0) return; e.hp -= dmg; e.flash = .09; e.hitT = .2;
-  if (e.k !== 'turret' && e.k !== 'boss') { e.vx += dx * (e.k === 'warden' ? 1 : 5); }
+  if (e.k !== 'turret' && e.k !== 'boss' && !(ENEMY[e.k] && ENEMY[e.k].heavy)) { e.vx += dx * (e.k === 'warden' ? 1 : 5); }
   if (e.k === 'warden' && dmg >= 5) { e.stun = .9; }
   sparks(e.x, e.y - e.h / 2, 5, dx, dy, PAL[C.white], 30); sfx('hit', .8);
   if (e.k === 'boss') { S.bossHit = (S.bossHit || 0) + 1; }
@@ -948,11 +1013,13 @@ function killEnemy(e) {
   e.dead = true; S.kills++; S.score += e.score;
   const cx = e.x, cy = e.y - e.h / 2;
   if (e.k === 'boss') { bossDie(e); return; }
-  const big = e.k === 'warden' || e.k === 'gunship'; boom(cx, cy, big ? 2.2 : e.k === 'turret' || e.k === 'raider' ? 1.4 : 1); sfx(big ? 'bigboom' : 'boom'); S.freeze = big ? .12 : .045;
+  const FD = ENEMY[e.k] || {}; if (e.onKill) e.onKill(e);
+  if (FD.die) { FD.die(e); if (e.arena) e.arena.alive = Math.max(0, e.arena.alive - 1); return; }
+  const big = e.k === 'warden' || e.k === 'gunship' || !!FD.big; boom(cx, cy, big ? 2.2 : e.k === 'turret' || e.k === 'raider' ? 1.4 : 1); sfx(big ? 'bigboom' : 'boom'); S.freeze = big ? .12 : .045;
   if (e.k === 'seeker') blast(cx, cy, 4, 0);
   const letters = '01#$%&@'.split(''); for (let i = 0; i < 6; i++) pt(cx, cy, rr(-20, 20), rr(-20, 4), rr(.6, 1.2), letters, PAL[C.red], { g: 40, bounce: .4, col: true });
-  if (Math.random() < (e.k === 'grunt' ? .25 : e.k === 'warden' || e.k === 'gunship' ? 1 : e.k === 'raider' ? .4 : .12) * EASY.hpDrop) S.pks.push({ k: 'hp', x: cx, y: cy, t: 0, vy: -10, drop: true });
-  for (let i = 0; i < (e.k === 'warden' || e.k === 'gunship' ? 8 : e.k === 'raider' ? 4 : 2); i++) S.pks.push({ k: 'chip', x: cx + rr(-1, 1), y: cy, t: 0, vy: rr(-22, -8), vx: rr(-10, 10), drop: true });
+  if (Math.random() < (FD.hpc !== undefined ? FD.hpc : e.k === 'grunt' ? .25 : e.k === 'warden' || e.k === 'gunship' ? 1 : e.k === 'raider' ? .4 : .12) * EASY.hpDrop) S.pks.push({ k: 'hp', x: cx, y: cy, t: 0, vy: -10, drop: true });
+  for (let i = 0; i < (FD.chips !== undefined ? FD.chips : e.k === 'warden' || e.k === 'gunship' ? 8 : e.k === 'raider' ? 4 : 2); i++) S.pks.push({ k: 'chip', x: cx + rr(-1, 1), y: cy, t: 0, vy: rr(-22, -8), vx: rr(-10, 10), drop: true });
   if (e.arena) { e.arena.alive = Math.max(0, e.arena.alive - 1); }
 }
 function blast(x, y, r, dmgP) {
@@ -960,13 +1027,14 @@ function blast(x, y, r, dmgP) {
 }
 function ebullet(x, y, ang, spd, dmg, o) { spd *= EASY.ebulSpd; S.ebul.push(Object.assign({ x, y, vx: Math.cos(ang) * spd, vy: Math.sin(ang) * spd * .5, life: 5, dmg: dmg || 10, a: ang }, o || {})); }
 
+const AIK = {};   // AI for the enemy kinds added in 47_foes.js and later
 function updEnemies(dt) {
   const p = S.P, L = S.L;
   for (const e of S.en) {
     if (e.dead) continue;
     e.t += dt; e.flash = Math.max(0, e.flash - dt); e.hitT = Math.max(0, e.hitT - dt);
     const dxp = p.x - e.x, dyp = (p.y - 1.5) - (e.y - e.h / 2), dist = Math.hypot(dxp, dyp);
-    e.active = dist < 95 || e.k === 'boss';
+    e.active = dist < 95 || e.k === 'boss' || !!e.always;
     if (!e.active) continue;
     if (e.stun > 0) { e.stun -= dt; e.vx *= .9; if (e.k === 'warden') { e.vy += PH.grav * dt; moveEnt(e, dt); continue; } }
     e.lostT = (e.lostT || 0) - dt; if (e.lostT <= 0) { e.lostT = .18 + Math.random() * .1; e.see = !p.dead && dist < (e.range || 56) && los(e.x, e.y - e.h * .6, p.x, p.y - 1.5); }
@@ -979,9 +1047,11 @@ function updEnemies(dt) {
       case 'gunship': aiGunship(e, dt, dxp, dyp, dist); break;
       case 'raider': aiRaider(e, dt, dxp, dyp, dist); break;
       case 'boss': aiBoss(e, dt, dxp, dyp, dist); break;
+      default: if (AIK[e.k]) AIK[e.k](e, dt, dxp, dyp, dist);
     }
     /* touch damage */
-    if (!p.dead && e.k !== 'boss' && e.k !== 'turret' && e.k !== 'gunship' && Math.abs(dxp) < e.w / 2 + p.w / 2 - .2 && p.y > e.y - e.h && p.y - p.h < e.y && e.k !== 'drone') hurtPlayer(e.k === 'warden' ? 22 : 12, e.x, e.y);
+    const td = (ENEMY[e.k] || {}).tdmg;
+    if (!p.dead && td !== 0 && e.k !== 'boss' && e.k !== 'turret' && e.k !== 'gunship' && Math.abs(dxp) < e.w / 2 + p.w / 2 - .2 && p.y > e.y - e.h && p.y - p.h < e.y && e.k !== 'drone') hurtPlayer(td || (e.k === 'warden' ? 22 : 12), e.x, e.y);
   }
   S.en = S.en.filter(e => !e.dead);
 }
@@ -1056,10 +1126,12 @@ function aiSeeker(e, dt, dxp, dyp, dist) {
 /* =========================================================================
    boss : ARCHON
    ========================================================================= */
-function spawnBoss(x, y, arena) {
-  const e = spawnEnemy({ k: 'boss', x, y }); e.arena = null; e.ph = 1; e.atk = 0; e.fire = 2.4; e.cx = x; e.cy = y; e.laser = null; e.intro = 2.6; e.rot = 0; e.noHit = false; e.bounds = arena; S.boss = e; return e;
+function spawnBoss(x, y, arena, kind) {
+  const bh = kind && BOSSHP[kind], e = spawnEnemy(bh ? { k: 'boss', x, y, hp: bh, maxhp: bh, kind } : { k: 'boss', x, y, kind: 'archon' }); e.arena = null; e.ph = 1; e.atk = 0; e.fire = 2.4; e.cx = x; e.cy = y; e.laser = null; e.intro = 2.6; e.rot = 0; e.noHit = false; e.bounds = arena; S.boss = e; return e;
 }
+const BOSSHP = {}, AIBOSS = {};
 function aiBoss(e, dt, dxp, dyp, dist) {
+  if (e.kind !== 'archon') return AIBOSS[e.kind](e, dt, dxp, dyp, dist);
   const B = e.bounds, p = S.P; e.rot += dt;
   const frac = e.hp / e.maxhp; const ph = frac > .66 ? 1 : frac > .33 ? 2 : 3;
   if (ph !== e.ph) { e.ph = ph; e.fire = 2.5; e.tele = 0; e.laser = null; banner('ARCHON // PHASE ' + ph, ph === 2 ? 'LASERFELD AKTIV' : 'KERN FREIGELEGT. ÜBERTAKTUNG.', C.red); shake(1.2); ring(e.x, e.y - 5, 30, 1, PAL[C.red]); sfx('bigboom', .8); glitchAmt = 1.2; S.flash = .4; S.flashCol = '#ff3b4d'; if (ph === 3) { S.phase3 = true; } }
@@ -1103,12 +1175,22 @@ function bossDie(e) {
 /* =========================================================================
    bullets, waves, particles, pickups, doors, movers, zones
    ========================================================================= */
+/* bunker blocks (Level.brk) crumble when a bullet hits them */
+function hitBrk(x, y) {
+  const L = S.L; if (!L.brk) return false; const tx = Math.floor(x), ty = Math.floor(y), i = ty * L.W + tx; if (!L.inb(tx, ty) || !L.brk[i]) return false;
+  for (const [ox, oy] of [[0, 0], [1, 0], [-1, 0], [0, 1], [0, -1]]) {
+    if (ox && oy === 0 && Math.random() < .55) continue; if (oy && Math.random() < .4) continue;
+    const xx = tx + ox, yy = ty + oy; if (!L.inb(xx, yy)) continue; const j = yy * L.W + xx; if (!L.brk[j]) continue;
+    L.brk[j] = 0; L.t[j] = 0; L.ch[j] = 0; L.bg[j] = 0; L.an[j] = 0; L.sty[j] = 0; for (let k = 0; k < 2; k++) pt(xx + .5, yy + .5, rr(-8, 8), rr(-10, 2), rr(.3, .6), ['▒', '░', '▪', '·'], PAL[C.mint], { g: 40 });
+  }
+  sfx('step', .5); return true;
+}
 function updBullets(dt) {
   const p = S.P, L = S.L;
   for (const b of S.bul) {
     const steps = 2; for (let s = 0; s < steps; s++) {
       b.x += b.vx * dt / steps; b.y += b.vy * dt / steps;
-      if (solidAt(b.x, b.y)) { b.life = 0; sparks(b.x, b.y, 5, -b.vx, -b.vy, b.col, 24); pt(b.x, b.y, 0, 0, .15, ['*'], b.col, {}); if (Math.random() < .3) sfx('step', .4); break; }
+      if (solidAt(b.x, b.y)) { hitBrk(b.x, b.y); b.life = 0; sparks(b.x, b.y, 5, -b.vx, -b.vy, b.col, 24); pt(b.x, b.y, 0, 0, .15, ['*'], b.col, {}); if (Math.random() < .3) sfx('step', .4); break; }
       for (const e of S.en) {
         if (e.dead || e.noHit) continue;
         if (Math.abs(b.x - e.x) < e.w / 2 + .3 && b.y > e.y - e.h - .3 && b.y < e.y + .3 && !b.hit.includes(e)) {
@@ -1129,7 +1211,7 @@ function updBullets(dt) {
       for (const q of S.bul) if (q.life > 0 && Math.abs(q.x - b.x) < 1.5 && Math.abs(q.y - b.y) < 1.2) { q.life = 0; b.hp = (b.hp === undefined ? 2 : b.hp) - 1; if (b.hp <= 0) { b.life = 0; boom(b.x, b.y, .8); sfx('boom', .4); } }
     }
     b.x += b.vx * dt; b.y += b.vy * dt; b.life -= dt;
-    if (solidAt(b.x, b.y)) { b.life = 0; sparks(b.x, b.y, 3, -b.vx, -b.vy, PAL[C.red], 20); continue; }
+    if (solidAt(b.x, b.y)) { hitBrk(b.x, b.y); b.life = 0; sparks(b.x, b.y, 3, -b.vx, -b.vy, PAL[C.red], 20); continue; }
     if (!p.dead && Math.abs(b.x - p.x) < p.w / 2 + .5 && b.y > p.y - p.h - .2 && b.y < p.y + .2) { if (hurtPlayer(b.dmg, b.x - b.vx * .1, b.y)) b.life = 0; }
     if (Math.random() < .35) pt(b.x, b.y, 0, 0, .2, ['·'], PAL[C.red], {});
   }
@@ -1271,6 +1353,7 @@ function updWorld(dt) {
   updMovers(dt);
   updPlayer(dt);
   updVehicles(dt);
+  if (S.race) updRace(dt); if (S.inv) updInvaders(dt);
   // hook flight / retract
   const p = S.P, h = p.hook;
   if (h.st === 1) {
@@ -1398,7 +1481,7 @@ function makeLayer(d, th) {
         // neon vertical sign + accent strip
         const acc = th.accent[id % th.accent.length], accHex = PAL[acc];
         if (R() < .6) { const sx = bx + R.i(2, w - 3); for (let j = top + 3; j < top + 3 + R.i(5, 12) && j < baseRow; j++) gl('║', sx * CW, j * CH, accHex, .85); }
-        if (R() < .65) { const pool = SKY.kana ? SIGNS_KANA.concat(SIGNS_ASCII.slice(0, 5)) : SIGNS_ASCII; const txt = R.pick(pool); const vert = R() < .5; signs.push({ x: (bx + R.i(1, Math.max(1, w - (vert ? 3 : txt.length + 1)))), y: top + R.i(3, 8), txt, col: accHex, vert, ph: R() * 9, flick: R() < .4 }); }
+        if (R() < .65) { const pool = th.signs || (SKY.kana ? SIGNS_KANA.concat(SIGNS_ASCII.slice(0, 5)) : SIGNS_ASCII); const txt = R.pick(pool); const vert = R() < .5; signs.push({ x: (bx + R.i(1, Math.max(1, w - (vert ? 3 : txt.length + 1)))), y: top + R.i(3, 8), txt, col: accHex, vert, ph: R() * 9, flick: R() < .4 }); }
         // rooftop ac boxes
         for (let i = bx + 1; i < bx + w - 3; i += R.i(3, 6)) { if (R() < .5) { gl('▄', i * CW, (top - 1) * CH + CH / 2, edge, .6); gl('▄', (i + 1) * CW, (top - 1) * CH + CH / 2, edge, .6); } }
       }
@@ -1747,6 +1830,7 @@ function drawDecor(t, layer) {
       }
       case 'flyer': if (layer === (d.front ? 1 : 0)) drawFlyer(d, t); break;
       case 'vent': break;
+      case 'custom': if (layer === (d.front ? 1 : 0) && onScr(d.x + (d.w || 0) / 2, d.y, d.vis || 40)) d.draw(d, t); break;
     }
   }
 }
@@ -1858,9 +1942,12 @@ function drawEnemy(e, t) {
   } else if (e.k === 'seeker') {
     const p = .6 + .4 * Math.sin(t * 14 + e.seed), c = fl ? '#fff' : '#ff3b4d'; wgl('▟', e.x - 1, e.y - 2, c, p); wgl('▙', e.x, e.y - 2, c, p); wgl('▜', e.x - 1, e.y - 1, c, p); wgl('▛', e.x, e.y - 1, c, p); glow(e.x, e.y - 1, 4, '#ff3b4d', .4 * p);
   } else if (e.k === 'gunship' || e.k === 'raider') drawEnemyVeh(e, t);
+  else if (FOE_DRAW[e.k]) FOE_DRAW[e.k](e, t);
   else if (e.k === 'boss') drawBoss(e, t);
 }
+const FOE_DRAW = {}, BOSS_DRAW = {}, BOSS_TITLE = { archon: ['A R C H O N', 'A R C H O N   //   W Ä C H T E R   D E R   S P I T Z E'] };
 function drawBoss(e, t) {
+  if (e.kind && e.kind !== 'archon') return BOSS_DRAW[e.kind](e, t);
   const cx = e.x, cy = e.y - 5, fl = e.flash > 0, ph = e.ph, P = S.P;
   const rx = 12, ry = 6, ex = clamp((P.x - cx) / 40, -1, 1), ey = clamp((P.y - cy) / 24, -1, 1);
   const hot = ph === 1 ? ['#3a0a30', '#ff2fb9', '#ffd0f0'] : ph === 2 ? ['#3a0a1a', '#ff3b4d', '#ffe0c0'] : ['#400808', '#ff5a2d', '#fff4d0'];
@@ -1910,7 +1997,7 @@ function drawCheckpoints(t) {
 }
 function drawBullets(t) {
   for (const b of S.bul) { if (!onScr(b.x, b.y)) continue; const bgl = gunGlyph(b.a), gch = bgl === '▬' ? '═' : bgl; wgl(gch, b.x - .5, b.y - .5, '#ffffff'); wgl(gch, b.x - b.vx * .014 - .5, b.y - b.vy * .014 - .5, b.col, .8); glow(b.x, b.y, 3, b.col, .3); }
-  for (const b of S.ebul) { if (!onScr(b.x, b.y)) continue; wgl(b.big ? '●' : '•', b.x - .5, b.y - .5, '#ff7a6a'); wgl(b.big ? 'o' : '·', b.x - .5, b.y - .5, '#ffffff', .0); glow(b.x, b.y, b.big ? 4 : 3, '#ff3b4d', .4); }
+  for (const b of S.ebul) { if (!onScr(b.x, b.y)) continue; if (b.inv) { wgl(Math.floor(S.t * 14 + b.x) % 2 ? '╪' : '╫', b.x - .5, b.y - .5, '#ffe45e'); glow(b.x, b.y, 3, '#ffe45e', .35); continue; } wgl(b.big ? '●' : '•', b.x - .5, b.y - .5, '#ff7a6a'); wgl(b.big ? 'o' : '·', b.x - .5, b.y - .5, '#ffffff', .0); glow(b.x, b.y, b.big ? 4 : 3, '#ff3b4d', .4); }
   for (const w of S.waves) { for (let k = 0; k < 3; k++) wgl(k === 0 ? '▌' : '▒', w.x - w.dir * k - .5, w.y - 1, '#ffb347', 1 - k * .3), wgl(k === 0 ? '▌' : '▒', w.x - w.dir * k - .5, w.y - 2, '#ffb347', .6 - k * .15); glow(w.x, w.y - 1, 5, '#ffb347', .3); }
   for (const b of S.bolts) {
     const k = b.t / b.dur, dx = b.x1 - b.x0, dy = b.y1 - b.y0, n = Math.ceil(Math.hypot(dx, dy * 2) * 1.0), ang = Math.atan2(dy * 2, dx), ch = Math.abs(Math.sin(ang)) < .38 ? '═' : Math.abs(Math.cos(ang)) < .38 ? '║' : (Math.cos(ang) * Math.sin(ang) > 0 ? '╲' : '╱');
@@ -1973,7 +2060,7 @@ function drawWorld(t) {
   drawMovers(t); drawDoors(t);
   drawDecor(t, 1);
   drawCheckpoints(t); drawPickups(t);
-  for (const e of S.en) { if (e.k !== 'boss' && !e.dead && onScr(e.x, e.y - e.h / 2, 12)) halo(e.x, e.y - e.h / 2, e.k === 'warden' ? 8 : 5, .55); drawEnemy(e, t); }
+  for (const e of S.en) { if (e.k !== 'boss' && !e.dead && onScr(e.x, e.y - e.h / 2, 12)) halo(e.x, e.y - e.h / 2, (ENEMY[e.k] && ENEMY[e.k].halo) || (e.k === 'warden' ? 8 : 5), .55); drawEnemy(e, t); }
   drawLasers(t); drawBlades(t); drawZap(t);
   if (!S.P.dead && S.mode !== 'title') halo(S.P.x, S.P.y - 1.5, 6, .6);
   drawHook(t); drawVehicles(t); if (!S.P.veh) drawPlayer(t);
@@ -2023,10 +2110,11 @@ function drawHud(t) {
   // boss bar: top centre, between the two panels (drops under them on narrow screens)
   if (S.boss && S.boss.intro <= 0.5) {
     const b = S.boss, free = COLS - 90, wide = free >= 20, bw2 = wide ? Math.min(60, free) : Math.min(60, COLS - 8), by = wide ? 2.6 : 6.8, f = Math.round(bw2 * clamp(b.hp / b.maxhp, 0, 1)), x0 = Math.round((COLS - bw2) / 2);
-    txtC(wide && bw2 < 54 ? 'A R C H O N' : 'A R C H O N   //   W Ä C H T E R   D E R   S P I T Z E', COLS / 2, by - 1.3, '#ff3b4d');
+    { const bt = BOSS_TITLE[b.kind || 'archon']; txtC(wide && bw2 < 54 ? bt[0] : bt[1], COLS / 2, by - 1.3, '#ff3b4d'); }
     for (let i = 0; i < bw2; i++) gl(i < f ? '█' : '░', Math.round((x0 + i) * CW), Math.round(by * CH), i < f ? (b.ph === 3 ? '#ff5a2d' : '#ff3b4d') : '#3a1a30');
     gl('▐', Math.round((x0 - 1) * CW), Math.round(by * CH), '#ff3b4d'); gl('▌', Math.round((x0 + bw2) * CW), Math.round(by * CH), '#ff3b4d');
   }
+  if (S.race) drawRaceHud(t); if (S.inv) drawInvHud(t);
   // comms
   if (S.comms.length) {
     const c = S.comms[0], bwid = TC.on ? Math.min(72, COLS - 44) : Math.min(78, COLS - 8), lines = wrapText(c.text, bwid - 10), shown = Math.floor(c.t * 62), x0 = Math.round((COLS - bwid) / 2), y0 = ROWS - 4 - lines.length - 1;
@@ -2366,12 +2454,13 @@ function touchLayout() {
   const B = {};
   const riding = !!(S.P && S.P.veh), vehOn = riding || !!S.near;
   if (play) {
-    B.jump = { x: jx, y: jy, r: 1.15 * u, label: riding && S.P.veh.k === 'heli' ? 'HOCH' : 'SPRUNG' };
-    B.dash = { x: jx - 2.6 * u, y: jy + .4 * u, r: .88 * u, label: riding ? 'TURBO' : 'DASH' };
-    B.hook = { x: jx - 2.2 * u, y: jy - 2.15 * u, r: .88 * u, label: riding ? 'RAKETE' : 'HAKEN' };
+    B.jump = { x: jx, y: jy, r: 1.15 * u, label: riding && S.P.veh.k === 'heli' ? 'HOCH' : riding && S.P.veh.k === 'cannon' ? 'FEUER' : 'SPRUNG' };
+    const cannon = riding && S.P.veh.k === 'cannon';
+    if (!cannon) B.dash = { x: jx - 2.6 * u, y: jy + .4 * u, r: .88 * u, label: riding ? 'TURBO' : 'DASH' };
+    if (!cannon) B.hook = { x: jx - 2.2 * u, y: jy - 2.15 * u, r: .88 * u, label: riding ? 'RAKETE' : 'HAKEN' };
     if (!riding) B.fly = { x: jx + .05 * u, y: jy - 2.7 * u, r: .88 * u, label: 'FLUG' };
     if (!riding && S.P && S.P.wpns && (S.P.wpns[1] || S.P.wpns[2])) B.wpn = { x: W - sr - 1.5 * u, y: Math.max(CH * 6.4, H * .3), r: .72 * u, label: 'WAFFE' };
-    if (vehOn) B.veh = riding ? { x: jx + .05 * u, y: jy - 2.7 * u, r: .88 * u, label: 'RAUS' } : { x: jx - 4.3 * u, y: jy - .3 * u, r: .95 * u, label: 'REIN' };
+    if (vehOn && !cannon) B.veh = riding ? { x: jx + .05 * u, y: jy - 2.7 * u, r: .88 * u, label: 'RAUS' } : { x: jx - 4.3 * u, y: jy - .3 * u, r: .95 * u, label: 'REIN' };
     const cy = CH * 8.8, cx = sl + 1.1 * u;
     B.pause = { x: cx, y: cy, r: .7 * u, label: 'II' };
     B.fs = { x: cx + 1.75 * u, y: cy, r: .7 * u, label: fsEl() ? '><' : '<>', off: !fsCan() };
@@ -2525,8 +2614,10 @@ function drawTouch(t) {
     tcRing(mx0, my0, R, '#19f0ff', m ? .55 : .2, .25);
     if (m) { const l = Math.hypot(m.vx, m.vy), k = l > 1 ? 1 / l : 1; tcRing(mx0 + m.vx * R * k, my0 + m.vy * R * k, u * .62, '#19f0ff', .8, .6); } else tcLabel('LAUFEN', mx0, my0, '#19f0ff', .35);
     const ax0 = a ? a.ox : W * .6, ay0 = a ? a.oy : H - sb - 2.4 * u;
+    if (!a && S.P && S.P.veh && S.P.veh.k === 'cannon') { /* the cannon only fires straight up: no aim ring */ } else {
     tcRing(ax0, ay0, R, '#ff2fb9', a ? .55 : .2, .25);
     if (a) { const l = Math.hypot(a.vx, a.vy), k = l > 1 ? 1 : l; tcRing(ax0 + a.nx * R * k, ay0 + a.ny * R * k, u * .62, '#ff2fb9', .85, .6); } else tcLabel('ZIELEN', ax0, ay0, '#ff2fb9', .35);
+    }
   }
   for (const k in TC.btn) {
     const b = TC.btn[k]; if (b.off) continue;
@@ -2560,6 +2651,7 @@ const VEH = {
   heli:  { name: 'HUBSCHRAUBER', w: 9, h: 3.8, hp: 120, speed: 31, boost: 50 },
   car:   { name: 'FLUCHTWAGEN',  w: 9, h: 3.2, hp: 140, speed: 34, boost: 54 },
   hover: { name: 'GLEITER',      w: 9, h: 3.2, hp: 130, speed: 40, boost: 62 },
+  racer: { name: 'RENNWAGEN',    w: 9, h: 3.2, hp: 130, speed: 40, boost: 64 },
 };
 S.veh = []; S.rkt = []; S.near = null; S.vseen = {};
 ENEMY.gunship = { w: 9, h: 3.8, hp: 18, hook: true, score: 400 };
@@ -2588,6 +2680,7 @@ function vehHint(v) {
     'Hubschrauber! Linker Stick fliegt, rechter Stick zielt und feuert die Bordkanone. RAKETE schießt, TURBO gibt Schub, RAUS steigt aus.'), 7.5);
   else if (v.k === 'car') say('ECHO', TX('Fluchtwagen! A und D geben Gas und bremsen, LEERTASTE springt, SHIFT gibt Turbo. Fahr die Fußtruppen um, spring über Lücken und Sperren. V steigt aus.',
     'Fluchtwagen! Linker Stick gibt Gas und bremst, nach oben springt er. TURBO gibt Schub, RAKETE und rechter Stick feuern. RAUS steigt aus.'), 7.5);
+  else if (v.k === 'cannon') say('ECHO', TX('Laserkanone! A und D fahren, J, LEERTASTE oder Linksklick feuern senkrecht nach oben. Du kannst nicht aussteigen, bis das Spiel gewonnen ist.', 'Laserkanone! Linker Stick fährt, SPRUNG oder rechter Stick feuern senkrecht nach oben. Aussteigen geht erst nach dem Sieg.'), 7.5);
   else say('ECHO', TX('Gleiter! Fährt wie ein Wagen, schwebt aber und springt höher. Maus zielt, Linksklick feuert, Rechtsklick schießt Raketen. V steigt aus.',
     'Gleiter! Fährt wie ein Wagen, schwebt aber und springt höher. Rechter Stick zielt und feuert, RAKETE schießt, RAUS steigt aus.'), 7.5);
 }
@@ -2598,7 +2691,7 @@ function boardVeh(v) {
   v.face = p.face || 1; v.rktCd = Math.max(v.rktCd, .4);
   sfx('board'); ring(v.x, v.y - v.h / 2, 8, .5, PAL[C.cyan]); ring(v.x, v.y - v.h / 2, 12, .7, PAL[C.mag], ['.', '·']);
   for (let i = 0; i < 12; i++) pt(v.x + rr(-4, 4), v.y - rr(0, v.h), rr(-8, 8), rr(-14, -2), rr(.3, .7), ['*', '+', '·'], PAL[C.cyan], { drag: 2 });
-  banner(vehName(v), TX('V = AUSSTEIGEN', 'RAUS = AUSSTEIGEN'), C.cyan); vehHint(v);
+  banner(vehName(v), v.k === 'cannon' ? 'NUR NACH OBEN SCHIESSEN' : TX('V = AUSSTEIGEN', 'RAUS = AUSSTEIGEN'), v.k === 'cannon' ? C.mint : C.cyan); vehHint(v);
 }
 function placePlayerNear(v) {
   /* a standing spot on real ground close to the vehicle; if there is none (open sky), Sam bails out above it with the flight pack lit */
@@ -2624,6 +2717,7 @@ function healVeh(v, k) {
 
 /* ---------- damage ---------- */
 function hurtVeh(v, dmg, fromX, fromY) {
+  if (v.k === 'cannon') return cannonHit(v);
   if (v.dead || v.inv > 0) return false;
   v.hp -= dmg * .62; v.inv = .35; v.flash = .12;
   v.vx += (sign(v.x - fromX) || -v.face) * 5;
@@ -2702,6 +2796,8 @@ function updRockets(dt) {
 function vehGroundDist(v, maxD) { const h = rayTile(v.x, v.y, 0, 1, maxD); return h ? h.d : maxD; }
 function updRide(v, dt) {
   const p = S.P, L = S.L, d = VEH[v.k];
+  if (S.race && S.race.phase === 'grid') { v.vx = 0; v.vy = Math.min(PH.maxFall, v.vy + 84 * dt); moveEnt(v, dt, false); v.t += dt; p.x = v.x; p.y = v.y; p.vx = p.vy = 0; p.ground = v.ground; p.face = v.face; p.w = v.w; p.h = v.h; p.inv = 0; return; }
+  if (v.k === 'cannon') return updCannon(v, dt);
   const left = KEY.KeyA || KEY.ArrowLeft, right = KEY.KeyD || KEY.ArrowRight, up = KEY.KeyW || KEY.ArrowUp || KEY.Space, down = KEY.KeyS || KEY.ArrowDown;
   const dir = (right ? 1 : 0) - (left ? 1 : 0), jumpP = pressed('Space') || pressed('KeyW') || pressed('ArrowUp'), boostHeld = KEY.ShiftLeft || KEY.ShiftRight || KEY.KeyL;
   v.fireCd = Math.max(0, v.fireCd - dt); v.rktCd = Math.max(0, v.rktCd - dt); v.inv = Math.max(0, v.inv - dt); v.flash = Math.max(0, v.flash - dt); v.t += dt;
@@ -2737,6 +2833,7 @@ function updRide(v, dt) {
     if (v.ground && Math.abs(v.vx) > 6 && Math.random() < dt * 40) pt(v.x - v.face * 4.5, v.y - .1, -v.face * rr(2, 9), rr(-4, -.5), rr(.2, .5), ['░', '·', '.'], PAL[C.greyD], { drag: 3 });
     v.spin = 1;
   }
+  if (v.padT > 0) { v.padT -= dt; if (v.ground) v.vx = v.face > 0 ? Math.max(v.vx, d.speed * 1.28) : Math.min(v.vx, -d.speed * 1.28); }
   /* weapons */
   const fireHeld = MOUSE.l || KEY.KeyJ;
   if (fireHeld && v.fireCd <= 0) vehGun(v, a);
@@ -2750,7 +2847,7 @@ function updRide(v, dt) {
   /* ramming */
   if (v.k !== 'heli' && Math.abs(v.vx) > 18) {
     for (const e of S.en) {
-      if (e.dead || e.k === 'boss' || e.noHit || e.k === 'gunship') continue;
+      if (e.dead || e.k === 'boss' || e.noHit || e.k === 'gunship' || (ENEMY[e.k] && ENEMY[e.k].noRam)) continue;
       if (Math.abs(e.x - v.x) < (e.w + v.w) / 2 - .6 && e.y > v.y - v.h && e.y - e.h < v.y - .4 && S.t - (e.rammed || -9) > .35) {
         e.rammed = S.t; damageEnemy(e, e.k === 'warden' ? 5 : 4, sign(v.vx), -.4, false); v.vx *= .88; shake(.45); sparks(e.x, e.y - 1.2, 14, sign(v.vx), -.5, PAL[C.yel], 38); sfx('stomp', .5);
       }
@@ -2783,7 +2880,7 @@ function updRide(v, dt) {
   p.x = v.x; p.y = v.y; p.vx = v.vx; p.vy = v.vy; p.ground = v.ground; p.face = v.face; p.w = v.w; p.h = v.h; p.inv = 0;
   p.hitT = 0; p.fuel = Math.min(1, p.fuel + dt * .5); p.hp = Math.min(100, p.hp + dt * 4);
   /* leaving */
-  if (pressed('KeyV')) exitVeh(v);
+  if (pressed('KeyV')) { if (S.race && S.race.phase !== 'done') { KP.KeyV = false; if (S.t - (S.race.noExit || -9) > 3) { S.race.noExit = S.t; banner('AUSSTEIGEN GESPERRT', 'DAS RENNEN LÄUFT', C.amber); sfx('select', .5); } } else exitVeh(v); }
 }
 
 /* ---------- parked and wrecked vehicles ---------- */
@@ -2907,6 +3004,7 @@ function drawGunGlyph(cx, cy, a, fl, col) {
   const gg = gunGlyph(a); wgl(gg, cx + Math.cos(a) * 1 - .5, cy + Math.sin(a) * .5 - .5, fl ? '#fff' : '#d0d8ff'); wgl(gg, cx + Math.cos(a) * 2 - .5, cy + Math.sin(a) * 1 - .5, fl ? '#fff' : col);
 }
 function drawVeh(v, t) {
+  if (v.k === 'cannon') return drawCannon(v, t);
   const fl = v.flash > .02, dead = v.dead, al = dead ? .85 : (v.inv > 0 && Math.floor(t * 24) % 2 ? .6 : 1), cy = v.y - v.h / 2;
   const dcol = r => dead ? r.map(s => s.replace(/[^ ]/g, 'G')) : r;
   if (v.k === 'heli') {
@@ -2920,10 +3018,10 @@ function drawVeh(v, t) {
     if (!dead) wgl('▪', v.x - v.face * 6.1 - .5, y0 + 1.4, Math.floor(t * 2) % 2 ? '#ff3b4d' : '#3a1020', .9);
     if (!dead) cockpit(v.x + v.face * 3, v.y - 3, 2, 2, v.driver ? 1 : 0, t);
   } else {
-    const rows = v.k === 'hover' ? HOV_R : CAR_R, cols = v.k === 'hover' ? HOV_C : CAR_C, x0 = v.x - 4.5, y0 = v.y - 3, bob = v.k === 'hover' && !dead ? Math.sin(t * 5 + v.t) * .15 : 0;
+    const rows = v.k === 'hover' ? HOV_R : v.k === 'racer' ? RCR_R : CAR_R, cols = v.k === 'hover' ? HOV_C : v.k === 'racer' ? RCR_C.map(r => r.replace(/t/g, 'c')) : CAR_C, x0 = v.x - 4.5, y0 = v.y - 3, bob = v.k === 'hover' && !dead ? Math.sin(t * 5 + v.t) * .15 : 0;
     spr(rows, dcol(cols), x0, y0 + bob - (v.k === 'hover' && !dead ? .35 : 0), v.face, al, fl);
     if (!dead) cockpit(v.x, y0 + 1 + bob - (v.k === 'hover' ? .35 : 0), 3, 1, v.driver ? 1 : 0, t);
-    if (v.k === 'car' && !dead) { const wf = Math.floor(v.wheel) % 2 ? '+' : 'x'; wgl(wf, x0 + 1 - .5, y0 + 2, '#eaf6ff', .85); wgl(wf, x0 + 7 - .5, y0 + 2, '#eaf6ff', .85); }
+    if ((v.k === 'car' || v.k === 'racer') && !dead) { const wf = Math.floor(v.wheel) % 2 ? '+' : 'x'; wgl(wf, x0 + 1 - .5, y0 + 2, '#eaf6ff', .85); wgl(wf, x0 + 7 - .5, y0 + 2, '#eaf6ff', .85); }
     if (!dead) {
       glow(v.x, v.y - .6, 8, v.k === 'hover' ? '#19f0ff' : '#ff2fb9', v.boosting ? .5 : .2);
       if (v.k === 'hover') for (let i = 0; i < 7; i++) wgl('▔', x0 + 1 + i - .5, v.y - .1 + bob - .35, '#19f0ff', .5 + .3 * Math.sin(t * 9 + i));
@@ -2987,6 +3085,7 @@ function drawFlyer(d, t) {
 
 /* ---------- cockpit HUD: replaces Sam's vitals while he rides ---------- */
 function drawVehHud(p, t) {
+  if (p.veh.k === 'cannon') return drawCannonHud(p, t);
   const v = p.veh, f = clamp(v.hp / v.maxhp, 0, 1), col = f > .55 ? '#5dffb0' : f > .28 ? '#ffb347' : '#ff3b4d', blink = f < .28 && Math.floor(S.t * 6) % 2;
   const X = c => Math.round(c * CW), Y = r => Math.round(r * CH);
   panel(2, 1, 41, 6, '#19f0ff', vehName(v));
@@ -2998,8 +3097,745 @@ function drawVehHud(p, t) {
   txtPx('◊ ' + String(S.chips).padStart(3, '0'), X(24), Y(3), '#ffe45e'); txtPx('GEGNER ' + String(S.kills).padStart(2, '0'), X(31), Y(3), '#8a96c4');
   const rk = 1 - v.rktCd / VROCKET_CD; txtPx('RAKETE', X(11), Y(4), '#8a96c4'); for (let i = 0; i < 8; i++) gl('▰', X(18 + i), Y(4), i < rk * 8 ? '#ffb347' : '#2a3470');
   txtPx(v.rktCd <= 0 ? TX('RECHTSKLICK', 'RAKETE-KNOPF') : 'LÄDT...', X(28), Y(4), v.rktCd <= 0 ? '#5dffb0' : '#8a96c4');
-  txtPx(TX('[V] AUSSTEIGEN', 'RAUS = AUSSTEIGEN'), X(11), Y(5), '#5dffb0');
+  txtPx(S.race ? 'RENNEN LÄUFT' : TX('[V] AUSSTEIGEN', 'RAUS = AUSSTEIGEN'), X(11), Y(5), S.race ? '#ffb347' : '#5dffb0');
 }
+
+/* =========================================================================
+   NEUE GEGNER (ab Sektor 6), jeder größer als der vorige
+   sniper   Scharfschütze: zielt mit rotem Laser, schießt auf die gemerkte Stelle (ausweichen!)
+   mech     Brecher: stampft Schockwellen, feuert Salven. Mit scale 2 wird er zum Titan (Zwischenboss)
+   orb      Satellit: Kugel mit Schildplatten, die Kugeln umkreisen
+   koloss   Wächter der Station: wandelnder Turm mit Geschütz, Raketen und Stampfschlag
+   ========================================================================= */
+ENEMY.sniper = { w: 1.8, h: 2.9, hp: 4, hook: true, score: 300, tdmg: 0, hpc: .4 };
+ENEMY.mech = { w: 8, h: 7, hp: 42, hook: true, strike: 10, score: 900, tdmg: 16, heavy: true, big: true, halo: 9, chips: 10, hpc: 1 };
+ENEMY.orb = { w: 4, h: 4, hp: 7, hook: true, score: 250, tdmg: 10, heavy: true, halo: 6, chips: 3 };
+ENEMY.koloss = { w: 14, h: 12, hp: 110, hook: false, strike: 8, score: 2500, tdmg: 22, heavy: true, big: true, halo: 14, chips: 20, hpc: 1 };
+
+/* sprite scaled by an integer factor (every glyph becomes k x k glyphs) */
+function sprK(rows, cols, x, y, face, al, flash, k) {
+  for (let j = 0; j < rows.length; j++) { const r = rows[j], n = r.length, cr = cols[j]; for (let i = 0; i < n; i++) {
+    const ii = face > 0 ? i : n - 1 - i; let c = r[ii]; if (c === ' ') continue; if (face < 0 && MIR[c]) c = MIR[c];
+    const col = flash ? '#ffffff' : SPC[cr[ii]] || '#fff';
+    for (let a = 0; a < k; a++) for (let b = 0; b < k; b++) wgl(c, x + i * k + a, y + j * k + b, col, al);
+  } }
+}
+function bossBar(e, w, dy, col) {
+  const hp = clamp(e.hp / e.maxhp, 0, 1), n = Math.round(w * hp);
+  txtPx('▐' + '█'.repeat(n) + '░'.repeat(w - n) + '▌', Math.round((e.x - w / 2 - 1) * CW - CXp), Math.round((e.y - dy) * CH - CYp), col || '#ff3b4d', .9);
+}
+
+/* ---------- sniper ---------- */
+AIK.sniper = function (e, dt, dxp, dyp, dist) {
+  const p = S.P; e.vy = Math.min(PH.maxFall, e.vy + PH.grav * dt); e.vx *= Math.exp(-8 * dt); moveEnt(e, dt);
+  e.face = sign(dxp) || e.face; const cx = e.x + e.face * .6, cy = e.y - 2.1; e.rec = Math.max(0, (e.rec || 0) - dt);
+  if (e.see && dist < (e.range || 85) && !p.dead) {
+    e.fire -= dt / EASY.fireSlow;
+    if (e.fire <= 0 && e.tele <= 0) { e.tele = 1.2; e.ax = p.x; e.ay = p.y - 1.5; sfx('warn', .5); }
+  } else if (e.tele <= 0 && e.fire < .6) e.fire = .6;
+  if (e.tele > 0) {
+    e.tele -= dt;
+    if (e.tele > .38) { const k = Math.min(1, 3.4 * dt); e.ax = lerp(e.ax, p.x, k); e.ay = lerp(e.ay, p.y - 1.5, k); }   // follows, then locks
+    if (e.tele <= 0) { const a = vang(e.ax - cx, e.ay - cy); ebullet(cx, cy, a, 105, 22, { big: 1, life: 2.4 }); sfx('rail', .55); e.fire = rr(2.2, 3.3); e.rec = .25; sparks(cx, cy, 6, Math.cos(a), 0, PAL[C.mag], 30); }
+  }
+};
+FOE_DRAW.sniper = function (e, t) {
+  const fl = e.flash > 0, f = GF.idle, rows = f[0], cols = f[1].map(r => r.replace(/v/g, 'm'));
+  spr(rows, cols, e.x - 1.5, e.y - 3, e.face, e.stun > 0 ? .5 : 1, fl);
+  const cx = e.x + e.face * .6, cy = e.y - 2.1, tele = e.tele > 0;
+  const a = tele ? vang(e.ax - cx, e.ay - cy) : (e.face > 0 ? 0 : PI);
+  for (let i = 1; i <= 3; i++) wgl(gunGlyph(a), cx + Math.cos(a) * i * 1.05 - .5 - (e.rec || 0) * Math.cos(a) * 2, cy + Math.sin(a) * i * .52 - .5 - (e.rec || 0) * Math.sin(a), fl ? '#fff' : (i === 3 ? '#ff2fb9' : '#d0d8ff'));
+  if (tele) {   // laser sight, fading in; flashes white just before the shot
+    const L2 = Math.hypot(e.ax - cx, (e.ay - cy) * 2), n = Math.min(70, Math.ceil(L2 / 1.1)), k = 1 - e.tele / 1.2, hot = e.tele < .38;
+    for (let i = 3; i < n; i += 1) { const u = i / n; wgl('·', cx + (e.ax - cx) * u - .5, cy + (e.ay - cy) * u - .5, hot ? '#ffffff' : '#ff3b4d', hot ? .95 : .25 + k * .5); }
+    wgl('◎', e.ax - .5, e.ay - .5, hot ? '#ffffff' : '#ff3b4d', .5 + .4 * Math.sin(t * 30)); wgl(TXT_WARN, e.x - .5, e.y - 4.6, '#ff3b4d');
+  }
+  glow(e.x, e.y - 2, 4, '#ff2fb9', tele ? .4 : .08);
+};
+
+/* ---------- mech / titan ---------- */
+const MECH_R = ['  ▄██▄  ', ' ▟████▙ ', '▟█▀██▀█▙', '█▐████▌█', '▜█▙▄▄▟█▛', ' ▐█▌▐█▌ ', ' ▟█▙▟█▙ '];
+const MECH_R2 = ['  ▄██▄  ', ' ▟████▙ ', '▟█▀██▀█▙', '█▐████▌█', '▜█▙▄▄▟█▛', ' ▐█▌▐█▌ ', '▟█▙  ▟█▙'];
+const MECH_C = ['  RrrR  ', ' RrrrrR ', 'RrykkyrR', 'RGrRRrGR', 'RrGGGGrR', ' GRGGRG ', ' GRGGRG '];
+AIK.mech = function (e, dt, dxp, dyp, dist) {
+  const p = S.P, L = S.L, K = e.scale || 1, sp = K > 1 ? 6 : 8.5; e.cool = Math.max(0, (e.cool || 0) - dt);
+  e.vy = Math.min(PH.maxFall, e.vy + PH.grav * dt);
+  const chase = e.see || dist < 55;
+  if (e.st === 0) {   // walk
+    const want = chase ? sign(dxp) * (Math.abs(dxp) > 6 ? sp : 0) : (e.dirP || (e.dirP = Math.random() < .5 ? -1 : 1)) * sp * .4;
+    e.vx = lerp(e.vx, want, Math.min(1, 3 * dt)); if (Math.abs(e.vx) > 1) e.face = sign(e.vx); else if (chase) e.face = sign(dxp) || e.face;
+    moveEnt(e, dt);
+    if (e.ground) { const ax = e.x + sign(e.vx || e.face) * (e.w / 2 + 1.5); if (!solidAt(ax, e.y + .5)) { e.vx = 0; if (!chase) e.dirP = -(e.dirP || 1); } if (e.hitL || e.hitR) { if (!chase) e.dirP = -(e.dirP || 1); } }
+    if (Math.abs(e.vx) > 2) { e.gait = (e.gait || 0) + Math.abs(e.vx) * dt * .25; if (e.ground && Math.floor(e.gait) !== e.gstep) { e.gstep = Math.floor(e.gait); if (onScr(e.x, e.y, 20)) { sfx('step', .8); shake(.12 * K); } } }
+    if (chase && e.cool <= 0) {
+      e.fire -= dt / EASY.fireSlow;
+      if (e.fire <= 0) {
+        e.cyc = (e.cyc || 0) + 1;
+        if (Math.abs(dxp) < 22 * K && Math.abs(dyp) < 8 * K && e.cyc % 2 === 1) { e.st = 1; e.tele = .65; e.vx = 0; sfx('warn', .7); }
+        else if (K > 1 && e.cyc % 4 === 0) { e.st = 4; e.tele = .6; e.vx = 0; sfx('warn', .7); }
+        else { e.st = 3; e.tele = .5; e.vx = 0; e.burst = K > 1 ? 5 : 3; e.bt = 0; sfx('warn', .6); }
+        e.fire = rr(1.3, 2.2);
+      }
+    }
+  } else if (e.st === 1) {   // stomp: crouch, leap, slam
+    e.vx = 0; e.tele -= dt; moveEnt(e, dt);
+    if (e.tele <= 0) { e.st = 2; e.vy = K > 1 ? -30 : -27; e.ground = false; e.vx = sign(dxp) * 8; sfx('stomp', .6); }
+  } else if (e.st === 2) {
+    moveEnt(e, dt); e.vx *= Math.exp(-.8 * dt);
+    if (e.ground && e.vy >= 0) {
+      sfx('stomp'); shake(.9 * K); ring(e.x, e.y, 12 * K, .5, PAL[C.amber], ['═', '─']); for (let i = 0; i < 14; i++) pt(e.x + rr(-e.w / 2, e.w / 2), e.y - .2, rr(-18, 18), rr(-14, -3), rr(.3, .7), ['▒', '░', '▪', '·'], PAL[C.greyD], { g: 40 });
+      for (const dir of [-1, 1]) S.waves.push({ x: e.x + dir * (e.w / 2 + 1), y: e.y, dir, spd: 30 + K * 3, life: .75 + K * .25, dmg: 18 });
+      if (K > 1) for (const dir of [-1, 1]) S.waves.push({ x: e.x + dir * (e.w / 2 + 6), y: e.y, dir, spd: 22, life: .8, dmg: 18 });
+      e.st = 0; e.cool = .9;
+    }
+  } else if (e.st === 3) {   // aimed cannon burst
+    e.vx = 0; moveEnt(e, dt); e.face = sign(dxp) || e.face;
+    if (e.tele > 0) e.tele -= dt;
+    else if (e.burst > 0) { e.bt -= dt; if (e.bt <= 0) { e.bt = .17; e.burst--; const mx = e.x + e.face * (e.w / 2 - .5), my = e.y - e.h * .72, a = vang(p.x - mx, p.y - 1.6 - my) + rr(-.05, .05); ebullet(mx, my, a, 33, 10, { big: 1 }); sfx('ebullet', .6); } }
+    else { e.st = 0; e.cool = .7; }
+  } else if (e.st === 4) {   // three homing rockets (titan only)
+    e.vx = 0; moveEnt(e, dt); e.tele -= dt;
+    if (e.tele <= 0) { for (let i = 0; i < 3; i++) { const mx = e.x + (i - 1) * 4, my = e.y - e.h * .92; ebullet(mx, my, -PI / 2 + (i - 1) * .5, 20, 14, { big: 1, hom: 1, life: 3.8, hp: 2 }); } sfx('rocket', .7); e.st = 0; e.cool = 1; }
+  }
+  if (e.y > L.deathY) { e.hp = 0; killEnemy(e); }
+};
+FOE_DRAW.mech = function (e, t) {
+  const fl = e.flash > 0, K = e.scale || 1, step = Math.floor(e.gait || 0) % 2, crouch = e.st === 1 && e.tele > 0, tele = e.tele > 0 && e.st !== 0;
+  const rows = step ? MECH_R2 : MECH_R, x0 = e.x - 4 * K, y0 = e.y - 7 * K + (crouch ? K : 0);
+  const vis = tele && Math.floor(t * 20) % 2 ? 'w' : 'y', cols = MECH_C.map(r => r.replace(/y/g, vis));
+  sprK(rows, cols, x0, y0, e.face, e.stun > 0 ? .5 : 1, fl, K);
+  const mx = e.x + e.face * (e.w / 2 - .5), my = e.y - e.h * .72;
+  wgl('▬', mx - .5 + e.face * 1, my - .5, fl ? '#fff' : '#ff7a3a'); if (K > 1) wgl('▬', mx - .5 + e.face * 2, my - .5, fl ? '#fff' : '#ffb347');
+  glow(e.x, e.y - e.h * .6, 8 * K, '#ff3b4d', tele ? .5 : .16);
+  if (tele) wgl(TXT_WARN, e.x - .5, e.y - e.h - 1.6, '#ff3b4d');
+  bossBar(e, K > 1 ? 24 : 12, e.h + 1.4 + (K > 1 ? 1 : 0), '#ff3b4d');
+  if (e.name) txtPx(e.name, Math.round(e.x * CW - CXp - e.name.length * CW / 2), Math.round((e.y - e.h - 3.6) * CH - CYp), '#ff3b4d', .9);
+};
+
+/* ---------- orb (satellite) ---------- */
+AIK.orb = function (e, dt, dxp, dyp, dist) {
+  const p = S.P, L = S.L; e.rot = (e.rot || 0) + dt * 2.6;
+  if (e.owner && !e.owner.dead) {   // circling a boss
+    e.ang += dt * (e.owner.orbSpd || .9); const R = e.owner.orbR || 14;
+    e.x = e.owner.x + Math.cos(e.ang) * R * 1.6; e.y = e.owner.y - (e.owner.h || 10) * .5 + Math.sin(e.ang) * R * .72 + 2;
+  } else {   // free: hover and snipe
+    const tx = e.see ? p.x + Math.sin(e.t * .8 + e.seed) * 16 : e.home.x + Math.sin(e.t * .5 + e.seed) * 8, ty = e.see ? p.y - 10 + Math.sin(e.t * 1.1 + e.seed) * 3 : e.home.y + Math.sin(e.t * .7 + e.seed) * 2;
+    e.vx = lerp(e.vx, clamp((tx - e.x) * 1.2, -14, 14), Math.min(1, 2 * dt)); e.vy = lerp(e.vy, clamp((ty - e.y) * 1.2, -10, 10), Math.min(1, 2 * dt));
+    const nx = e.x + e.vx * dt, ny = e.y + e.vy * dt; if (!collides(e, nx, ny)) { e.x = nx; e.y = ny; }
+  }
+  if (e.see || e.owner) {
+    e.fire -= dt / EASY.fireSlow;
+    if (e.fire <= 0 && e.tele <= 0) { e.tele = .5; sfx('warn', .4); }
+    if (e.tele > 0) { e.tele -= dt; if (e.tele <= 0) { e.fire = rr(1.8, 3); for (let i = -1; i <= 1; i++) { const a = vang(p.x - e.x, p.y - 1.6 - (e.y - 2)) + i * .22; ebullet(e.x, e.y - 2, a, 26, 8); } sfx('ebullet', .5); } }
+  }
+};
+FOE_DRAW.orb = function (e, t) {
+  const fl = e.flash > 0, cx = e.x, cy = e.y - 2, hot = e.tele > 0, col = fl ? '#fff' : e.elite ? '#ff2fb9' : '#19f0ff';
+  const R = ['  ▄▄▄▄  ', ' ▟████▙ ', '▐██◙◙██▌', ' ▜████▛ ', '  ▀▀▀▀  '];
+  for (let j = 0; j < 5; j++) for (let i = 0; i < 8; i++) { const ch = R[j][i]; if (ch === ' ') continue; wgl(ch, cx - 4 + i, cy - 2.5 + j, ch === '◙' ? (hot ? '#ffffff' : '#ff3b4d') : (j === 2 ? '#6a78c0' : '#3d4676'), 1); }
+  for (let k = 0; k < 3; k++) { const a = e.rot + k * TAU / 3; wgl('▪', cx + Math.cos(a) * 3.6 - .5, cy + Math.sin(a) * 1.8 - .5, col); }
+  glow(cx, cy, 6, col, hot ? .5 : .16); if (hot) wgl(TXT_WARN, cx - .5, cy - 4, '#ff3b4d');
+};
+
+/* ---------- koloss ---------- */
+const KOL_R = ['    ▗▄▄▄▄▖    ', '   ▟██████▙   ', '  ▐█▀▀██▀▀█▌  ', ' ▄██▌◙██◙▐██▄ ', '▐████▄▄▄▄████▌', '▐█▌▐██████▌▐█▌', ' ▀▌ ▜████▛ ▐▀ ', '    ▐█▌▐█▌    ', '   ▗██▌▐██▖   ', '   ▐██▌▐██▌   ', '  ▟███▌▐███▙  ', ' ▀▀▀▀  ▀▀▀▀▀  '];
+const KOL_C = KOL_R.map((r, j) => r.split('').map((c, i) => c === ' ' ? ' ' : c === '◙' ? 'r' : (j === 2 && c === '▀') ? 'y' : c === '█' ? ((i + j) % 3 === 0 ? 'g' : 'G') : 'g').join(''));
+for (const r of KOL_R) if (r.length !== 14) console.error('koloss width', r.length, r);
+AIK.koloss = function (e, dt, dxp, dyp, dist) {
+  const p = S.P, L = S.L; e.cool = Math.max(0, (e.cool || 0) - dt); e.vy = Math.min(PH.maxFall, e.vy + PH.grav * dt);
+  const chase = e.see || dist < 70;
+  if (e.st === 0) {
+    const want = chase ? sign(dxp) * (Math.abs(dxp) > 9 ? 5 : 0) : 0; e.vx = lerp(e.vx, want, Math.min(1, 2 * dt)); if (Math.abs(e.vx) > .8) e.face = sign(e.vx); else if (chase) e.face = sign(dxp) || e.face;
+    moveEnt(e, dt); if (e.ground && !solidAt(e.x + sign(e.vx || 0) * (e.w / 2 + 1.5), e.y + .5)) e.vx = 0;
+    if (Math.abs(e.vx) > 1) { e.gait = (e.gait || 0) + Math.abs(e.vx) * dt * .2; if (e.ground && Math.floor(e.gait) !== e.gstep) { e.gstep = Math.floor(e.gait); sfx('stomp', .45); shake(.25); } }
+    if (chase && e.cool <= 0) { e.fire -= dt / EASY.fireSlow; if (e.fire <= 0) { e.cyc = (e.cyc || 0) + 1; const m = e.cyc % 3; e.st = m === 1 ? 1 : m === 2 ? 3 : 4; e.tele = .75; e.vx = 0; e.burst = 7; e.bt = 0; e.fire = rr(1.2, 1.9); sfx('warn', .8); } }
+  } else if (e.st === 1) { e.vx = 0; e.tele -= dt; moveEnt(e, dt); if (e.tele <= 0) { e.st = 2; e.vy = -33; e.ground = false; e.vx = sign(dxp) * 9; sfx('stomp', .7); } }
+  else if (e.st === 2) {
+    moveEnt(e, dt); e.vx *= Math.exp(-.7 * dt);
+    if (e.ground && e.vy >= 0) { sfx('bigboom', .6); shake(1.2); ring(e.x, e.y, 20, .6, PAL[C.amber], ['═', '─']); for (const dir of [-1, 1]) for (let k = 0; k < 2; k++) S.waves.push({ x: e.x + dir * (8 + k * 8), y: e.y, dir, spd: 26 + k * 8, life: 1.1, dmg: 20 }); e.st = 0; e.cool = 1; }
+  } else if (e.st === 3) {   // cannon fan
+    e.vx = 0; moveEnt(e, dt); e.face = sign(dxp) || e.face; if (e.tele > 0) e.tele -= dt;
+    else if (e.burst > 0) { e.bt -= dt; if (e.bt <= 0) { e.bt = .13; e.burst--; const mx = e.x + e.face * 5, my = e.y - 8.4, a = vang(p.x - mx, p.y - 1.6 - my) + (e.burst - 3) * .09; ebullet(mx, my, a, 33, 10, { big: 1 }); sfx('ebullet', .6); } }
+    else { e.st = 0; e.cool = .8; }
+  } else if (e.st === 4) {   // shoulder rockets
+    e.vx = 0; moveEnt(e, dt); e.tele -= dt;
+    if (e.tele <= 0) { for (let i = 0; i < 4; i++) ebullet(e.x + (i - 1.5) * 3.4, e.y - 12.6, -PI / 2 + (i - 1.5) * .42, 20, 14, { big: 1, hom: 1, life: 3.8, hp: 2 }); sfx('rocket', .8); e.st = 0; e.cool = 1.1; }
+  }
+  if (e.y > L.deathY) { e.hp = 0; killEnemy(e); }
+};
+FOE_DRAW.koloss = function (e, t) {
+  const fl = e.flash > 0, step = Math.floor(e.gait || 0) % 2, crouch = e.st === 1 && e.tele > 0, tele = e.tele > 0 && e.st !== 0;
+  const x0 = e.x - 7, y0 = e.y - 12 + (crouch ? 1 : 0), cols = KOL_C.map(r => r.replace(/y/g, tele && Math.floor(t * 20) % 2 ? 'w' : 'y'));
+  const rows = KOL_R;
+  spr(rows, cols, x0, y0, e.face, e.stun > 0 ? .5 : 1, fl);
+  const mx = e.x + e.face * 5.2, my = e.y - 8.4; wgl('▬', mx - .5, my - .5, fl ? '#fff' : '#ff7a3a'); wgl('▬', mx + e.face - .5, my - .5, fl ? '#fff' : '#ffb347');
+  glow(e.x, e.y - 7, 14, '#ff3b4d', tele ? .5 : .18); if (tele) wgl(TXT_WARN, e.x - .5, e.y - 14.4, '#ff3b4d');
+  bossBar(e, 28, 14.2, '#ff3b4d');
+};
+
+/* =========================================================================
+   RENNEN :: Neon Grand Prix (Sektor 5)
+   Sam fährt einen Rennwagen gegen drei Rivalen. Boost-Pads, Gruben, Sperren und eine Dampfwalze,
+   die ab der Streckenmitte hinter dir her rollt. Ins Ziel kommt man mit Platz 1 oder 2.
+   Rivalen sind Gegner der Art 'racer': sie fahren die Strecke selbst (springen über Gruben und Sperren),
+   die Gummiband-Regel hält das Feld zusammen, Treffer und Rempler bremsen sie aus.
+   ========================================================================= */
+ENEMY.racer = { w: 9, h: 3.2, hp: 28, hook: false, score: 400, tdmg: 0, heavy: true, big: true, halo: 6, chips: 6, noRam: true, die: dieRacer };
+ENEMY.walze = { w: 20, h: 7, hp: 60, hook: false, score: 2000, tdmg: 0, heavy: true, big: true, halo: 11, chips: 16, hpc: 1, noRam: true, die: dieWalze };
+const RACE_PLACES = 4;
+const RCR_R = ['▄ ▗▄▄▄▖  ', '▟███████▙', ' ●▀▀▀▀▀● '], RCR_C = ['t qVVVq  ', 'ttttttttt', 'qGmmmmmGq'];
+
+/* ---------- set-up ---------- */
+function spawnRivals() {
+  const R = S.L.race;
+  S.en = S.en.filter(e => e.k !== 'racer' && e.k !== 'walze');
+  for (const r of R.rivals) spawnEnemy({ k: 'racer', x: r.x, y: R.y, top: r.top, team: r.team, name: r.name, always: true, face: 1, bump: -9 });
+}
+function initRace() {
+  const L = S.L; if (!L.race) { S.race = null; return; }
+  S.race = { phase: 'grid', t: 0, cd: 4.4, place: 1, fin: 0, retryT: 0, walzeOn: false, count: 4, safe: null, noExit: -9, best: 1, padSnd: 0 };
+  spawnRivals(); S.vseen.racer = true;
+  const v = S.veh[0], p = S.P; if (v && !p.veh) { boardVeh(v); S.banner = null; }
+  S.respawn = { x: L.start.x, y: L.start.y };
+}
+function retryRace() {
+  const L = S.L; if (!L.race) return;
+  S.bul.length = 0; S.ebul.length = 0; S.rkt.length = 0;
+  S.race = { phase: 'grid', t: 0, cd: 3.4, place: 1, fin: 0, retryT: 0, walzeOn: false, count: 4, safe: null, noExit: -9, best: 1, padSnd: 0 };
+  spawnRivals();
+  const v = S.veh[0], p = S.P; if (v) { boardVeh(v); S.banner = null; }
+  S.en = S.en.filter(e => e.k === 'racer' || e.k === 'walze' || e.always || e.k === 'grunt' || e.k === 'turret' || e.k === 'drone' || e.k === 'gunship' || e.k === 'seeker' || e.k === 'raider');
+}
+const raceRivals = () => S.en.filter(e => e.k === 'racer' && !e.dead);
+function racePlace() { const p = S.P; let n = 1; for (const r of raceRivals()) if (r.x > p.x) n++; return n; }
+function groundAt(x, y0, maxD) {
+  const L = S.L, tx = Math.floor(x); for (let y = Math.floor(y0); y < Math.floor(y0) + (maxD || 40); y++) if (L.solid(tx, y) || L.tt(tx, y) === T.ONE) return y; return null;
+}
+function inPad(x) { for (const q of S.L.race.pads) if (x > q.x && x < q.x + q.w) return true; return false; }
+
+/* ---------- the controller ---------- */
+function updRace(dt) {
+  const R = S.race, L = S.L, p = S.P, RC = L.race; R.t += dt;
+  const v = p.veh;
+  if (R.phase === 'grid') {
+    const cd0 = Math.ceil(R.cd); R.cd -= dt; const cd1 = Math.ceil(R.cd);
+    if (cd1 !== cd0 && R.cd > 0 && cd1 <= 3) { sfx('beep'); }
+    if (R.cd <= 0) { R.phase = 'run'; R.t = 0; sfx('go'); banner('LOS!', 'PLATZ 1 ODER 2 BRINGT DICH WEITER', C.mint); shake(.5); MUS.inten_t = .7; }
+    return;
+  }
+  /* position, pads, rescue from the pits */
+  R.place = racePlace();
+  const subjects = []; if (v && !v.dead) subjects.push(v); for (const r of raceRivals()) subjects.push(r);
+  for (const o of subjects) {
+    o.padT = o.padT || 0;
+    if (o.ground && inPad(o.x) && !(o.padT > .3)) { o.padT = .85; if (o === v) { v.nitro = Math.min(1, v.nitro + .4); if (S.t - R.padSnd > .4) { sfx('pad'); R.padSnd = S.t; } shake(.15); } }
+    if (o.ground) { o.sx = o.x - 6; o.sy = o.y; }
+    if (o.y > RC.y + 15 && !o.dead && o.sx !== undefined) {   // fell into a pit: set back on the road, a little the worse for wear
+      const o2 = o; o2.x = o2.sx; o2.y = o2.sy; o2.vx = 14; o2.vy = 0; o2.inv = Math.max(o2.inv || 0, 1.2);
+      ring(o2.x, o2.y - 2, 10, .5, PAL[C.cyan]); sfx('boot', .6);
+      if (o === v) { hurtVeh(v, 10, v.x - 3, v.y); v.inv = 1.4; banner('ZURÜCKGESETZT', 'GRUBE ERWISCHT', C.amber); }
+    }
+    if (o.padT > 0 && Math.random() < dt * 60 && onScr(o.x, o.y, 10)) pt(o.x - 5, o.y - rr(.4, 2.6), rr(-34, -12), rr(-3, 3), rr(.2, .4), ['═', '─', '»'], PAL[C.cyan], { drag: 2 });
+  }
+  /* the steamroller wakes up */
+  if (R.phase === 'run' && !R.walzeOn && v && p.x >= RC.walzeAt) {
+    R.walzeOn = true; const w = spawnEnemy({ k: 'walze', x: p.x - RC.walzeGap, y: RC.y, always: true, face: 1, sp: 32, tt: 0 });
+    banner('DAMPFWALZE', 'LAUF! SIE IST SCHNELLER ALS DU', C.red); sfx('bigboom', .8); sfx('warn'); say('ECHO', TX('Die Dampfwalze, Sam! Die planiert alles hinter dir. Halt nicht an, nutz Turbo und die Pads. Mit Raketen kriegst du sie klein.', 'Die Dampfwalze, Sam! Die planiert alles hinter dir. Halt nicht an, nutz TURBO und die Pads. Mit RAKETE kriegst du sie klein.'), 6.5);
+  }
+  /* lost the car (wrecked or left) */
+  if (R.phase === 'run' && (!v || v.dead)) { R.phase = 'lose'; R.retryT = 2.6; banner('RENNEN VERLOREN', 'DER WAGEN IST SCHROTT  //  NOCHMAL', C.red); }
+  if (R.phase === 'run' && v && p.x >= RC.x1) {   // the finish line
+    R.phase = 'done'; R.place = racePlace(); R.fin = R.t; const win = R.place <= 2;
+    banner(win ? 'ZIEL! PLATZ ' + R.place : 'ZIEL! NUR PLATZ ' + R.place, win ? 'LIFTKARTE GEHÖRT DIR' : 'NUR DIE ERSTEN ZWEI KOMMEN WEITER', win ? C.mint : C.red);
+    sfx(win ? 'cp' : 'hurt'); if (win) { ring(p.x, p.y - 2, 22, 1, PAL[C.mint]); S.score += (RACE_PLACES - R.place + 1) * 500; } R.retryT = win ? 0 : 3.4; R.winT = win ? 2.4 : 0; MUS.inten_t = 0;
+  }
+  if (R.phase === 'done') {
+    if (R.winT > 0) { R.winT -= dt; if (R.winT <= 0) stageClear(); }
+    else if (R.retryT > 0) { R.retryT -= dt; if (R.retryT <= 0) { respawnPlayer(); } }
+  }
+  if (R.phase === 'lose') { R.retryT -= dt; if (R.retryT <= 0) respawnPlayer(); }
+  /* no exit trap if the finish car keeps rolling */
+  if (R.phase === 'done' && v && p.x > RC.x1 + 70) { v.vx *= Math.exp(-3 * dt); }
+}
+
+/* ---------- rivals ---------- */
+function dieRacer(e) {
+  const cx = e.x, cy = e.y - 1.6; boom(cx, cy, 2.2); boom(cx + rr(-3, 3), cy, 1.4); sfx('bigboom', .7); S.freeze = .08; shake(.7);
+  for (let i = 0; i < 16; i++) pt(cx + rr(-4, 4), cy + rr(-1, 1), rr(-24, 24), rr(-28, -4), rr(.7, 1.5), ['▪', '▒', '#', '%'], PAL[pick([C.greyD, C.amber, C.red])], { g: 40, bounce: .3 });
+  for (let i = 0; i < 6; i++) S.pks.push({ k: 'chip', x: cx + rr(-1, 1), y: cy, t: 0, vy: rr(-22, -8), vx: rr(-10, 10), drop: true });
+  if (S.race) say('ECHO', e.name + ' ist raus. Ein Rivale weniger.', 3);
+}
+AIK.racer = function aiRacer(e, dt) {
+  const R = S.race, L = S.L, p = S.P; if (!R) return;
+  e.vy = Math.min(PH.maxFall, e.vy + 84 * dt); e.face = 1; e.stun = Math.max(0, (e.stun || 0) - dt); e.boostT = Math.max(0, (e.boostT || 0) - dt); e.padT = Math.max(0, (e.padT || 0) - dt);
+  let want = 0;
+  if (R.phase === 'run' || R.phase === 'done' || R.phase === 'lose') {
+    const gap = p.x - e.x;   // > 0: the player is ahead of this rival
+    const k = clamp(1 + gap * .0048, .84, 1.2);
+    want = e.top * k * (e.stun > 0 ? .3 : 1) * (e.boostT > 0 ? 1.4 : 1) * (e.padT > 0 ? 1.3 : 1);
+    if (R.phase !== 'run') want = e.top * .6;
+    e.nt = (e.nt === undefined ? rr(3, 6) : e.nt) - dt; if (e.nt <= 0) { e.nt = rr(5, 9); if (gap > -20) e.boostT = rr(.9, 1.7); }
+  }
+  e.vx = lerp(e.vx, want, Math.min(1, (e.stun > 0 ? 4 : 1.7) * dt));
+  moveEnt(e, dt);
+  if (e.ground && want > 5) {
+    const ax = e.x + e.w / 2 + 1.2 + e.vx * .05;
+    const pit = !solidAt(ax, e.y + .6) && !solidAt(ax, e.y + 1.6) && L.tt(Math.floor(ax), Math.floor(e.y + .6)) !== T.ONE;
+    const wall = solidAt(e.x + e.w / 2 + .9 + e.vx * .07, e.y - 1.2) || solidAt(e.x + e.w / 2 + .9 + e.vx * .07, e.y - 2.4);
+    if (pit || wall || e.hitR) { e.vy = -31; e.ground = false; if (e.hitR) e.vx = Math.max(e.vx, 22); }
+  }
+  if (e.ground && Math.random() < dt * 30 && Math.abs(e.vx) > 8) pt(e.x - 4.5, e.y - .1, -rr(2, 9), rr(-4, -.5), rr(.2, .5), ['░', '·', '.'], PAL[C.greyD], { drag: 3 });
+  /* a collision with the player's car: whoever is faster wins the shove */
+  const v = p.veh;
+  if (v && !v.dead && R.phase === 'run' && Math.abs(e.x - v.x) < 8.4 && Math.abs(e.y - v.y) < 2.8 && S.t - e.bump > .45) {
+    e.bump = S.t; const rel = v.vx - e.vx; sparks((e.x + v.x) / 2, e.y - 1.5, 12, sign(rel), -.3, PAL[C.yel], 36); sfx('stomp', .5); shake(.3);
+    if (rel > 6) { e.stun = .9; e.vx *= .5; damageEnemy(e, 2, 1, -.3, false); v.vx *= .94; }
+    else if (rel < -6) { hurtVeh(v, 5, e.x, e.y); v.vx *= .86; }
+    else { v.vx *= .97; e.vx *= .97; }
+  }
+  if (e.y > L.deathY - 3) { e.hp = 0; killEnemy(e); }
+};
+
+/* ---------- the steamroller ---------- */
+function dieWalze(e) {
+  const cx = e.x, cy = e.y - 3;
+  for (let k = 0; k < 4; k++) setTimeout(() => { if (S.L) { boom(cx + rr(-8, 8), cy + rr(-2, 2), 2); sfx('bigboom', .7); } }, k * 120);
+  boom(cx, cy, 3); shake(1.2); S.freeze = .12; sfx('bigboom');
+  for (let i = 0; i < 30; i++) pt(cx + rr(-9, 9), cy + rr(-3, 2), rr(-26, 26), rr(-34, -6), rr(.8, 1.8), ['▪', '▒', '#', '%', '@'], PAL[pick([C.greyD, C.amber, C.red, C.white])], { g: 40, bounce: .3 });
+  for (let i = 0; i < 16; i++) S.pks.push({ k: 'chip', x: cx + rr(-6, 6), y: cy, t: 0, vy: rr(-24, -8), vx: rr(-14, 14), drop: true });
+  S.pks.push({ k: 'hp', x: cx, y: e.y - 2, t: 0, vy: -12, drop: true });
+  banner('WALZE ZERSTÖRT', 'DIE STRECKE GEHÖRT DIR', C.mint); sfx('cp');
+}
+AIK.walze = function aiWalze(e, dt) {
+  const R = S.race, L = S.L, p = S.P; if (!R) return;
+  const run = R.phase === 'run';
+  if (run) { e.tt += dt; e.sp = Math.min(L.race.walzeMax, 32 + e.tt * L.race.walzeAcc); e.x += e.sp * dt; } else e.sp = lerp(e.sp, 0, Math.min(1, 3 * dt));
+  if (R.phase === 'done') e.x += e.sp * dt;
+  const gy = groundAt(e.x + 5, e.y - 12, 34); if (gy !== null) e.y = lerp(e.y, gy, Math.min(1, 9 * dt));
+  e.vx = e.sp;
+  if (!onScr(e.x, e.y, 90)) { /* far away: silent */ }
+  const dd = Math.abs(p.x - e.x);
+  if (dd < 90) { shake(clamp((90 - dd) / 90, 0, 1) * .16); e.snd = (e.snd || 0) - dt; if (e.snd <= 0) { e.snd = .42; sfx('stomp', clamp(.7 - dd / 160, .12, .7)); } }
+  if (onScr(e.x, e.y - 3, 14)) {
+    if (Math.random() < dt * 90) pt(e.x + 8, e.y - rr(0, 2), rr(8, 30), rr(-16, -2), rr(.25, .6), ['░', '▒', '·', '*'], PAL[pick([C.greyD, C.amber, C.yel])], { g: 20, drag: 1.5 });
+    if (Math.random() < dt * 20) pt(e.x - 6, e.y - 7.4, -rr(1, 4), rr(-9, -4), rr(.6, 1.2), ['░', '▒', '▓'], PAL[C.greyD], { g: -4, drag: .8 });
+  }
+  /* it flattens everything it touches */
+  for (const o of S.en) if (o.k === 'racer' && !o.dead && o.x < e.x + e.w / 2 - 2 && o.x > e.x - e.w / 2 - 4 && Math.abs(o.y - e.y) < 5) { o.hp = 0; killEnemy(o); }
+  const v = p.veh;
+  if (v && !v.dead && v.x < e.x + e.w / 2 - 1 && v.x > e.x - e.w / 2 - 5 && Math.abs(v.y - e.y) < 5.5) { v.hp = 0; destroyVeh(v); banner('ZERQUETSCHT', 'DIE WALZE HAT DICH ERWISCHT', C.red); }
+  else if (!v && !p.dead && Math.abs(p.x - e.x) < e.w / 2 && Math.abs(p.y - e.y) < 6) { p.hp = 0; killPlayer(); }
+  if (e.x > L.race.x1 + 30) { e.dead = true; boom(e.x, e.y - 3, 2.4); }
+};
+
+/* ---------- drawing ---------- */
+FOE_DRAW.racer = function (e, t) {
+  const fl = e.flash > 0, x0 = e.x - 4.5, y0 = e.y - 3, cols = RCR_C.map(r => r.replace(/t/g, e.team || 'r'));
+  spr(RCR_R, cols, x0, y0, 1, e.stun > 0 && Math.floor(t * 20) % 2 ? .5 : 1, fl);
+  cockpit(e.x - .4, y0 + 1, 3, 1, 2, t);
+  const wf = Math.floor(e.x * .6) % 2 ? '+' : 'x'; wgl(wf, x0 + 1 - .5, y0 + 2, '#eaf6ff', .85); wgl(wf, x0 + 7 - .5, y0 + 2, '#eaf6ff', .85);
+  const col = SPC[e.team || 'r']; glow(e.x, e.y - 1, 7, col, e.boostT > 0 || e.padT > 0 ? .5 : .16);
+  if (e.boostT > 0 || e.padT > 0) for (let i = 0; i < 3; i++) wgl(['═', '─', '»'][i], x0 - 1.5 - i - .5, e.y - 1.6, col, .8 - i * .2);
+  if (e.stun > 0) wgl('*', e.x - .5 + Math.sin(t * 14) * 2, y0 - 1.2, '#ffe45e');
+  const nm = e.name, px = Math.round(e.x * CW - CXp - nm.length * CW / 2), py = Math.round((e.y - 5) * CH - CYp); txtPx(nm, px, py, col, .9);
+  const hp = e.hp / e.maxhp; if (hp < 1) { const bw = 8, n = Math.round(bw * hp); txtPx('▐' + '█'.repeat(n) + '░'.repeat(bw - n) + '▌', Math.round((e.x - bw / 2 - 1) * CW - CXp), Math.round((e.y - 5.9) * CH - CYp), col, .8); }
+};
+FOE_DRAW.walze = function (e, t) {
+  const fl = e.flash > 0, x = e.x, y = e.y, col = fl ? '#ffffff' : '#b42a40', col2 = fl ? '#ffffff' : '#6a1a2a', rot = (x * .9) % 4;
+  /* cab with a window and a smokestack */
+  for (let j = 0; j < 5; j++) for (let i = 0; i < 8; i++) { const ch = j === 0 ? '▄' : (j === 1 && i > 1 && i < 6) ? '◙' : j === 4 ? '▀' : '█'; wgl(ch, x - 10 + i - .5, y - 6.2 + j + (j === 4 ? .2 : 0), (j === 1 && ch === '◙') ? (Math.floor(t * 12) % 2 ? '#ffe45e' : '#ff7a3a') : (j === 2 ? col2 : col)); }
+  for (let j = 0; j < 3; j++) wgl('█', x - 9 - .5, y - 8.2 + j, '#3d4676'); wgl('▄', x - 9 - .5, y - 8.2, '#8a96c4');
+  /* chassis */
+  for (let i = -10; i <= 4; i++) wgl('▀', x + i - .5, y - 1.2, '#3d4676'); for (let i = -10; i <= 1; i++) wgl('▄', x + i - .5, y - 1.0, '#2a3470');
+  /* the drum: a rolling ellipse with spikes */
+  const dx = x + 4.2, dy = y - 3.5, rx = 7, ry = 3.5;
+  for (let j = -4; j <= 3; j++) for (let i = -rx; i <= rx; i++) {
+    const u = i / rx, w = (j + .5) / ry, r2 = u * u + w * w; if (r2 > 1) continue;
+    const edge = r2 > .72, ch = edge ? '█' : (((Math.floor(i + rot * 2) + j) & 1) ? '▓' : '▒');
+    wgl(ch, dx + i - .5, dy + j, edge ? (fl ? '#fff' : '#ff3b4d') : (fl ? '#fff' : '#8e1c2b'));
+  }
+  for (let k = 0; k < 9; k++) { const a = rot * 1.2 + k / 9 * TAU, sx = dx + Math.cos(a) * (rx + .6), sy = dy + Math.sin(a) * (ry + .6); wgl(Math.cos(a) > 0 ? '►' : '◄', sx - .5, sy - .5, '#ffb347', .9); }
+  wgl('◙', dx - .5, dy - .5, '#ffe45e');
+  glow(x, y - 3, 12, '#ff3b4d', .26); glow(dx + 4, dy, 9, '#ffb347', .12);
+  const hp = e.hp / e.maxhp, bw = 18, n = Math.round(bw * hp); txtPx('▐' + '█'.repeat(n) + '░'.repeat(bw - n) + '▌', Math.round((x - bw / 2 - 1) * CW - CXp), Math.round((y - 10.4) * CH - CYp), '#ff3b4d', .9);
+  wgl(Math.floor(t * 4) % 2 ? '!' : ' ', x - .5, y - 11.6, '#ff3b4d');
+};
+
+function drawArch(d, t) {
+  const x0 = d.x, x1 = d.x + d.w, y0 = d.y, col = d.col;
+  for (let y = y0; y < d.y2; y++) { wgl('█', x0 - .5, y, '#2a3470'); wgl('▐', x0 + .5 - .5, y, '#3d4676'); wgl('█', x1 - .5, y, '#2a3470'); wgl('▌', x1 - 1.5 + .5, y, '#3d4676'); }
+  rectPx(Math.round(x0 * CW - CXp), Math.round(y0 * CH - CYp), Math.round((x1 - x0 + 1) * CW), Math.round(3 * CH), '#05060f', .85);
+  for (let x = x0; x <= x1; x++) { wgl(((x + 0) & 1) ? '▀' : '▄', x - .5, y0, '#ffffff', .95); wgl(((x + 1) & 1) ? '▀' : '▄', x - .5, y0 + 2, '#ffffff', .95); }
+  const n = signPx(d.text, 0, -999, col, 0); signPx(d.text, Math.round((x0 + (x1 - x0 - n) / 2 + .5) * CW - CXp), Math.round((y0 + 1) * CH - CYp), col, .6 + .4 * Math.sin(t * 6));
+  glow((x0 + x1) / 2, y0 + 1.5, (x1 - x0) * .6, col, .14);
+}
+function drawCrowd(d, t) {
+  const n = d.w, y = d.y;
+  for (let r = 0; r < 3; r++) for (let i = 0; i < n; i++) wgl(r === 2 ? '▀' : '░', d.x + i - .5, y + r + 1, r === 2 ? '#3d4676' : '#1a2050', .9);
+  for (let i = 0; i < n; i++) {
+    const h = hash2(i + d.x, 3), bob = Math.sin(t * (3 + h * 4) + i * 1.7) > .55 ? -.5 : 0, c = ['#ffe45e', '#ff2fb9', '#19f0ff', '#5dffb0', '#ff7a3a'][Math.floor(h * 5)];
+    if (h < .8) { wgl('●', d.x + i - .5, y + .4 + bob, c, .9); wgl('▾', d.x + i - .5, y + 1.3, c, .6); }
+  }
+}
+function drawBoostPad(d, t) {
+  for (let i = 0; i < d.w; i++) { const k = (Math.floor(t * 10) - i) % 3; wgl(k === 0 ? '»' : k === 1 ? '›' : '·', d.x + i - .5, d.y, k === 0 ? '#ffffff' : '#19f0ff', .95); }
+  glow(d.x + d.w / 2, d.y, d.w * .8, '#19f0ff', .22);
+}
+
+function drawRaceHud(t) {
+  const R = S.race, L = S.L, p = S.P, RC = L.race, bw = Math.min(54, COLS - 100 > 20 ? COLS - 100 : COLS - 12), x0 = Math.round((COLS - bw) / 2), by = COLS - 100 > 20 ? 1.6 : 7.8;
+  const px = x => x0 + Math.round(clamp((x - RC.x0) / (RC.x1 - RC.x0), 0, 1) * (bw - 1));
+  for (let i = 0; i < bw; i++) gl('─', Math.round((x0 + i) * CW), Math.round(by * CH), '#3d4676');
+  gl('▐', Math.round((x0 + bw) * CW), Math.round(by * CH), '#ffffff'); gl('▌', Math.round((x0 - 1) * CW), Math.round(by * CH), '#ffffff');
+  for (const e of raceRivals()) gl('●', Math.round(px(e.x) * CW), Math.round(by * CH), SPC[e.team], .95);
+  const w = S.en.find(e => e.k === 'walze' && !e.dead); if (w) gl(Math.floor(t * 4) % 2 ? '▲' : '△', Math.round(px(w.x) * CW), Math.round((by - 1) * CH), '#ff3b4d');
+  gl('◆', Math.round(px(p.x) * CW), Math.round(by * CH), '#19f0ff');
+  const pl = R.phase === 'grid' ? 1 : R.place; txtC('PLATZ ' + pl + '/' + RACE_PLACES, COLS / 2, by + 1.3, pl <= 2 ? '#5dffb0' : '#ffb347');
+  const tm = R.phase === 'run' ? R.t : R.phase === 'done' ? R.fin : 0; txtC(String(tm / 60 | 0).padStart(2, '0') + ':' + String(Math.floor(tm % 60)).padStart(2, '0') + '.' + String(Math.floor(tm * 10) % 10), COLS / 2, by + 2.5, '#8a96c4');
+  if (R.phase === 'grid') {
+    const n = Math.ceil(R.cd), s = n > 3 ? 'BEREIT' : String(Math.max(1, n)), sx = n > 3 ? 3 : 6, a = clamp(R.cd - Math.floor(R.cd) + .25, .3, 1), xx = Math.round((COLS - bigWidth(s, sx)) / 2), yy = Math.round(ROWS * .26);
+    bigText(s, xx, yy, sx, n > 3 ? TITLE_GRADS[0] : [ '#ffe45e', '#ffd05a', '#ffb347', '#ff7a3a', '#ff3b4d' ], '#1a0838', a, 0);
+  }
+}
+
+/* =========================================================================
+   SEKTOR 7 :: ARCADE ORBIT
+   Pixelhüpfer und Geister für die Spielhalle, dazu das Space-Invaders-Minispiel:
+   Sam steigt automatisch in eine Laserkanone, schießt nur nach oben und wehrt drei Wellen ab,
+   die letzte ist das MUTTERSCHIFF. Level-Daten: L.inv = { x0, x1, fy, cx, trig, doors, bunkers }.
+   ========================================================================= */
+ENEMY.pixel = { w: 2.6, h: 2.2, hp: 2, hook: true, score: 120, tdmg: 10, hpc: .18, chips: 2 };
+ENEMY.ghost = { w: 4, h: 3, hp: 2, hook: true, score: 200, tdmg: 12, hpc: .2, chips: 3, halo: 4 };
+ENEMY.invader = { w: 4, h: 2, hp: 1, hook: false, score: 60, tdmg: 0, heavy: true, noRam: true, hpc: 0, chips: 0, die(e) { invBoom(e); } };
+ENEMY.ufo = { w: 7, h: 2, hp: 3, hook: false, score: 1000, tdmg: 0, heavy: true, noRam: true, halo: 6, die(e) { ufoDie(e); } };
+ENEMY.mother = { w: 26, h: 5, hp: 46, hook: false, score: 8000, tdmg: 0, heavy: true, noRam: true, big: true, halo: 16, chips: 30, hpc: 1, die(e) { motherDie(e); } };
+
+/* ---------- pixel hopper ---------- */
+AIK.pixel = function (e, dt, dxp, dyp, dist) {
+  e.vy = Math.min(PH.maxFall, e.vy + PH.grav * dt); if (e.ground) e.vx *= Math.exp(-12 * dt);
+  e.hop = (e.hop === undefined ? .3 + e.seed % 1 : e.hop) - dt; e.face = sign(dxp) || e.face;
+  if (e.ground && e.hop <= 0) { if (e.see) { e.vy = -(24 + (e.seed * 7) % 7); e.vx = sign(dxp) * (11 + (e.seed * 3) % 6); } else { e.vy = -15; e.vx = Math.sin(e.seed * 9 + e.t) * 6; } e.hop = .75 + (e.seed * 11) % .6; e.ground = false; }
+  moveEnt(e, dt); if (e.y > S.L.deathY) { e.hp = 0; killEnemy(e); }
+};
+/* ---------- ghost: drifts straight through walls ---------- */
+AIK.ghost = function (e, dt, dxp, dyp, dist) {
+  const sp = e.see || dist < 40 ? 10 : 3.5, d = Math.hypot(dxp, dyp * 2) || 1, k = Math.min(1, 2.2 * dt);
+  e.vx += (dxp / d * sp + Math.sin(e.t * 1.7 + e.seed) * 2 - e.vx) * k; e.vy += (dyp / d * sp * .5 + Math.cos(e.t * 1.3 + e.seed) * .8 - e.vy) * k;
+  e.x += e.vx * dt; e.y += e.vy * dt; e.face = sign(e.vx) || e.face;
+};
+const GHOST_C = ['r', 'p', 'c', 'a'], PIX_C = ['n', 'c', 'y', 'm'];
+FOE_DRAW.ghost = function (e, t) {
+  const fl = e.flash > 0, c = GHOST_C[Math.floor(e.seed) % 4], f = Math.floor(t * 6 + e.seed) % 2;
+  spr(['▗▄▄▖', '▟◉◉▙', f ? '█▜▛█' : '▜▚▞▛'], [c.repeat(4), c + 'ww' + c, c.repeat(4)], e.x - 2, e.y - 3, e.face, e.stun > 0 ? .5 : .95, fl);
+  glow(e.x, e.y - 1.5, 4, SPC[c], .14);
+};
+FOE_DRAW.pixel = function (e, t) {
+  const fl = e.flash > 0, c = PIX_C[Math.floor(e.seed) % 4], air = !e.ground;
+  spr(['▛▀▀▜', air ? '▙▃▃▟' : '▙▄▄▟'], [c.repeat(4), c.repeat(4)], e.x - 2, e.y - 2.2 + (air ? 0 : .2), e.face, e.stun > 0 ? .5 : 1, fl);
+  wgl('▪', e.x - 1.5, e.y - 1.9, fl ? '#fff' : '#05060f'); wgl('▪', e.x + .5, e.y - 1.9, fl ? '#fff' : '#05060f');
+};
+
+/* ---------- the invaders ---------- */
+const INV_R = [[[' ▟▙ ', '▗▘▝▖'], [' ▟▙ ', '▝▖▗▘']], [['▟▜▛▙', '▝▘▝▘'], ['▟▜▛▙', ' ▚▞ ']], [['▟██▙', '▜▚▞▛'], ['▟██▙', '▝▞▚▘']]], INV_COL = ['m', 'c', 'n'];
+FOE_DRAW.invader = function (e, t) {
+  const I = S.inv, fr = e.free ? Math.floor(t * 8) % 2 : (I ? I.frame : 0), ty = e.free ? 1 : e.row === 0 ? 0 : e.row < 3 ? 1 : 2, c = e.free ? 'r' : INV_COL[ty], rows = INV_R[ty][fr];
+  spr(rows, [c.repeat(4), c.repeat(4)], e.x - 2, e.y - 2, 1, 1, e.flash > 0);
+  if (!(e.flash > 0)) { wgl('▪', e.x - 1.5, e.y - 1.8, '#05060f', .9); wgl('▪', e.x + .5, e.y - 1.8, '#05060f', .9); }
+  glow(e.x, e.y - 1, 3, SPC[c], .16);
+};
+AIK.invader = function (e, dt) {
+  const I = S.inv, p = S.P; if (!e.free) return; if (!I) { e.dead = true; return; }
+  e.x += clamp(p.x - e.x, -1, 1) * 7 * dt; e.y += (13 + I.wave * 2) * dt;
+  const v = I.cannon;
+  if (v && !v.dead && Math.abs(e.x - v.x) < (v.w + e.w) / 2 && e.y > v.y - v.h) { e.dead = true; boom(e.x, e.y - 1, 1); cannonHit(v); }
+  else if (e.y >= I.fy) { e.dead = true; boom(e.x, e.y - 1, .8); sfx('boom', .4); }
+};
+function invBoom(e) { const cx = e.x, cy = e.y - 1; boom(cx, cy, .9); sfx('boom', .55); for (let i = 0; i < 8; i++) pt(cx, cy, rr(-22, 22), rr(-16, 6), rr(.3, .7), ['▪', '▒', '·'], PAL[C.mint], { g: 30 }); }
+/* the UFO: shoot it for an extra life */
+FOE_DRAW.ufo = function (e, t) {
+  const fl = e.flash > 0, f = Math.floor(t * 10) % 3, lamp = i => f === i ? 'y' : 'R';
+  spr([' ▗▄██▄▖ ', '▟██████▙', ' ▀▘▝▘▝▀ '], ['  rrrr  ', 'rrrrrrrr', ' y' + lamp(0) + lamp(1) + lamp(2) + 'y '], e.x - 4, e.y - 2.4, 1, 1, fl);
+  glow(e.x, e.y - 1, 7, '#ff3b4d', .25);
+};
+AIK.ufo = function (e, dt) {
+  const I = S.inv; if (!I) { e.dead = true; return; } e.dirx = e.dirx || 1; e.x += e.dirx * 16 * dt; e.ufoT = (e.ufoT || 0) - dt; if (e.ufoT <= 0) { e.ufoT = .32; sfx('ufo', .5); }
+  if ((e.dirx > 0 && e.x > I.x1 + 6) || (e.dirx < 0 && e.x < I.x0 - 6)) { e.dead = true; I.ufo = 0; }
+};
+function ufoDie(e) {
+  const I = S.inv; boom(e.x, e.y - 1, 1.6); sfx('bigboom'); shake(.5);
+  for (let i = 0; i < 18; i++) S.pks.push({ k: 'chip', x: e.x + rr(-3, 3), y: e.y - 1, t: 0, vy: rr(-18, -6), vx: rr(-12, 12), drop: true });
+  if (I) { I.ufo = 0; if (I.lives < 5) { I.lives++; banner('EXTRALEBEN', 'UFO ABGESCHOSSEN', C.mint); sfx('heal'); } else { S.score += 1500; } }
+}
+
+/* ---------- the MOTHERSHIP ---------- */
+const fit = (s, n) => { const k = Math.max(0, n - s.length), l = k >> 1; return (' '.repeat(l) + s + ' '.repeat(k - l)).slice(0, n); };
+const MOM_R = ['▗▄▄▟██████▙▄▄▖', '▗▟██▀██▀▀▀▀██▀██▙▖', '▗▟' + '█'.repeat(22) + '▙▖', '▀▀' + '▜██▛▀▀'.repeat(4), '▝▀▘      ▝▀▘      ▝▀▘'].map(r => fit(r, 26));
+const MOM_COL = (i, ch) => i === 0 ? 'c' : i === 1 ? 'r' : i === 3 && ch === '█' ? 'y' : 'R';
+const MOM_C = MOM_R.map((r, i) => r.split('').map(ch => MOM_COL(i, ch)).join(''));
+FOE_DRAW.mother = function (e, t) {
+  const fl = e.flash > 0, tele = e.tele > 0, blink = Math.floor(t * 8) % 2, cols = MOM_C.map((r, i) => i === 3 && blink ? r.replace(/y/g, 'a') : r);
+  spr(MOM_R, cols, e.x - 13, e.y - 5, 1, 1, fl || (tele && Math.floor(t * 20) % 2 === 0));
+  glow(e.x, e.y - 2.5, 14, '#ff3b4d', tele ? .5 : .2);
+  if (tele) wgl(TXT_WARN, e.x - .5, e.y - 7, '#ff3b4d');
+  bossBar(e, 28, 6.4, '#ff3b4d'); txtPx('MUTTERSCHIFF', Math.round(e.x * CW - CXp - 6 * CW), Math.round((e.y + .6) * CH - CYp), '#ff3b4d', .9);
+};
+AIK.mother = function (e, dt) {
+  const I = S.inv; if (!I) { e.dead = true; return; }
+  const rage = e.hp < e.maxhp * .5, x0 = I.x0 + 14, x1 = I.x1 - 14;
+  e.ph = (e.ph || 0) + dt; e.dirx = e.dirx || 1; e.x += e.dirx * (rage ? 15 : 9.5) * dt; if (e.x > x1) { e.x = x1; e.dirx = -1; } if (e.x < x0) { e.x = x0; e.dirx = 1; }
+  e.y = I.fy - 20 + Math.sin(e.ph * 1.3) * 1.1; e.vx = e.vy = 0;
+  if (e.fire === undefined) e.fire = 1.6;
+  if (e.tele > 0) {
+    e.tele -= dt;
+    if (e.tele <= 0) {
+      e.volley = (e.volley || 0) + 1; sfx('rocket', .5);
+      if (e.volley % 3 === 0) { for (let i = -1; i <= 1; i++) spawnEnemy({ k: 'invader', x: e.x + i * 7, y: e.y + 2, free: true, always: true, range: 999, hp: 1, row: 1 }); sfx('boot', .6); }
+      else if (e.volley % 2 === 0) { for (let i = -3; i <= 3; i++) ebullet(e.x + i * 3.4, e.y, PI / 2 + i * .1, 21, 1, { big: 1, inv: 1, life: 4 }); }
+      else { for (let i = -2; i <= 2; i++) ebullet(e.x + i * 4, e.y, PI / 2 + i * .3, 20, 1, { big: 1, inv: 1, life: 4 }); }
+      e.fire = rage ? 1.15 : 1.8;
+    }
+  } else { e.fire -= dt; if (e.fire <= 0) { e.tele = .55; sfx('warn', .4); } }
+};
+function motherDie(e) {
+  boom(e.x, e.y - 2, 3); sfx('bigboom'); sfx('bigboom'); shake(1.4); S.freeze = .15; glitchAmt = 1;
+  for (let k = 0; k < 8; k++) boom(e.x + rr(-11, 11), e.y - rr(0, 5), 1.4 + Math.random());
+  for (let i = 0; i < 30; i++) S.pks.push({ k: 'chip', x: e.x + rr(-8, 8), y: e.y - 2, t: 0, vy: rr(-24, -8), vx: rr(-14, 14), drop: true });
+}
+
+/* =========================================================================
+   die Laserkanone (Fahrzeug, nur im Minispiel)
+   ========================================================================= */
+VEH.cannon = { name: 'LASERKANONE', w: 5, h: 3, hp: 100, speed: 34, boost: 34 };
+function cannonHit(v) {
+  const I = S.inv; if (!v || v.dead || v.inv > 0) return false;
+  v.inv = 1.3; v.flash = .3; shake(.7); sfx('hurt', .8); sfx('bigboom', .5); boom(v.x, v.y - 1.5, 1.3); S.flash = Math.max(S.flash, .15); S.flashCol = '#ff3b4d'; glitchAmt = Math.max(glitchAmt, .6);
+  if (I) { I.lives--; if (I.lives <= 0) failInvaders('KANONE ZERSTÖRT'); }
+  return true;
+}
+function updCannon(v, dt) {
+  const p = S.P, I = S.inv, left = KEY.KeyA || KEY.ArrowLeft, right = KEY.KeyD || KEY.ArrowRight, dir = (right ? 1 : 0) - (left ? 1 : 0), d = VEH.cannon;
+  v.fireCd = Math.max(0, v.fireCd - dt); v.inv = Math.max(0, v.inv - dt); v.flash = Math.max(0, v.flash - dt); v.t += dt; v.boosting = false;
+  v.vx += (dir * d.speed - v.vx) * Math.min(1, 10 * dt); if (!dir && Math.abs(v.vx) < .6) v.vx = 0; if (dir) v.face = dir;
+  v.vy = Math.min(PH.maxFall, v.vy + 84 * dt); moveEnt(v, dt, false);
+  const B = v.bounds; if (B) { if (v.x - v.w / 2 < B.x0) { v.x = B.x0 + v.w / 2; v.vx = Math.max(0, v.vx); } if (v.x + v.w / 2 > B.x1) { v.x = B.x1 - v.w / 2; v.vx = Math.min(0, v.vx); } }
+  const held = MOUSE.l || KEY.KeyJ || KEY.Space || KEY.KeyK || KEY.KeyE || KEY.ArrowUp || KEY.KeyW;
+  if (held && v.fireCd <= 0 && !(I && I.phase === 1)) {
+    v.fireCd = .27; S.bul.push({ x: v.x, y: v.y - v.h - .2, vx: 0, vy: -48, life: 1.3, dmg: 1, col: PAL[C.mint], a: -PI / 2, pierce: 0, hit: [] });
+    sfx('shoot', .55); pt(v.x, v.y - v.h, 0, -8, .12, ['*'], PAL[C.mint], {}); v.recoil = .12;
+  }
+  v.recoil = Math.max(0, (v.recoil || 0) - dt);
+  if (Math.abs(v.vx) > 3 && Math.random() < dt * 24) pt(v.x - sign(v.vx) * 2.4, v.y - .1, -sign(v.vx) * rr(2, 8), rr(-3, -.5), rr(.2, .4), ['·', '░'], PAL[C.greyD], { drag: 3 });
+  p.x = v.x; p.y = v.y; p.vx = v.vx; p.vy = v.vy; p.ground = true; p.face = v.face; p.w = v.w; p.h = v.h; p.inv = 0; p.hitT = 0; p.hp = 100; p.aim = { x: 0, y: -1, a: -PI / 2, cx: 0, cy: -.5, d: 20, wx: v.x, wy: v.y - 20, mx: v.x, my: v.y - v.h };
+}
+function drawCannon(v, t) {
+  const fl = v.flash > .02, blink = v.inv > 0 && Math.floor(t * 20) % 2, x0 = v.x - 2.5, rec = v.recoil > 0 ? .5 : 0;
+  spr(['  ▲  ', '  █  ', '▟███▙'], ['  c  ', '  c  ', 'nnnnn'], x0, v.y - 3 + rec * .4, 1, blink ? .45 : 1, fl);
+  spr(['▐███▌'], ['GGGGG'], x0, v.y - 1 + 0, 1, blink ? .45 : 1, fl);
+  wgl('▀', v.x - .5, v.y - 3.9 + rec * .4, '#ffffff', blink ? .3 : .9); glow(v.x, v.y - 1.5, 7, '#5dffb0', .22); if (rec) glow(v.x, v.y - 3.6, 4, '#ffffff', .4);
+  cockpit(v.x, v.y - 1.1, 3, 1, 1, t);
+}
+function drawCannonHud(p, t) {
+  const v = p.veh, I = S.inv, X = c => Math.round(c * CW), Y = r => Math.round(r * CH);
+  panel(2, 1, 41, 6, '#5dffb0', 'LASERKANONE');
+  { const bu = Math.max(2, Math.floor(CH * .25)); drawSamBadge(Math.round(3.4 * CW), Math.round(2 * CH + (4 * CH - 12 * bu) / 2), bu, S.t); }
+  txtPx('LEBEN', X(11), Y(2), '#8a96c4'); for (let i = 0; i < 5; i++) txtPx(i < (I ? I.lives : 3) ? '♥' : '·', X(17 + i * 2), Y(2), i < (I ? I.lives : 3) ? '#ff3b4d' : '#3d4676');
+  txtPx('WELLE', X(11), Y(3), '#8a96c4'); txtPx((I ? Math.max(1, I.wave) : 1) + ' / 3', X(17), Y(3), '#5dffb0');
+  txtPx('◊ ' + String(S.chips).padStart(3, '0'), X(24), Y(3), '#ffe45e'); txtPx('INVADER ' + String(S.en.filter(e => e.k === 'invader' && !e.dead).length).padStart(2, '0'), X(11), Y(4), '#8a96c4');
+  txtPx(TX('A D FAHREN  //  J / LEERTASTE / MAUS FEUER', 'STICK FAHREN  //  FEUER-KNOPF'), X(11), Y(5), '#5dffb0');
+}
+
+/* =========================================================================
+   Steuerung des Minispiels
+   ========================================================================= */
+function initInvaders() {
+  const L = S.L; S.inv = null; if (!L || !L.inv) return; const D = L.inv;
+  S.inv = { phase: 0, wave: 0, lives: 3, t: 0, timer: 0, frame: 0, done: false, x0: D.x0, x1: D.x1, fy: D.fy, ox: 0, oy: 0, dir: 1, stepT: 0, step: 0, bombT: 1.5, ufo: 0, ufoT: 9, cannon: null, total: 1, retry: false };
+  /* bunkers: bright green blocks that crumble; remember them so every new try starts clean */
+  const I = S.inv; I.snap = [];
+  for (const b of D.bunkers) {
+    const cells = [];
+    for (let y = b.y; y < b.y + b.h; y++) for (let x = b.x; x < b.x + b.w; x++) { const i = y * L.W + x; if (L.t[i] === T.SOL) { L.ch[i] = (x + y) % 3 ? '▓'.charCodeAt(0) : '█'.charCodeAt(0); L.fg[i] = C.mint; L.bg[i] = 0; L.sty[i] = CUSTOM | ST.METAL; } cells.push([i, L.t[i], L.ch[i], L.fg[i], L.bg[i], L.an[i], L.sty[i], L.brk ? L.brk[i] : 0]); }
+    I.snap.push(cells);
+  }
+}
+function restoreBunkers() {
+  const I = S.inv, L = S.L; if (!I || !I.snap) return;
+  for (const cells of I.snap) for (const [i, t, ch, fg, bg, an, sty, br] of cells) { L.t[i] = t; L.ch[i] = ch; L.fg[i] = fg; L.bg[i] = bg; L.an[i] = an; L.sty[i] = sty; if (L.brk) L.brk[i] = br; }
+}
+function clearInvaderFoes() {
+  for (const e of S.en) if (e.k === 'invader' || e.k === 'ufo' || e.k === 'mother') e.dead = true;
+  S.ebul = S.ebul.filter(b => !b.inv); if (S.inv) { S.inv.ufo = 0; }
+}
+function resetInvaders(hard) {
+  const I = S.inv, L = S.L; if (!I || !L || !L.inv || I.phase === 5) return; const D = L.inv, p = S.P;
+  clearInvaderFoes(); S.veh = S.veh.filter(v => v.k !== 'cannon'); I.cannon = null;
+  if (p && p.veh && p.veh.k === 'cannon') { p.veh = null; p.w = 1.6; p.h = 2.9; }
+  restoreBunkers(); D.doors[0].target = 1; D.doors[1].target = 0; S.cam.lock = null; MUS.inten = 0; MUS.inten_t = 0;
+  I.phase = 0; I.wave = 0; I.lives = 3;
+}
+function startInvaders() {
+  const I = S.inv, L = S.L, D = L.inv, p = S.P; if (!I || I.phase !== 0) return;
+  I.phase = 1; I.timer = 3.6; I.wave = 1; I.lives = 3; D.doors[0].target = 0; D.doors[1].target = 0;
+  for (const e of S.en) if (!e.dead && e.k !== 'invader' && e.k !== 'ufo' && e.k !== 'mother' && Math.abs(e.x - D.cx) < 120) { e.dead = true; ring(e.x, e.y - e.h / 2, 5, .4, PAL[C.mag]); }   // nobody from the hall may drift in
+  const v = spawnVeh({ k: 'cannon', x: D.x0 + 8, y: D.fy, face: 1, bounds: { x0: D.x0, x1: D.x1 } }); I.cannon = v; S.vseen.cannon = true; boardVeh(v);
+  S.cam.lock = { x: D.cx, y: D.fy - 12.5 }; S.respawn = D.respawn || S.respawn; MUS.inten_t = 1; MUS.inten = 1;
+  banner('SPACE INVADERS', TX('ABWEHRWELLE 1 VON 3', 'ABWEHRWELLE 1 VON 3'), C.mint); sfx('go'); say('ECHO', TX('Das ist ein echtes Arcade-Spiel, Sam. Die Kanone schießt nur nach oben: A und D fahren, J oder LEERTASTE feuern. Hinter den Bunkern bist du sicher.', 'Das ist ein echtes Arcade-Spiel, Sam. Die Kanone schießt nur nach oben: Stick fährt, FEUER schießt. Hinter den Bunkern bist du sicher.'), 3.4);
+}
+function spawnWave(w) {
+  const I = S.inv, L = S.L, D = L.inv; I.wave = w; I.ox = 0; I.oy = 0; I.dir = 1; I.stepT = 0; I.step = 0; I.bombT = 1.8; I.ufo = 0; I.ufoT = 7 + Math.random() * 5; I.phase = 2; I.lives = Math.max(I.lives, 3);
+  const rows = w === 1 ? 4 : 5, cols = 10; I.rows = rows; I.cols = cols; I.total = rows * cols;
+  if (w <= 2) {
+    for (let r = 0; r < rows; r++) for (let c = 0; c < cols; c++) { const e = spawnEnemy({ k: 'invader', x: D.x0 + 5 + c * 5, y: D.fy - 23 + r * 3, row: r, col: c, always: true, range: 999, hp: w === 2 && r === 0 ? 2 : 1 }); if (e) { e.bx = e.x; e.by = e.y; } }
+    banner('WELLE ' + w + ' VON 3', w === 1 ? 'SCHIESS SIE AB' : 'SCHNELLER UND DICHTER', C.mint); sfx('go', .8);
+  } else {
+    const m = spawnEnemy({ k: 'mother', x: D.cx, y: D.fy - 20, always: true, range: 999, hp: 46, maxhp: 46 }); if (m) { m.dirx = 1; }
+    banner('MUTTERSCHIFF', 'WELLE 3 VON 3 // BLEIB IN BEWEGUNG', C.red); sfx('warn'); sfx('warn');
+  }
+}
+function failInvaders(msg) {
+  const I = S.inv, L = S.L, D = L.inv; if (!I || I.phase === 3 || I.phase === 4) return;
+  banner(msg, 'WELLE NEU // KEINE PANIK', C.red); sfx('warn'); sfx('bigboom'); shake(1); glitchAmt = 1; clearInvaderFoes(); restoreBunkers();
+  I.phase = 3; I.timer = 2.6; I.retry = true; I.lives = 3; const v = I.cannon; if (v) { v.x = D.x0 + 8; v.vx = 0; v.hp = v.maxhp; v.dead = false; v.inv = 2; }
+}
+function winInvaders() {
+  const I = S.inv, L = S.L, D = L.inv, p = S.P; I.phase = 4; I.timer = 2.5; clearInvaderFoes();
+  banner('SPACE INVADERS GESCHLAGEN', 'DAS TOR ÖFFNET SICH', C.mint); sfx('heal'); sfx('go'); MUS.inten = 0; MUS.inten_t = 0;
+  say('ECHO', 'Geschafft, Sam! Das Spiel ist aus, und das Tor nach Zenit steht offen. Die Station ist das Ende dieser Signalspur.', 6);
+}
+function updInvaders(dt) {
+  const I = S.inv, L = S.L, p = S.P; if (!I || !L || !L.inv) return; const D = L.inv;
+  if (I.phase === 0) { const t = D.trig; if (!p.dead && !p.veh && p.x > t.x && p.x < t.x + t.w && p.y > t.y && p.y < t.y + t.h) startInvaders(); return; }
+  if (I.phase === 5) return;
+  I.t += dt; const alive = S.en.filter(e => e.k === 'invader' && !e.free && !e.dead);
+  if (I.phase === 1) { I.timer -= dt; if (I.timer <= 0) spawnWave(1); return; }
+  if (I.phase === 3) { I.timer -= dt; if (I.timer <= 0) { if (I.retry) { I.retry = false; spawnWave(I.wave); } else if (I.wave >= 3) winInvaders(); else spawnWave(I.wave + 1); } return; }
+  if (I.phase === 4) { I.timer -= dt; if (I.timer <= 0) {
+    const v = I.cannon; if (v) { exitVeh(v); v.dead = true; v.x = -999; v.y = -999; v.vx = v.vy = 0; }
+    D.doors[0].target = 1; D.doors[1].target = 1; S.cam.lock = null; I.phase = 5; I.done = true; S.pks.push({ k: 'hp', x: D.cx, y: D.fy - 3, t: 0 }); S.respawn = D.after || S.respawn; return; }
+    return; }
+  /* phase 2: the march */
+  if (I.wave <= 2) {
+    const total = I.total, speed = I.wave === 1 ? 1 : .72, every = (.06 + .5 * Math.pow(alive.length / total, .8)) * speed;
+    I.stepT += dt;
+    if (alive.length > 0 && I.stepT >= every) {
+      I.stepT = 0; let minX = 1e9, maxX = -1e9; for (const e of alive) { minX = Math.min(minX, e.bx + I.ox - 2); maxX = Math.max(maxX, e.bx + I.ox + 2); }
+      if ((I.dir > 0 && maxX + 1 > I.x1 - .5) || (I.dir < 0 && minX - 1 < I.x0 + .5)) { I.dir = -I.dir; I.oy += 1; } else I.ox += I.dir;
+      I.frame ^= 1; I.step++; sfx('inv' + (I.step % 4), .5);
+    }
+    for (const e of alive) {
+      e.x = e.bx + I.ox; e.y = e.by + I.oy;
+      for (let y = Math.floor(e.y - 2); y <= Math.floor(e.y); y++) for (let x = Math.floor(e.x - 2); x <= Math.floor(e.x + 2); x++) { if (L.brk && L.inb(x, y) && L.brk[y * L.W + x] && L.t[y * L.W + x] === T.SOL) { const i = y * L.W + x; L.brk[i] = 0; L.t[i] = 0; L.ch[i] = 0; L.bg[i] = 0; L.sty[i] = 0; } }
+      if (e.y >= D.fy - 3.5) { failInvaders('INVASION'); return; }
+    }
+    /* bombs: mostly from the column near the cannon */
+    I.bombT -= dt;
+    if (I.bombT <= 0 && alive.length) {
+      I.bombT = (I.wave === 1 ? 1.6 : 1.0) * (.6 + Math.random() * .8);
+      const v = I.cannon, cols = {}; for (const e of alive) if (!cols[e.col] || e.y > cols[e.col].y) cols[e.col] = e;
+      const low = Object.values(cols); let pick = low[Math.floor(Math.random() * low.length)];
+      if (v && Math.random() < .4) { let bd = 1e9; for (const e of low) if (Math.abs(e.x - v.x) < bd) { bd = Math.abs(e.x - v.x); pick = e; } }
+      ebullet(pick.x, pick.y, PI / 2, 21 + I.wave * 3, 1, { big: 1, inv: 1, life: 4 }); sfx('beep', .35);
+    }
+    /* the mystery UFO */
+    I.ufoT -= dt;
+    if (I.ufoT <= 0 && !I.ufo && alive.length > 6) { I.ufoT = 16 + Math.random() * 8; const dir = Math.random() < .5 ? 1 : -1; const u = spawnEnemy({ k: 'ufo', x: dir > 0 ? I.x0 - 5 : I.x1 + 5, y: D.fy - 25, always: true, range: 999 }); if (u) { u.dirx = dir; I.ufo = 1; } }
+    if (!alive.length && !S.en.some(e => e.k === 'invader' && !e.dead)) { I.phase = 3; I.timer = 2.3; I.retry = false; S.ebul = S.ebul.filter(b => !b.inv); banner('WELLE ' + I.wave + ' GESCHAFFT', 'NÄCHSTE WELLE KOMMT', C.mint); sfx('heal', .8); }
+  } else {
+    const m = S.en.find(e => e.k === 'mother' && !e.dead);
+    if (!m) { if (!S.en.some(e => e.k === 'invader' && !e.dead)) { I.phase = 3; I.timer = 1.8; I.retry = false; clearInvaderFoes(); } }
+  }
+}
+function drawInvHud(t) {
+  const I = S.inv; if (!I || I.phase === 0 || I.phase === 5) return;
+  const msg = I.phase === 1 ? 'BEREIT?' : I.phase === 4 ? 'GESCHAFFT' : 'SPACE INVADERS  //  WELLE ' + Math.max(1, I.wave) + ' VON 3', w = msg.length * CW + 2 * CW, px = Math.round(W / 2 - w / 2), py = Math.round(CH * 1.2);
+  rectPx(px, py - 3, w, CH + 6, '#05060f', .6); txtPx(msg, px + CW, py, I.phase === 4 ? '#5dffb0' : '#ffe45e');
+}
+
+/* =========================================================================
+   Endboss :: ZENITH
+   Das Gehirn der Orbitalstation. Ein Schild aus kreisenden Orbs schützt den Kern: erst alle Orbs
+   abschießen, dann liegt der Kern neun Sekunden frei. Phase 2 bringt Laser-Säulen, Phase 3 lässt
+   die Schwerkraft schwanken und schickt Lenkraketen.
+   ========================================================================= */
+BOSSHP.zenith = 210;
+BOSS_TITLE.zenith = ['Z E N I T H', 'Z E N I T H   //   D A S   G E H I R N   D E R   S T A T I O N'];
+const ZEN_WINDOW = 9;
+
+function zenOrbs(e, n) {
+  for (let i = 0; i < n; i++) {
+    const o = spawnEnemy({ k: 'orb', x: e.x, y: e.y - 5, owner: e, ang: i / n * TAU, hp: 5, maxhp: 5, always: true, range: 999 });
+    if (o) { o.fire = 1.2 + i * .4; ring(o.x, o.y - 2, 5, .4, PAL[C.cyan]); }
+  }
+}
+function zenAlive(e) { let n = 0; for (const o of S.en) if (o.k === 'orb' && !o.dead && o.owner === e) n++; return n; }
+
+AIBOSS.zenith = function (e, dt, dxp, dyp, dist) {
+  const B = e.bounds, p = S.P, L = S.L; e.rot += dt;
+  const frac = e.hp / e.maxhp, ph = frac > .66 ? 1 : frac > .33 ? 2 : 3;
+  if (e.intro > 0) { e.intro -= dt; e.noHit = true; e.y = lerp(e.y, e.cy, Math.min(1, 2 * dt)); if (e.intro <= 0) { e.orbSpd = .9; e.orbR = 13; zenOrbs(e, 4); e.noHit = true; e.fire = 2.2; } return; }
+  if (ph !== e.ph) {
+    e.ph = ph; e.open = 0; e.laserT = 0; e.beams = []; e.fire = 2.6; e.volley = 0;
+    for (const o of S.en) if (o.k === 'orb' && o.owner === e && !o.dead) { o.dead = true; boom(o.x, o.y - 2, 1); }
+    e.orbSpd = ph === 2 ? 1.25 : 1.6; e.orbR = 13; zenOrbs(e, ph + 3); e.noHit = true;
+    banner('ZENITH // PHASE ' + ph, ph === 2 ? 'LASER-SÄULEN AKTIV' : 'SCHWERKRAFT SCHWANKT', C.red); shake(1.2); ring(e.x, e.y - 5, 30, 1, PAL[C.red]); sfx('bigboom', .8); glitchAmt = 1.2; S.flash = .4; S.flashCol = '#ffffff';
+  }
+  /* the shield: down while every orb is gone, then it comes back */
+  const orbs = zenAlive(e);
+  if (e.open > 0) { e.open -= dt; e.noHit = false; if (e.open <= 0) { e.open = 0; e.noHit = true; zenOrbs(e, ph + 3); banner('SCHILD AKTIV', 'NEUE ORBS', C.cyan); sfx('boot', .8); } }
+  else if (orbs === 0) { e.open = ZEN_WINDOW; e.noHit = false; banner('KERN OFFEN', 'JETZT ZUSCHLAGEN', C.mint); sfx('heal'); shake(.6); }
+  else e.noHit = true;
+  /* the hover path */
+  const spd = ph === 1 ? .5 : ph === 2 ? .7 : .9;
+  const tx = e.cx + Math.sin(e.t * spd) * (B.w * .26), ty = e.cy + Math.sin(e.t * spd * 1.7) * 2.2;
+  e.vx = (tx - e.x) * 3; e.vy = (ty - e.y) * 3; e.x += e.vx * dt; e.y += e.vy * dt;
+  e.fire -= dt / EASY.fireSlow; const cx = e.x, cy = e.y - 5;
+  /* laser columns */
+  if (e.beams) for (const b of e.beams) {
+    b.t += dt;
+    if (b.t > b.tele && b.t < b.tele + b.dur) { if (!b.on) { b.on = true; sfx('laser', .8); shake(.6); } if (!p.dead && Math.abs(p.x - b.x) < 2.1) hurtPlayer(20, b.x, p.y); if (Math.random() < .7) pt(b.x + rr(-1.5, 1.5), B.floor - .2, rr(-8, 8), rr(-26, -6), rr(.2, .5), ['*', '+', '·'], PAL[C.cyan], { g: 30 }); }
+  }
+  if (e.beams) e.beams = e.beams.filter(b => b.t < b.tele + b.dur);
+  if (e.fire <= 0) {
+    const seq = ph === 1 ? ['aim', 'ring', 'aim'] : ph === 2 ? ['aim', 'beams', 'ring', 'beams'] : ['seek', 'beams', 'ring', 'aim', 'seek'];
+    const a = seq[(e.atk = (e.atk || 0) + 1) % seq.length];
+    if (a === 'aim') { e.volley = ph === 1 ? 5 : 7; e.vt = 0; e.fire = 2.3; sfx('warn'); }
+    else if (a === 'ring') { const n = ph === 3 ? 28 : 20, off = Math.random() * TAU; for (let i = 0; i < n; i++) ebullet(cx, cy, off + i / n * TAU, ph === 3 ? 20 : 16, 9, { big: 1 }); sfx('scatter'); shake(.4); ring(cx, cy, 8, .4, PAL[C.cyan]); e.fire = 2.2; }
+    else if (a === 'beams') { const n = ph === 2 ? 3 : 4; e.beams = e.beams || []; for (let i = 0; i < n; i++) e.beams.push({ x: B.x0 + 8 + ((i + Math.random() * .8) / n) * (B.w - 16), t: 0, tele: 1.1, dur: .8, on: false }); e.beams.push({ x: p.x, t: 0, tele: 1.1, dur: .8, on: false }); sfx('warn'); sfx('warn'); e.fire = 3; }
+    else if (a === 'seek') { for (let i = 0; i < 3; i++) ebullet(cx + (i - 1) * 6, cy + 3, PI / 2 + (i - 1) * .55, 16, 12, { big: 1, hom: 1, life: 4.2, hp: 2 }); sfx('rocket', .8); e.fire = 2.4; }
+  }
+  if (e.volley > 0) { e.vt -= dt; if (e.vt <= 0) { e.vt = ph === 3 ? .1 : .14; e.volley--; const ang = vang(p.x - cx, p.y - 1.6 - cy) + rr(-.07, .07); ebullet(cx, cy, ang, 30, 10, { big: 1 }); sfx('ebullet', .6); } }
+  /* phase 3: gravity wobbles between floaty and heavy */
+  if (ph === 3) L.gmul = (L.gbase || .45) * (1 + .75 * Math.sin(S.t * .85));
+};
+BOSS_DRAW.zenith = function (e, t) {
+  const cx = e.x, cy = e.y - 5, fl = e.flash > 0, open = e.open > 0, p = S.P, B = e.bounds;
+  /* shield */
+  if (e.noHit && e.intro <= 0) for (let k = 0; k < 44; k++) { const a = k / 44 * TAU + t * .3; wgl(k % 2 ? '░' : '▒', cx + Math.cos(a) * 17 - .5, cy + Math.sin(a) * 7 - .5, '#19f0ff', .25 + .2 * Math.sin(t * 4 + k)); }
+  /* ring */
+  const rot = (e.rot || 0) * (open ? .4 : .9);
+  for (let k = 0; k < 20; k++) { const a = rot + k / 20 * TAU, rx = Math.cos(a) * 15, ry = Math.sin(a) * 5.2; wgl(k % 5 === 0 ? '◆' : '■', cx + rx - .5, cy + ry * .9 - .5 + Math.sin(a) * .3, fl ? '#fff' : open ? '#ffb347' : k % 5 === 0 ? '#ff2fb9' : '#7a88d0', 1); }
+  /* core */
+  for (let j = -4; j <= 4; j++) for (let i = -8; i <= 8; i++) {
+    const d = Math.hypot(i / 7.6, j / 3.9); if (d > 1) continue;
+    const ch = d > .86 ? '▒' : d > .6 ? '▓' : '█';
+    const col = fl ? '#ffffff' : open ? (Math.floor(t * 9) % 2 ? '#ff7a3a' : '#ffb347') : d > .86 ? '#1f4fd0' : d > .55 ? '#3a56c8' : '#7f94ff';
+    wgl(ch, cx + i - .5, cy + j - .5, col, 1);
+  }
+  /* the eye follows Sam */
+  const ex = clamp((p.x - cx) / 14, -1, 1) * 2.4, ey = clamp(((p.y - 1.5) - cy) / 14, -1, 1) * 1.1;
+  for (let i = -3; i <= 3; i++) wgl(Math.abs(i) === 3 ? '◖' : '█', cx + i - .5, cy - .5, fl ? '#fff' : '#05060f', 1);
+  wgl('◉', cx + ex - .5, cy + ey - .5, open ? '#ffffff' : '#ff3b4d', 1); wgl('●', cx + ex - 1.5, cy + ey - .5, open ? '#ff3b4d' : '#8e1c2b', .9); wgl('●', cx + ex + .5, cy + ey - .5, open ? '#ff3b4d' : '#8e1c2b', .9);
+  glow(cx, cy, 20, open ? '#ffb347' : '#19f0ff', open ? .3 : .13);
+  /* laser columns */
+  if (e.beams && B) for (const b of e.beams) {
+    const on = b.t > b.tele, top = cy + 5, h = B.floor - top;
+    for (let y = 0; y < h; y++) {
+      if (on) { wgl('█', b.x - 1.5, top + y, '#ffffff', .85); wgl('█', b.x - .5, top + y, '#19f0ff', .95); wgl('█', b.x + .5, top + y, '#ffffff', .85); }
+      else if (y % 2 === 0) wgl('¦', b.x - .5, top + y, '#ff3b4d', .5 + .3 * Math.sin(t * 20));
+    }
+    if (on) glow(b.x, top + h * .5, 10, '#19f0ff', .35); else wgl(TXT_WARN, b.x - .5, B.floor - 2, '#ff3b4d');
+  }
+};
 
 /* =========================================================================
    shared level builders + STAGE 1 :: RAINLINE
@@ -3525,6 +4361,377 @@ function buildStage4() {
 }
 
 /* =========================================================================
+   SEKTOR 5 :: NEON GRAND PRIX
+   Ein Rennen über den Orbital-Ring. Ein Rennwagen, drei Rivalen, Boost-Pads, Gruben, Sperren,
+   ein Tunnel mit Geschütztürmen und ab der Mitte eine Dampfwalze, die dich jagt.
+   ========================================================================= */
+function buildStage5() {
+  const th = THEMES.speed, R = RNG(505), Hh = 120, S0 = 90, W = 1560, L = new Level(5, W, Hh, th);
+  L.deathY = Hh + 12; L.camRef = 70;
+  L.intro = {
+    title: 'NEON GRAND PRIX', sub: 'ORBITAL-RING // HAUPTPREIS: DIE LIFTKARTE // 22:00 UHR',
+    lines: ['ECHO: Archon war nur ein Relais, Sam. Sein Signal läuft weiter, hinauf zu einer Station namens ZENITH.',
+      'ECHO: Der Weg nach oben ist der Orbitallift im Kronos-Turm. Die Karte dafür ist der Hauptpreis dieses Rennens. Komm unter die ersten zwei.']
+  };
+  const road = [[4, 232], [250, 560], [584, 820], [838, 930], [936, 960], [966, 1060], [1084, 1200], [1218, 1520]];
+  for (const [a, b] of road) L.mass(a, S0, b - a, ST.ASPH);
+  L.mass(0, S0 - 40, 4, ST.METAL); L.mass(1520, S0 - 40, 40, ST.METAL);
+  facades(L, R, 0, W, S0, 24, 38);
+  L.start = { x: 66, y: S0 };
+  const stairs = (x, n, w, up) => { for (let k = 0; k < n; k++) { const i = up ? k : n - 1 - k; L.mass(x + k * w, S0 - (i + 1), w, ST.ASPH); } };
+  const pit = (x, w, label) => {
+    L.bfill(x, S0, w, Hh - S0, 0, 0, C.blk); for (let i = 0; i < w; i++) L.bset(x + i, S0, i % 2 ? '▚' : '▞', C.amber, C.blk);
+    L.bset(x - 1, S0 - 1, '▮', C.amber); L.bset(x + w, S0 - 1, '▮', C.amber);
+    if (label) L.dec('sign', x - 6, S0 - 10, { text: label, col: '#ffb347', flick: true, frame: true });
+  };
+  const barrier = (x, h) => { L.rect(x, S0 - h, 2, h, ST.BRICK); L.dec('sign', x - 2, S0 - h - 3, { text: 'SPERRE', col: '#ff3b4d', flick: true }); };
+  const pads = [], pad = x => { pads.push({ x, w: 12 }); L.dec('custom', x, S0 - 1, { w: 12, draw: drawBoostPad }); };
+  /* --- start straight --- */
+  L.dec('custom', 82, S0 - 22, { w: 18, y2: S0, col: '#ffe45e', text: 'START', draw: drawArch, vis: 40 });
+  L.dec('custom', 20, S0 - 5, { w: 30, draw: drawCrowd }); L.dec('custom', 100, S0 - 5, { w: 24, draw: drawCrowd });
+  L.dec('sign', 8, S0 - 22, { text: 'NEON GRAND PRIX', col: '#ff2fb9', flick: true, frame: true, front: false });
+  L.hint(40, 40, S0 - 12, 14, 'ECHO', TX('Rennwagen, Sam! A und D geben Gas und bremsen, LEERTASTE springt, SHIFT ist Turbo. Die Pads auf der Straße schieben dich nach vorn. Aussteigen geht nicht, es ist ein Rennen.', 'Rennwagen, Sam! Linker Stick gibt Gas, nach oben springt der Wagen, TURBO schiebt. Die Pads auf der Straße schieben dich nach vorn. Aussteigen geht nicht, es ist ein Rennen.'));
+  pad(150); pad(200);
+  chips(L, 112, S0 - 3, 140, S0 - 3, 6, 0); chips(L, 160, S0 - 3, 196, S0 - 3, 6, 0);
+  /* --- first pit, barricades --- */
+  pit(232, 18, 'LÜCKE');
+  chips(L, 228, S0 - 8, 254, S0 - 6, 6, 5);
+  barrier(288, 2); barrier(322, 3);
+  chips(L, 262, S0 - 3, 282, S0 - 3, 4, 0); chips(L, 296, S0 - 5, 316, S0 - 5, 4, 2); chips(L, 328, S0 - 3, 346, S0 - 3, 4, 0);
+  L.en('drone', 300, S0 - 18); L.en('drone', 340, S0 - 22);
+  /* --- the hill --- */
+  stairs(350, 8, 3, true); L.mass(374, S0 - 8, 36, ST.ASPH); stairs(410, 8, 3, false);
+  L.haz(384, S0 - 9, 6); L.dec('spark', 387, S0 - 10, { rate: 1.1 });
+  L.dec('sign', 366, S0 - 18, { text: 'KUPPE', col: '#19f0ff', flick: true, frame: true });
+  chips(L, 354, S0 - 12, 372, S0 - 18, 5, 3); chips(L, 392, S0 - 12, 414, S0 - 6, 5, 3);
+  L.en('turret', 396, S0 - 22, { dir: 'down' }); L.mass(388, S0 - 24, 18, ST.METAL, S0 - 22); lattice(L, 389, S0 - 22, S0 - 9, C.greyDD); lattice(L, 403, S0 - 22, S0 - 9, C.greyDD);
+  pad(440);
+  /* --- electric field --- */
+  L.haz(466, S0 - 1, 8); L.dec('spark', 470, S0 - 2, { rate: 1.3 }); L.haz(506, S0 - 1, 10); L.dec('spark', 511, S0 - 2, { rate: 1.2 });
+  chips(L, 462, S0 - 8, 480, S0 - 8, 5, 3); chips(L, 502, S0 - 8, 522, S0 - 8, 6, 3);
+  L.en('drone', 470, S0 - 16, { elite: true }); L.en('drone', 514, S0 - 18, { elite: true });
+  /* --- the launch ramp --- */
+  stairs(536, 8, 3, true); pit(560, 24, 'SPRUNGSCHANZE'); chips(L, 556, S0 - 14, 586, S0 - 8, 8, 8);
+  /* --- grandstand + the steamroller wakes --- */
+  pad(600); L.dec('custom', 590, S0 - 5, { w: 40, draw: drawCrowd }); L.dec('custom', 650, S0 - 5, { w: 20, draw: drawCrowd });
+  L.dec('sign', 636, S0 - 20, { text: 'ACHTUNG // BAUARBEITEN', col: '#ff3b4d', flick: true, frame: true });
+  L.zone(640, 10, S0 - 14, 16, { once: true, fn() { sfx('warn', .6); shake(.3); } });
+  chips(L, 604, S0 - 3, 690, S0 - 3, 10, 0);
+  /* --- tunnel --- */
+  L.mass(700, S0 - 16, 120, ST.METAL, S0 - 10);
+  for (let x = 700; x < 820; x += 4) { L.set(x, S0 - 10, undefined, '▼', C.amber, 0, AN.BLINK, undefined); L.bset(x, S0 - 9, '│', C.greyDD); }
+  for (let x = 704; x < 820; x += 12) L.dec('lamp', x, S0 - 10, { w: 6, len: 9, col: '#ffb347' });
+  L.dec('sign', 706, S0 - 8, { text: 'TUNNEL', col: '#ffb347', flick: true, front: true });
+  pad(770); L.en('turret', 730, S0 - 10, { dir: 'down' }); L.en('turret', 762, S0 - 10, { dir: 'down' }); L.en('turret', 800, S0 - 10, { dir: 'down' });
+  chips(L, 712, S0 - 3, 810, S0 - 3, 10, 0);
+  pit(820, 18, 'LÜCKE');
+  /* --- barricade, bridge of planks --- */
+  barrier(870, 3); chips(L, 842, S0 - 5, 866, S0 - 7, 5, 3); chips(L, 878, S0 - 4, 922, S0 - 4, 6, 0);
+  L.en('gunship', 880, S0 - 22);
+  pit(930, 6); pit(960, 6); L.dec('sign', 926, S0 - 14, { text: 'BRÜCKE', col: '#19f0ff', flick: true, frame: true }); chips(L, 928, S0 - 6, 968, S0 - 6, 8, 4);
+  L.en('drone', 946, S0 - 14, { elite: true }); L.en('drone', 998, S0 - 20);
+  /* --- second launch --- */
+  stairs(1036, 8, 3, true); pit(1060, 24, 'SPRUNGSCHANZE'); chips(L, 1056, S0 - 14, 1086, S0 - 8, 8, 8);
+  L.en('gunship', 1100, S0 - 24);
+  pad(1100); barrier(1150, 2); barrier(1180, 3);
+  chips(L, 1120, S0 - 3, 1146, S0 - 3, 5, 0); chips(L, 1156, S0 - 5, 1176, S0 - 5, 4, 2); chips(L, 1186, S0 - 3, 1196, S0 - 3, 3, 0);
+  pit(1200, 18, 'LETZTE LÜCKE');
+  /* --- last stretch --- */
+  L.haz(1250, S0 - 1, 10); L.dec('spark', 1255, S0 - 2, { rate: 1.3 }); L.haz(1282, S0 - 1, 8); L.dec('spark', 1286, S0 - 2, { rate: 1.1 });
+  chips(L, 1246, S0 - 8, 1264, S0 - 8, 5, 3); chips(L, 1278, S0 - 8, 1294, S0 - 8, 5, 3);
+  L.en('drone', 1262, S0 - 16, { elite: true }); L.en('drone', 1300, S0 - 20, { elite: true }); L.en('turret', 1340, S0 - 24, { dir: 'down' });
+  L.mass(1332, S0 - 26, 18, ST.METAL, S0 - 24); lattice(L, 1333, S0 - 24, S0 - 1, C.greyDD); lattice(L, 1347, S0 - 24, S0 - 1, C.greyDD);
+  pad(1330); pad(1390);
+  L.dec('custom', 1400, S0 - 5, { w: 40, draw: drawCrowd }); L.dec('custom', 1480, S0 - 5, { w: 30, draw: drawCrowd });
+  L.dec('custom', 1452, S0 - 22, { w: 18, y2: S0, col: '#5dffb0', text: 'ZIEL', draw: drawArch, vis: 40 });
+  L.dec('sign', 1424, S0 - 28, { text: 'NEON GRAND PRIX // ZIEL', col: '#ffe45e', flick: true, frame: true });
+  for (let x = 1458; x < 1472; x++) for (let k = 0; k < 2; k++) L.set(x, S0, undefined, ((x + k) & 1) ? '▚' : '▞', C.white);
+  L.camBox = { x0: 0, x1: W, y0: 0, y1: Hh };
+  L.race = {
+    x0: 42, x1: 1460, y: S0, pads, walzeAt: 660, walzeGap: 74, walzeMax: 50, walzeAcc: 1.3,
+    rivals: [{ x: 78, top: 39, team: 'r', name: 'VIPER' }, { x: 54, top: 37, team: 'a', name: 'KOMET' }, { x: 42, top: 35, team: 'n', name: 'ROCKY' }],
+  };
+  L.veh('racer', 66, S0, { face: 1, bounds: { x0: 6, x1: 1555 } });
+  finalizeLevel(L);
+  for (const [a, b] of road) for (let x = a; x < b; x++) { const i = S0 * W + x; if (L.t[i] === T.SOL && (x % 10) < 5 && L.ch[i] !== 0) { L.ch[i] = '▬'.charCodeAt(0); L.fg[i] = C.yel; } }
+  return L;
+}
+
+/* =========================================================================
+   SEKTOR 6 :: KRONOS-TURM
+   Ein senkrechter Aufstieg durch einen 300 Meter hohen Glasturm: Lobby, Büroetagen, Serverraum
+   (Brecher-Mechs), Aufzugschacht, die Außenfassade im Wind und das Dach mit dem Fassadenwächter.
+   Neu: Scharfschützen (roter Laser, ausweichen!) und der Mech.
+   ========================================================================= */
+function buildStage6() {
+  const th = THEMES.glass, R = RNG(606), Hh = 340, W = 200, L = new Level(6, W, Hh, th);
+  L.deathY = Hh + 12; L.camRef = 266;
+  L.intro = {
+    title: 'KRONOS-TURM', sub: 'EBENE 0 BIS 300 // DER WEG ZUM ORBITALLIFT // 23:40 UHR',
+    lines: ['ECHO: Das ist der Kronos-Turm, Sam. Ganz oben wartet der Orbitallift. Dazwischen liegen dreihundert Meter Glas und Konzernsicherheit.',
+      'ECHO: Achtung, Scharfschützen. Ein roter Laserpunkt heißt: gleich schießt er auf die Stelle, wo du gerade stehst. Beweg dich.']
+  };
+  const TL = 44, TR = 156, TOP = 76, CEIL = 150, F = [320, 302, 284, 266, 248, 230, 204, 186, 168];
+  /* the street, the glass skin, the solid crown block above the top office floor */
+  L.mass(0, 320, W, ST.ASPH);
+  facades(L, R, 0, 40, 320, 36, 56); facades(L, R, 160, 200, 320, 36, 56);
+  L.mass(40, TOP, 4, ST.GLASS, 320); L.mass(156, TOP, 4, ST.GLASS, 320);
+  L.clear(40, 310, 4, 10);                // the entrance gate
+  L.mass(TL, TOP, TR - TL, ST.GLASS, CEIL);
+  /* back wall of the offices: panels, pillars, lit windows */
+  L.bfillFn(TL, CEIL, TR - TL, 320 - CEIL, (x, y) => { const pan = (((x - TL) / 14) | 0) % 2; return [(x - TL) % 14 === 0 ? '│' : 0, C.greyDD, pan ? C.i1 : C.i2, 0]; });
+  for (let y = CEIL + 4; y < 316; y += 18) for (let x = TL + 4; x < TR - 6; x += 14) if (hash2(x, y) < .5) { for (let a = 0; a < 2; a++) for (let b = 0; b < 6; b++) L.bset(x + b, y + a, a === 0 ? '▀' : 0, C.cyanDD, hash2(x + b, y) < .3 ? C.g1 : C.g0); }
+  /* climb: one-way steps zigzag up through a slab hole */
+  const climb = (xa, yBelow, yTop) => { const dist = yBelow - (yTop + 3), n = Math.ceil(dist / 5.2); for (let k = 0; k < n; k++) { const y = yBelow - Math.round((k + 1) * dist / n), x = xa + (k % 2) * 8; L.plat(x, y, 8, '▔', C.cyan); for (let j = 0; j < 8; j++) L.set(x + j, y + 1, undefined, '░', C.cyanDD); } };
+  const slab = (i, hx0) => { L.mass(TL, F[i], TR - TL, ST.INT, F[i] + 2); L.clear(hx0, F[i], 16, 2); climb(hx0, F[i - 1], F[i]); L.dec('sign', hx0 + 1, F[i] - 4, { text: hx0 < 100 ? '▲ AUFSTIEG' : 'AUFSTIEG ▲', col: '#19f0ff', flick: true }); };
+  for (let i = 1; i <= 6; i++) slab(i, i % 2 === 1 ? 48 : 136);
+  /* office furniture: desks and server racks as background art */
+  const deskArt = (x, y) => L.stamp(x, y - 2, ['▛▀▀▀▀▜', '█◙▒▒◙█'], { back: true, d: C.greyD, c: { '◙': C.cyanD, '▒': C.cyanDD }, a: { '◙': AN.DATA } });
+  const rackR = (x, y) => L.stamp(x, y - 6, ['┌──┐', '│▪▪│', '│▪▪│', '│▪▪│', '│▪▪│', '└──┘'], { back: true, d: C.greyD, c: { '▪': C.mint }, a: { '▪': AN.BLINKF } });
+  for (let i = 0; i < 5; i++) { const y = F[i]; for (let x = 70 + (i % 2) * 5; x < 130; x += 18 + (i * 7) % 6) deskArt(x, y); L.dec('beacon', 46, y - 14, { col: '#19f0ff' }); }
+  const E = (i, spec) => spec.forEach(([k, x, dy, o]) => L.en(k, x, F[i] + (dy || 0), o));
+
+  /* ---- street and lobby ---- */
+  L.start = { x: 8, y: 320 };
+  L.dec('sign', 6, 296, { text: 'KRONOS', col: '#19f0ff', flick: true, frame: true, front: true });
+  L.hint(2, 14, 306, 14, 'ECHO', TX('Das Eingangstor steht offen. Rein, und dann immer nach oben: springen, Doppelsprung, an den Stufen entlang. A und D laufen, LEERTASTE springt.', 'Das Eingangstor steht offen. Rein, und dann immer nach oben: springen, Doppelsprung, an den Stufen entlang.'));
+  L.en('grunt', 20, 320); L.en('grunt', 30, 320); L.en('drone', 24, 304); L.pk('hp', 34, 318);
+  L.dec('sign', 80, 308, { text: 'LOBBY', col: '#ffe45e', flick: true });
+  L.en('grunt', 76, 320); L.en('grunt', 108, 320); L.en('drone', 92, 304); L.en('sniper', 150, 320); L.en('turret', 128, 320);
+  chips(L, 50, 318, 120, 318, 8, 0); L.cp(52, 320, 'KONTROLLPUNKT 01');
+  /* ---- offices 1 to 4 ---- */
+  E(1, [['grunt', 84], ['grunt', 112], ['drone', 98, -12], ['sniper', 148], ['turret', 130]]);
+  L.pk('hp', 80, F[1] - 2); chips(L, 70, F[1] - 2, 128, F[1] - 2, 7, 0);
+  E(2, [['sniper', 56], ['turret', 76], ['grunt', 100], ['drone', 116, -12, { elite: true }], ['seeker', 128, -8]]);
+  chips(L, 70, F[2] - 2, 130, F[2] - 2, 7, 0); L.cp(60, F[2], 'KONTROLLPUNKT 02');
+  E(3, [['warden', 100], ['sniper', 148], ['drone', 70, -12], ['grunt', 124]]);
+  L.hint(50, 14, F[3] - 12, 14, 'ECHO', 'Ein Wärter, Sam. Der zerschlägt, was er berührt. Schieß aus der Entfernung oder spring drüber.');
+  L.pk('hp', 64, F[3] - 2); chips(L, 70, F[3] - 2, 130, F[3] - 2, 7, 0);
+  E(4, [['mech', 100], ['drone', 66, -12, { elite: true }], ['drone', 128, -12, { elite: true }], ['sniper', 56]]);
+  L.hint(132, 14, F[4] - 12, 14, 'ECHO', TX('Ein Mech. Der Brecher stampft Schockwellen über den Boden, also spring im richtigen Moment. Greif ihn mit dem Haken an, das reißt ihn auf.', 'Ein Mech. Der Brecher stampft Schockwellen über den Boden, also spring im richtigen Moment. Greif ihn mit HAKEN an, das reißt ihn auf.'));
+  L.pk('hp', 126, F[4] - 2); chips(L, 70, F[4] - 2, 126, F[4] - 2, 7, 0); L.cp(138, F[4], 'KONTROLLPUNKT 03');
+  /* ---- the server room: floor 5 up to slab 6 ---- */
+  for (let x = 54; x < 124; x += 12) { rackR(x, F[5]); rackR(x, F[5] - 6); }
+  L.dec('sign', 74, F[5] - 22, { text: 'SERVERRAUM 04', col: '#ff3b4d', flick: true, front: true, frame: true });
+  const dS = L.door(126, 206, 24, { mode: 'arena', open: 1, target: 1 });
+  arena(L, 46, 206, 80, 25, [dS], [
+    [['sniper', 118, F[5]], ['sniper', 54, F[5]], ['grunt', 82, F[5]], ['grunt', 100, F[5]]],
+    [['mech', 90, F[5]], ['drone', 62, 214, { elite: true }], ['drone', 112, 214, { elite: true }]],
+    [['mech', 62, F[5]], ['mech', 112, F[5]], ['seeker', 82, 214], ['seeker', 92, 212], ['seeker', 102, 214]],
+  ], 'SERVERRAUM');
+  L.pk('hp', 142, F[5] - 2); L.cp(132, F[5], 'KONTROLLPUNKT 04');
+  /* ---- floors 6 to 8: two chained lifts ---- */
+  L.mass(TL, F[7], TR - TL, ST.INT, F[7] + 2); L.mass(TL, F[8], TR - TL, ST.INT, F[8] + 2);
+  L.clear(93, F[6], 12, 2); L.clear(93, F[7], 23, 2); L.clear(105, F[8], 12, 2);
+  L.mv({ kind: 'elev', x: 93, y: F[6], w: 11, h: 1, y0: F[6], y1: F[7], spd: .24, off: 0, pause: .9, cableTop: F[7] + 2, dx: 0, dy: 0 });
+  L.mv({ kind: 'elev', x: 105, y: F[7], w: 11, h: 1, y0: F[7], y1: F[8], spd: .24, off: 1.9, pause: .9, cableTop: CEIL, dx: 0, dy: 0 });
+  L.dec('sign', 88, F[6] - 14, { text: 'AUFZUG ▲', col: '#19f0ff', flick: true, front: true, frame: true });
+  L.dec('sign', 120, F[7] - 14, { text: 'AUFZUG ▲', col: '#19f0ff', flick: true, front: true, frame: true });
+  E(6, [['drone', 66, -12, { elite: true }], ['sniper', 56], ['turret', 76], ['grunt', 124]]);
+  chips(L, 56, F[6] - 2, 90, F[6] - 2, 5, 0);
+  L.laser(120, F[7] - 1, 150, 3.4, 1.2, 0, { h: true });
+  E(7, [['drone', 70, -12, { elite: true }], ['sniper', 150], ['turret', 56]]);
+  E(8, [['sniper', 148], ['mech', 64], ['drone', 130, -10]]);
+  L.pk('hp', 60, F[7] - 2); L.pk('hp', 130, F[8] - 2); chips(L, 50, F[7] - 2, 88, F[7] - 2, 5, 0); L.cp(124, F[8], 'KONTROLLPUNKT 05');
+  /* ---- out onto the facade: balconies, wind, snipers ---- */
+  L.clear(156, F[8] - 12, 4, 12); L.dec('sign', 146, F[8] - 15, { text: 'FASSADE ►', col: '#ffb347', flick: true, front: true });
+  L.mass(160, F[8], 12, ST.METAL, F[8] + 3);
+  const ledges = [[176, 163, 12], [190, 158, 9], [178, 153, 12], [164, 148, 10], [176, 143, 10], [188, 138, 10], [176, 133, 9], [164, 128, 10], [178, 123, 10], [190, 118, 8], [178, 113, 10], [166, 108, 10], [180, 103, 10], [168, 98, 10], [182, 93, 9], [170, 88, 10], [176, 83, 9], [162, 79, 8]];
+  for (const [x, y, w] of ledges) { L.plat(x, y, w, '▔', C.amber); for (let k = 0; k < w; k++) L.set(x + k, y + 1, undefined, k % 2 ? '╥' : '┬', C.amberD); }
+  L.mv({ kind: 'pad', x: 164, y: 118, cx: 172, cy: 118, w: 8, h: 1, amp: 7, f: .9, off: 0, dx: 0, dy: 0 });
+  L.en('sniper', 192, 158); L.en('sniper', 168, 148); L.en('sniper', 184, 123); L.en('drone', 186, 140); L.en('drone', 172, 110, { elite: true }); L.en('gunship', 182, 126); L.en('gunship', 178, 96); L.en('seeker', 188, 108);
+  L.pk('hp', 180, 152); L.pk('hp', 168, 107); chips(L, 164, 160, 178, 82, 14, 6);
+  L.hint(160, 12, F[8] - 12, 14, 'ECHO', 'Draußen, Sam. Die Fassade hat keine Treppen, nur Simse. Spring von Sims zu Sims, der Doppelsprung rettet dich, und Scharfschützen sitzen im Weg.');
+  L.cp(164, 168, 'KONTROLLPUNKT 06');
+  /* ---- the crown: roof garden, the Fassadenwächter, the orbital lift ---- */
+  L.mass(TL, TOP, 112, ST.METAL, TOP + 3);
+  for (const x of [66, 128]) { lattice(L, x, TOP - 22, TOP - 1, C.greyD); L.dec('beacon', x + .5, TOP - 22.5, { col: '#ff3b4d' }); }
+  PROPS.dish(L, 94, TOP); PROPS.antenna(L, 142, TOP); PROPS.antenna(L, 52, TOP); L.dec('steam', 112, TOP - 1, { rate: 9 }); L.dec('steam', 78, TOP - 1, { rate: 8 });
+  L.mass(TL, 36, 112, ST.GLASS, 40); L.mass(40, 36, 4, ST.GLASS, TOP);          // a glass canopy: the roof arena can't be flown over
+  const dR = L.door(150, 40, 36, { mode: 'arena', open: 1, target: 1 }), dL = L.door(58, 40, 36, { mode: 'arena', open: 1, target: 1 });
+  arena(L, 58, 40, 94, 37, [dR, dL], [
+    [['drone', 90, 56, { elite: true }], ['drone', 110, 52, { elite: true }], ['drone', 128, 58, { elite: true }], ['sniper', 72, TOP], ['sniper', 140, TOP]],
+    [['mech', 100, TOP], ['seeker', 80, 60], ['seeker', 118, 58], ['sniper', 72, TOP]],
+    [['mech', 104, TOP, { scale: 2, hp: 100, maxhp: 100, w: 16, h: 14, name: 'FASSADENWÄCHTER' }], ['sniper', 68, TOP], ['sniper', 144, TOP]],
+  ], 'DAS DACH');
+  L.hint(158, 8, 60, 20, 'ECHO', 'Das Dach. Der Fassadenwächter bewacht den Lift. Er ist groß, aber langsam. Bleib in Bewegung.');
+  L.dec('sign', 46, TOP - 12, { text: 'ORBITALLIFT', col: '#5dffb0', flick: true, frame: true, front: true });
+  L.stamp(44, TOP - 6, ['▛▀▀▀▀▜', '█    █', '█ ◙◙ █', '█ ◙◙ █', '█    █', '█    █'], { back: true, d: C.mintD, c: { '◙': C.mint }, a: { '◙': AN.PULSE } });
+  L.zone(45, TOP - 6, 5, 6, { exit: true });
+  L.pk('hp', 150, 70);
+  L.camBox = { x0: 0, x1: W, y0: 0, y1: Hh };
+  finalizeLevel(L);
+  return L;
+}
+
+/* =========================================================================
+   SEKTOR 7 :: ARCADE ORBIT
+   Die Wartehalle am Orbitallift ist ein Spielautomat geworden. Vier Spiele, vier Räume:
+   Jump'n'Run, Pong über dem Abgrund, ein Pac-Man-Gang voller Geister und zuletzt SPACE INVADERS
+   mit Laserkanone, Bunkern, UFO und Mutterschiff.
+   ========================================================================= */
+function buildStage7() {
+  const th = THEMES.arcade, R = RNG(707), Hh = 90, S0 = 70, W = 330, L = new Level(7, W, Hh, th);
+  L.deathY = Hh + 8; L.camRef = 53;
+  L.intro = {
+    title: 'ARCADE ORBIT', sub: 'WARTEHALLE // DER LIFT FÄHRT NUR MIT MÜNZEN // 00:20 UHR',
+    lines: ['ECHO: Der Lift steht, Sam. ZENIT hat die Wartehalle in einen Spielautomaten verwandelt. Wer weiter will, muss gewinnen.',
+      'ECHO: Vier Spiele, vier Räume. Keine Münze, keine Gnade. Und im letzten Raum musst du dich in eine Kanone setzen.']
+  };
+  const floor = [[0, 96], [110, 122], [172, W]];
+  for (const [a, b] of floor) L.mass(a, S0, b - a, ST.ROOF, Hh);
+  L.mass(0, 30, 6, ST.METAL, S0); L.mass(W - 4, 30, 4, ST.METAL, S0);
+  /* the screen behind everything: dark grid, scanlines, big pixel stars */
+  L.bfillFn(0, 20, W, 50, (x, y) => { if ((x % 8 === 0 && y % 4 === 0)) return ['·', C.i2, 0, 0]; if (hash2(x, y) > .993) return ['✦', C.mintD, 0, AN.BLINK]; return null; });
+  const cabinet = (x, y, col) => L.stamp(x, y - 8, ['  ▗▄▄▄▖  ', ' ▟█████▙ ', ' █▒▒▒▒▒█ ', ' █▒◉ ◉▒█ ', ' █▒▒▒▒▒█ ', ' ▜█▄▄▄█▛ ', '  █ ◎ █  ', '  █▄▄▄█  '], { back: true, d: C.greyD, c: { '◉': col, '▒': C.cyanDD, '◎': C.amber }, a: { '◉': AN.PULSE } });
+  const E = (k, x, dy, o) => L.en(k, x, S0 + (dy || 0), o);
+  /* ---- A :: INSERT COIN ---- */
+  L.start = { x: 10, y: S0 };
+  L.dec('sign', 8, 46, { text: 'ARCADE ORBIT', col: '#5dffb0', flick: true, frame: true });
+  L.dec('sign', 24, 58, { text: 'INSERT COIN', col: '#ffe45e', flick: true, front: true });
+  cabinet(34, S0, '#5dffb0'); cabinet(46, S0, '#ff2fb9'); cabinet(76, S0, '#19f0ff');
+  L.hint(2, 18, S0 - 12, 14, 'ECHO', TX('Spiel eins: Jump n Run. Pixelhüpfer springen dich an, hol dir die Münzen. A und D laufen, LEERTASTE springt, ein zweiter Druck in der Luft gibt den Doppelsprung.', 'Spiel eins: Jump n Run. Pixelhüpfer springen dich an, hol dir die Münzen. Der Doppelsprung hilft bei jeder Lücke.'));
+  E('pixel', 38); E('pixel', 52); E('drone', 44, -14); L.pk('hp', 26, S0 - 2); chips(L, 16, S0 - 3, 56, S0 - 3, 10, 0); L.cp(30, S0, 'KONTROLLPUNKT 01');
+  /* ---- B :: stairs and the first pit ---- */
+  const heights = [1, 2, 3, 4, 3, 2, 1];
+  heights.forEach((h, i) => { L.mass(60 + i * 4, S0 - h, 4, ST.ROOF, S0); });
+  L.plat(62, S0 - 8, 5, '▀', C.yel); L.plat(74, S0 - 11, 5, '▀', C.yel); chips(L, 58, S0 - 6, 90, S0 - 4, 12, 3);
+  for (const x of [62, 74]) L.dec('sign', x + 1, S0 - (x === 62 ? 10 : 13), { text: '?', col: '#ffe45e', flick: true });
+  E('pixel', 70); E('pixel', 84); E('ghost', 90, -8); E('pixel', 92);
+  L.dec('sign', 98, 80, { text: 'GAME OVER', col: '#ff3b4d', flick: true, front: true });
+  L.mv({ kind: 'pad', x: 96, y: S0 - 1, cx: 100, cy: S0 - 1, w: 6, h: 1, amp: 2, f: 1.1, off: 0, dx: 0, dy: 0 });
+  L.mv({ kind: 'pad', x: 104, y: S0 - 1, cx: 106, cy: S0 - 3, w: 6, h: 1, amp: 2, f: 1.1, off: 2, ampy: 2, dx: 0, dy: 0 });
+  /* ---- C :: PONG over a long pit ---- */
+  L.dec('sign', 126, 40, { text: 'P O N G', col: '#19f0ff', flick: true, frame: true });
+  for (let i = 0; i < 4; i++) L.mv({ kind: 'pad', x: 125 + i * 14, y: S0 - 5, cx: 127 + i * 14, cy: S0 - 5, w: 6, h: 1, amp: 0, ampy: 4, f: 1.5, off: i * 1.7, dx: 0, dy: 0 });
+  L.blade(147, 60, 22, 5, 1.8, 0, 2.2); L.blade(147, 56, 20, 3, 1.3, 2.4, 1.6);
+  chips(L, 126, S0 - 9, 168, S0 - 9, 12, 4); E('drone', 140, -18, { elite: true }); E('drone', 160, -20, { elite: true });
+  L.dec('sign', 142, 80, { text: 'GAME OVER', col: '#ff3b4d', flick: true, front: true });
+  L.cp(176, S0, 'KONTROLLPUNKT 02');
+  /* ---- D :: the Pac-Man corridor: pellets, ghosts, power pills ---- */
+  L.mass(182, S0 - 12, 48, ST.METAL, S0 - 10);
+  for (const x of [188, 202, 216]) L.mass(x, S0 - 2, 4, ST.METAL, S0);
+  for (let x = 184; x < 228; x += 2) L.pk('chip', x + .5, S0 - 3);
+  L.pk('hp', 190, S0 - 3); L.pk('hp', 222, S0 - 3);
+  L.dec('sign', 190, S0 - 18, { text: 'P A C - G A N G', col: '#ffe45e', flick: true, frame: true });
+  E('ghost', 192, -5); E('ghost', 204, -6); E('ghost', 214, -5); E('ghost', 224, -6); E('pixel', 198); E('pixel', 210);
+  L.hint(180, 10, S0 - 12, 14, 'ECHO', 'Pac-Gang. Die Geister gleiten durch Wände, rennen bringt nichts. Schieß sie ab und friss die Punkte.');
+  /* ---- E :: SPACE INVADERS ---- */
+  const AX0 = 244, AX1 = 310, FY = S0;
+  L.dec('sign', 234, 50, { text: 'SPACE INVADERS', col: '#ff2fb9', flick: true, frame: true });
+  L.cp(234, S0, 'KONTROLLPUNKT 03');
+  L.mass(238, 0, 80, ST.METAL, 36);                        // the machine's roof, all the way up so nobody flies over it
+  const dL = L.door(240, 36, 34, { mode: 'inv', open: 1, target: 1 }), dR = L.door(312, 36, 34, { mode: 'inv', open: 0, target: 0 });
+  const bunkers = [[250, 61, 10, 4], [266, 61, 10, 4], [282, 61, 10, 4], [298, 61, 10, 4]];
+  for (const [x, y, w, h] of bunkers) { L.brkRect(x, y, w, h, ST.METAL); L.clear(x + 3, y + 2, 4, 2); L.clear(x, y, 1, 1); L.clear(x + w - 1, y, 1, 1); }
+  L.bfill(AX0 - 2, 36, AX1 - AX0 + 4, 34, 0, 0, C.ink);
+  L.bfillFn(AX0 - 2, 36, AX1 - AX0 + 4, 34, (x, y) => (y % 3 === 0 ? ['─', C.i1, C.ink, 0] : hash2(x, y) > .992 ? ['·', C.mintD, C.ink, AN.BLINK] : null));
+  for (let x = AX0; x < AX1; x++) L.bset(x, FY - 1, '▁', C.mintD);
+  L.dec('sign', 262, 38, { text: 'SCORE  000000      HI-SCORE  999999', col: '#5dffb0', flick: false, front: false });
+  L.inv = { x0: AX0, x1: AX1, fy: FY, cx: (AX0 + AX1) / 2, trig: { x: AX0 + 1, y: S0 - 14, w: 8, h: 15 }, doors: [dL, dR], bunkers: bunkers.map(([x, y, w, h]) => ({ x, y, w, h })), respawn: { x: 234, y: S0 }, after: { x: 318, y: S0 } };
+  L.pk('hp', 244, S0 - 3);
+  /* ---- the way out ---- */
+  L.cp(318, S0, 'KONTROLLPUNKT 04');
+  cabinet(322, S0, '#ffe45e');
+  L.dec('sign', 316, 56, { text: 'WARP ► ZENIT', col: '#5dffb0', flick: true, frame: true });
+  L.zone(318, S0 - 6, 8, 6, { exit: true });
+  L.camBox = { x0: 0, x1: W, y0: 0, y1: Hh };
+  finalizeLevel(L);
+  return L;
+}
+
+/* =========================================================================
+   SEKTOR 8 :: ZENIT
+   Die Orbitalstation, 400 Kilometer über der Erde, Schwerkraft nur 45 Prozent. Andockbucht,
+   Solarfeld (Gleiter!), Reaktorring mit Auftriebsschacht, der Koloss als Torwächter und zuletzt der
+   Kern: ZENITH, das Gehirn der Station. Danach ist das Signal verstummt.
+   ========================================================================= */
+function buildStage8() {
+  const th = THEMES.orbit, R = RNG(808), Hh = 110, W = 470, F = 80, L = new Level(8, W, Hh, th);
+  L.deathY = Hh + 10; L.camRef = 62; L.gmul = .45; L.gbase = .45;
+  L.intro = {
+    title: 'ZENIT', sub: 'ORBITALSTATION // 400 KM HÖHE // SCHWERKRAFT 45 PROZENT // 02:40 UHR',
+    lines: ['ECHO: Das ist ZENIT, Sam. Hier laufen alle Signale zusammen, auch Archons. Dahinter sitzt etwas, das größer ist als er.',
+      'ECHO: Die Schwerkraft ist schwach. Du springst hoch und weit, aber du bremst auch schlecht. Nimm den Gleiter, wenn du willst.']
+  };
+  const hull = (x, y, w, t) => { L.mass(x, y, w, ST.HULL, y + (t || 3)); };
+  const strut = (x, y, h) => { for (let yy = y; yy < y + h; yy++) { L.bset(x, yy, yy % 4 === 0 ? '╫' : '║', C.greyDD); L.bset(x + 1, yy, yy % 4 === 0 ? '╫' : '║', C.greyDD); } };
+  const pod = (x, y, w, t) => { hull(x, y, w, t || 4); strut(x + 2, y + (t || 4), 8); strut(x + w - 4, y + (t || 4), 8); L.dec('beacon', x + .5, y - .5, { col: '#19f0ff' }); L.dec('beacon', x + w - .5, y - .5, { col: '#ff3b4d' }); };
+  const panel = (x, y, w, h) => L.bfillFn(x, y, w, h, (xx, yy, i, j) => [(i % 6 === 0 || j % 4 === 0) ? '┼' : 0, C.cyanDD, ((i / 6 | 0) + (j / 4 | 0)) % 2 ? C.i1 : C.i2, 0]);
+  const E = (k, x, y, o) => L.en(k, x, y, o);
+
+  /* ---- 1 :: the docking bay ---- */
+  hull(0, F, 74, 8); L.mass(0, F - 34, 4, ST.HULL, F); L.mass(0, F - 38, 74, ST.HULL, F - 34);
+  L.bfill(4, F - 34, 70, 34, 0, 0, C.hull0);
+  for (let x = 8; x < 70; x += 14) L.bfillFn(x, F - 28, 8, 14, (xx, yy, i, j) => [(i === 0 || j === 0 || i === 7 || j === 13) ? '▒' : 0, C.hullL, (j > 2 && j < 12 && i > 0 && i < 7) ? C.b2 : C.hull1, 0]);
+  L.dec('sign', 10, F - 30, { text: 'ZENIT // DECK 1', col: '#19f0ff', flick: true, frame: true });
+  L.start = { x: 12, y: F }; L.cp(12, F, 'KONTROLLPUNKT 01');
+  L.hint(4, 24, F - 12, 14, 'ECHO', TX('Schwerkraft 45 Prozent. Dein Sprung trägt dich dreimal so weit wie sonst. Der Gleiter da vorn schwebt über das Solarfeld, V steigt ein.', 'Schwerkraft 45 Prozent. Dein Sprung trägt dich weit. Der Gleiter da vorn schwebt über das Solarfeld, REIN steigt ein.'));
+  L.veh('hover', 40, F, { face: 1 });
+  E('orb', 52, F - 14); E('drone', 30, F - 12); E('grunt', 60, F); L.pk('hp', 26, F - 2); chips(L, 16, F - 4, 68, F - 20, 12, 8);
+  /* ---- 2 :: the solar field: pods across the void ---- */
+  panel(94, 26, 22, 24); panel(128, 32, 22, 24); panel(160, 28, 22, 24); strut(104, 50, 18); strut(138, 56, 12); strut(170, 52, 16);
+  pod(86, F, 14); pod(116, F - 8, 12); pod(142, F - 16, 14); pod(172, F - 8, 18);
+  L.mv({ kind: 'pad', x: 104, y: F - 3, cx: 108, cy: F - 4, w: 7, h: 1, amp: 5, f: 1.0, off: 0, dx: 0, dy: 0 });
+  L.mv({ kind: 'pad', x: 129, y: F - 12, cx: 133, cy: F - 12, w: 7, h: 1, amp: 5, f: .95, off: 2, dx: 0, dy: 0 });
+  L.mv({ kind: 'pad', x: 158, y: F - 12, cx: 162, cy: F - 12, w: 7, h: 1, amp: 5, f: 1.05, off: 4, dx: 0, dy: 0 });
+  E('orb', 96, F - 16); E('orb', 126, F - 24); E('orb', 150, F - 30); E('seeker', 108, F - 14); E('seeker', 136, F - 24); E('seeker', 160, F - 22); E('drone', 120, F - 22, { elite: true }); E('drone', 166, F - 24, { elite: true });
+  L.pk('hp', 120, F - 10); L.pk('hp', 146, F - 18); chips(L, 90, F - 3, 190, F - 11, 22, 14); L.cp(146, F - 16, 'KONTROLLPUNKT 02');
+  L.hint(86, 14, F - 14, 16, 'ECHO', 'Das Solarfeld. Die Orbs sind Wachsatelliten und schießen Dreierfächer. Zerstör sie oder spring aus der Linie.');
+  /* ---- 3 :: the reactor ring, with a lift shaft ---- */
+  const RF = F - 8;
+  hull(190, RF, 66, 6); L.mass(190, RF - 38, 4, ST.HULL, RF - 14); L.mass(190, RF - 42, 66, ST.HULL, RF - 38);
+  L.bfill(194, RF - 38, 62, 38, 0, 0, C.hull0); panel(194, RF - 36, 62, 36);
+  L.plat(198, RF - 14, 16, '▔', C.cyan); L.plat(232, RF - 14, 16, '▔', C.cyan); L.plat(204, RF - 28, 14, '▔', C.mag); L.plat(228, RF - 28, 14, '▔', C.mag);
+  L.vent(216, RF - 36, 8, 36);
+  L.dec('sign', 200, RF - 36, { text: 'REAKTORRING', col: '#ffb347', flick: true, frame: true });
+  L.laser(198, RF - 36, RF - 1, 3.6, 1.2, 0); L.laser(246, RF - 36, RF - 1, 3.6, 1.2, 1.8);
+  L.blade(222, RF - 20, 12, 0, 1.8, 0, 2.2);
+  E('mech', 206, RF); E('mech', 240, RF); E('orb', 210, RF - 22); E('orb', 236, RF - 30); E('seeker', 222, RF - 30); L.pk('hp', 224, RF - 2); L.cp(194, RF, 'KONTROLLPUNKT 03');
+  chips(L, 200, RF - 3, 250, RF - 3, 8, 0); chips(L, 202, RF - 16, 246, RF - 16, 8, 0); chips(L, 206, RF - 30, 240, RF - 30, 8, 0);
+  L.hint(196, 14, RF - 12, 14, 'ECHO', 'Der Reaktorring. Hinten an der Wand siehst du die Lüftungsschächte. Der Schacht in der Mitte trägt dich hoch, wenn du hineinspringst.');
+  /* ---- 4 :: the gatekeeper ---- */
+  const KY = RF;
+  hull(256, KY, 76, 6); L.mass(256, 0, 214, ST.HULL, KY - 32);   // one solid block above the gatekeeper hall, the corridor and the core
+  L.mass(256, KY - 36, 76, ST.HULL, KY - 32);
+  L.bfill(260, KY - 32, 68, 32, 0, 0, C.hull0); panel(260, KY - 32, 68, 32);
+  const dKl = L.door(258, KY - 32, 32, { mode: 'arena', open: 1, target: 1 }), dKr = L.door(328, KY - 32, 32, { mode: 'arena', open: 1, target: 1 });
+  L.plat(272, KY - 12, 12, '▔', C.cyan); L.plat(304, KY - 12, 12, '▔', C.cyan); L.plat(288, KY - 22, 12, '▔', C.mag);
+  L.dec('sign', 280, KY - 30, { text: 'TORWÄCHTER', col: '#ff3b4d', flick: true, frame: true, front: true });
+  arena(L, 262, KY - 32, 62, 32, [dKl, dKr], [
+    [['koloss', 300, KY], ['orb', 274, KY - 22], ['orb', 312, KY - 24]],
+    [['mech', 276, KY], ['mech', 312, KY], ['orb', 292, KY - 26], ['seeker', 284, KY - 20], ['seeker', 300, KY - 22]],
+  ], 'TORWÄCHTER');
+  L.pk('hp', 292, KY - 2); L.cp(262, KY, 'KONTROLLPUNKT 04');
+  /* ---- 5 :: the approach and the core ---- */
+  hull(332, KY, 38, 6); L.mass(332, KY - 36, 38, ST.HULL, KY - 32);
+  L.bfill(332, KY - 32, 38, 32, 0, 0, C.hull0); panel(332, KY - 32, 38, 32);
+  L.dec('sign', 340, KY - 28, { text: 'KERNKAMMER ►', col: '#ff2fb9', flick: true, frame: true, front: true });
+  L.veh('hover', 344, KY, { face: 1 }); L.cp(340, KY, 'KONTROLLPUNKT 05'); L.pk('hp', 352, KY - 2); L.pk('hp', 360, KY - 2);
+  L.hint(334, 20, KY - 12, 14, 'ECHO', 'Hinter dieser Tür sitzt ZENITH. Seine Orbs bilden einen Schild. Erst alle Orbs zerstören, dann liegt der Kern frei. Und schieß schnell.');
+  const AX0 = 376, AX1 = 462, CX = (AX0 + AX1) / 2;
+  hull(370, KY, 100, 8); L.mass(370, KY - 40, 100, ST.HULL, KY - 36); L.mass(462, KY - 40, 8, ST.HULL, KY);
+  L.bfill(370, KY - 36, 92, 36, 0, 0, C.hull0); panel(370, KY - 36, 92, 36);
+  L.mass(370, KY - 36, 6, ST.HULL, KY - 14); L.clear(370, KY - 14, 6, 14);
+  const door = L.door(370, KY - 14, 14, { mode: 'arena', open: 1, target: 1 });
+  L.plat(384, KY - 8, 14, '▔', C.cyan); L.plat(440, KY - 8, 14, '▔', C.cyan);
+  for (const x of [384, 440]) for (let i = 0; i < 14; i++) L.set(x + i, KY - 7, undefined, '▀', C.cyanDD);
+  L.dec('sign', CX - 6, KY - 34, { text: 'Z E N I T H', col: '#ff3b4d', flick: true, frame: true });
+  L.zone(AX0 - 2, KY - 32, 6, 33, {
+    once: true, fn() {
+      door.target = 0; S.cam.lock = { x: CX, y: KY - 12.5, x0: AX0 - 6, x1: AX1 + 4 }; L.camBox = null; S.respawn = { x: AX0 + 2, y: KY }; MUS.inten_t = 1; musPlay('boss2');
+      setTimeout(() => { if (S.L === L && !S.boss) { const zb = spawnBoss(CX, KY - 15, { x0: AX0, w: AX1 - AX0, floor: KY }, 'zenith'); if (zb) zb.y = KY - 36; banner('ZENITH', 'DAS GEHIRN DER STATION', C.red); sfx('bigboom', .7); shake(1); glitchAmt = 1; } }, 900);
+      say('ECHO', 'Das ist ZENITH, Sam. Zerstör seine Orbs, dann bricht der Schild. Und halt dich fest, wenn die Schwerkraft zu schwanken beginnt.', 6);
+    }
+  });
+  L.camBox = { x0: 0, x1: W, y0: 0, y1: Hh };
+  L.bossArena = { x0: AX0, x1: AX1, floor: KY };
+  L.bossOff = ['ZENITH OFFLINE', 'DAS SIGNAL IST VERSTUMMT'];
+  finalizeLevel(L);
+  return L;
+}
+
+/* =========================================================================
    MAIN :: scenes, stage loading, loop
    scenes: boot -> title -> intro -> play <-> pause -> clearing -> clear -> intro...
                                       play -> (boss dies) -> ending -> title
@@ -3534,6 +4741,10 @@ const STAGES = [
   { build: buildStage2, name: 'NEON BASAR', sub: 'STRASSENEBENE // KOWLOON-TÜRME', par: 230 },
   { build: buildStage3, name: 'MERIDIAN TURM', sub: 'KONZERNINNERES // EBENEN 01-88', par: 300 },
   { build: buildStage4, name: 'DIE SPITZE', sub: 'GIPFELAUFSTIEG // ARCHON', par: 240 },
+  { build: buildStage5, name: 'NEON GRAND PRIX', sub: 'DAS RENNEN // ORBITAL-RING', par: 200 },
+  { build: buildStage6, name: 'KRONOS-TURM', sub: 'FASSADENAUFSTIEG // EBENE 0-300', par: 330 },
+  { build: buildStage7, name: 'ARCADE ORBIT', sub: 'LIFTSTATION // SPIEL ODER STIRB', par: 300 },
+  { build: buildStage8, name: 'ZENITH', sub: 'ORBITALSTATION // SCHWERELOS', par: 330 },
 ];
 const G = { scene: 'boot', t: 0, sel: 0, stage: 0, introT: 0, clearT: 0, endT: 0, pauseSel: 0, base: null, stats: null, fade: 1, started: false, titleL: null, camGY: 40 };
 const STEP = 1 / 60;
@@ -3544,7 +4755,7 @@ function clearTransient() {
   S.banner = null; S.boss = null; S.zap = null; S.phase3 = false; S.bossBody = null; S.lightning = 0; S.lbolt = null; S.lightningT = undefined; S.flash = 0; S.freeze = 0; S.slow = 1;
   S.bossFinal = false; S.endTimer = 0; S.bossFx = 0; S.bossDeadT = 0;
   S.cam.lock = null; S.cam.shake = 0; S.respawn = null; MUS.inten = 0; MUS.inten_t = 0; glitchAmt = 0;
-  S.veh = []; S.rkt = []; S.near = null; S.vseen = {};
+  S.veh = []; S.rkt = []; S.near = null; S.vseen = {}; S.race = null; S.inv = null;
 }
 function loadStage(i, wpns) {
   const L = STAGES[i].build();
@@ -3554,7 +4765,7 @@ function loadStage(i, wpns) {
   buildSky(L.th, L.camRef);
   for (const e of L.ents) spawnEnemy(Object.assign({}, e));
   for (const k of L.pks) S.pks.push({ k: k.k, x: k.x, y: k.y, t: 0 });
-  resetVehicles();
+  resetVehicles(); initRace(); initInvaders();
   S.cam.x = 0; S.cam.y = 0; updCam(.016, true);
   G.base = { score: S.score, kills: S.kills, chips: S.chips, deaths: S.deaths };
   glitchAmt = 0;
@@ -3593,7 +4804,7 @@ function bossDieStep(dt) {
     sfx('bigboom'); sfx('bigboom', .6); musStop();
   } else if (bd > 3.4 && S.mode === 'bossdie') {
     S.mode = 'play'; S.cam.lock = null; S.L.doors.forEach(d => { if (d.mode === 'arena') d.target = 1; }); MUS.inten_t = 0;
-    banner('ARCHON OFFLINE', 'DIE SPITZE IST DUNKEL', C.mint); S.pks.push({ k: 'hp', x: b.x, y: S.L.bossArena.floor - 2, t: 0 }); sfx('cp');
+    { const bo = S.L.bossOff || ['ARCHON OFFLINE', 'DIE SPITZE IST DUNKEL']; banner(bo[0], bo[1], C.mint); } S.pks.push({ k: 'hp', x: b.x, y: S.L.bossArena.floor - 2, t: 0 }); sfx('cp');
     S.endTimer = 0;
   }
 }
@@ -3604,7 +4815,7 @@ function stepPlay(dt) {
   if (S.mode === 'bossdie') bossDieStep(dt);
   const sdt = dt * (S.slow || 1);
   updWorld(sdt); updCam(sdt);
-  if (S.mode === 'play' && S.bossFinal) { S.endTimer = (S.endTimer || 0) + dt; if (S.endTimer > 3.2) { G.scene = 'ending'; G.endT = 0; S.bossFinal = false; computeStats(); musPlay('title'); } }
+  if (S.mode === 'play' && S.bossFinal) { S.endTimer = (S.endTimer || 0) + dt; if (S.endTimer > 3.2) { S.bossFinal = false; if (G.stage < STAGES.length - 1) stageClear(); else { G.scene = 'ending'; G.endT = 0; computeStats(); musPlay('title'); } } }
 }
 
 /* ---------------- title ---------------- */
@@ -3698,10 +4909,10 @@ function drawClear(t) {
   if (k > 3 && Math.floor(k * 1.8) % 2 === 0) txtC(G.stage < STAGES.length - 1 ? (TC.on ? '[ TIPPEN :: NÄCHSTER SEKTOR ]' : '[ ENTER :: NÄCHSTER SEKTOR ]') : (TC.on ? '[ TIPPEN ]' : '[ ENTER ]'), COLS / 2, y + 24.2, '#5dffb0');
 }
 const END_LINES = [
-  ['ECHO', 'Archon ist erledigt. Das ganze Netz hat gerade ausgeatmet.'],
-  ['ECHO', 'Auf jedem Bildschirm in Meridian blinkt es. Niemand gibt mehr Befehle.'],
-  ['ECHO', 'Sieh dir die Skyline an, Sam. Zum ersten Mal gehört sie denen, die darunter leben.'],
-  ['ECHO', 'Gut gemacht, Samuel Aumann. Die Stadt hat einen neuen Helden: Super Sam.'],
+  ['ECHO', 'ZENITH ist offline. Das Signal, dem wir gefolgt sind, ist verstummt.'],
+  ['ECHO', 'Zum ersten Mal sind Sprawl, Turm und Station getrennt. Niemand gibt mehr Befehle.'],
+  ['ECHO', 'Sieh nach unten, Sam. Das ist die Erde, und sie gehört denen, die darauf leben.'],
+  ['ECHO', 'Gut gemacht, Samuel Aumann. Die Stadt hat einen Helden, und der Himmel auch.'],
 ];
 function drawEnding(t) {
   drawWorld(t); const k = G.endT; drawBand(0, ROWS, clamp(k * .3, 0, .78));
@@ -3765,7 +4976,7 @@ function update(dt) {
   if (G.scene === 'title') {
     if (pressed('ArrowRight') || pressed('KeyD')) { G.sel = (G.sel + 1) % STAGES.length; sfx('select'); }
     if (pressed('ArrowLeft') || pressed('KeyA')) { G.sel = (G.sel + STAGES.length - 1) % STAGES.length; sfx('select'); }
-    if (pressed('Digit1') || pressed('Digit2') || pressed('Digit3') || pressed('Digit4')) { for (let i = 1; i <= 4; i++) if (pressed('Digit' + i)) G.sel = i - 1; sfx('select'); }
+    if ([1, 2, 3, 4, 5, 6, 7, 8].some(i => pressed('Digit' + i))) { for (let i = 1; i <= 8; i++) if (pressed('Digit' + i)) G.sel = i - 1; sfx('select'); }
     if (pressed('Enter') || pressed('Space') || pressed('NumpadEnter') || MOUSE.lp) { activateAudio(); resetRun(); G.carry = null; sfx('pick'); beginStage(G.sel); endFrameInput(); return; }
     updTitle(dt); musPlay('title'); endFrameInput(); return;
   }
