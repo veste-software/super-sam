@@ -32,9 +32,9 @@ function slab(L, x, top, w, legs) { L.mass(x, top, w, ST.BRICK, top + 8); if (le
 function walkers(L, R, x0, x1, n, y) { for (let i = 0; i < n; i++) L.dec('npc', R.r(x0, x1), y, { kind: 'walker', x0, x1, dir: R() < .5 ? -1 : 1, col: R.pick(NEON), umb: R() < .7, ph: R() * 4, sp: R.r(1.2, 3) }); }
 
 function buildStage2() {
-  const th = THEMES.bazaar, R = RNG(202), Hh = 112, S0 = 84, L = new Level(2, 760, Hh, th); L.deathY = Hh + 12; L.camRef = 64;
+  const th = THEMES.bazaar, R = RNG(202), Hh = 112, S0 = 84, L = new Level(2, 1080, Hh, th); L.deathY = Hh + 12; L.camRef = 64;
   L.intro = { title: 'NEON BASAR', sub: 'KOWLOON-TÜRME // UNTERER MARKT // 03:31 UHR', lines: [] };
-  L.mass(0, S0, 300, ST.ASPH); L.mass(524, S0, 236, ST.ASPH);
+  L.mass(0, S0, 300, ST.ASPH); L.mass(524, S0, 556, ST.ASPH);
   L.wet = { y: S0, x0: 0, x1: 300, h: 13, a: .34 };
   facades(L, R, 0, 300, S0, 30, 40); facades(L, R, 524, 760, S0, 28, 40);
   L.start = { x: 8, y: S0 };
@@ -108,9 +108,38 @@ function buildStage2() {
     [['turret', 634, S0], ['grunt', 648, S0], ['drone', 640, 74, { elite: true }]],
     [['warden', 648, S0], ['grunt', 634, S0]],
   ], 'DIE GRUBE');
-  L.dec('sign', 690, S0 - 12, { text: 'LASTENAUFZUG', col: '#19f0ff', flick: false, frame: true });
-  L.zone(716, S0 - 8, 8, 12, { exit: true }); solid(L, 732, S0 - 12, ['▛▀▀▀▀▀▀▀▀▀▀▀▀▜', '█            █', '█            █', '█            █', '█            █', '█            █', '█            █', '█            █', '█            █', '█            █', '█            █', '▙▄▄▄▄▄▄▄▄▄▄▄▄▟'], C.greyD);
-  L.camBox = { x0: 0, x1: 744, y0: 0, y1: Hh };
+  /* ---- FLUCHTWAGEN: the vehicle section. A parked car, a long street, an overpass with turrets, barricades, two gaps, raiders and gunships.
+         A workshop at the far end holds a checkpoint, repairs and a spare car, so the whole street never has to be driven twice. ---- */
+  facades(L, RNG(808), 760, 1080, S0, 28, 40);
+  const pit = (x, w) => { L.clear(x, S0, w, Hh - S0); L.bfill(x, S0, w, Hh - S0, 0, 0, C.blk); for (let i = 0; i < w; i++) { L.bset(x + i, S0, i % 2 ? '▚' : '▞', C.amber, C.blk); } L.bset(x - 1, S0 - 1, '▮', C.amber); L.bset(x + w, S0 - 1, '▮', C.amber); };
+  const barrier = (x, rows, col) => solid(L, x, S0 - rows.length, rows, col);
+  L.cp(670, S0, 'KONTROLLPUNKT 06');
+  L.veh('car', 690, S0, { face: 1, bounds: { x0: 662, x1: 1064 } });
+  L.dec('sign', 674, S0 - 14, { text: 'FLUCHTWAGEN  //  TANK VOLL', col: '#ffe45e', frame: true, flick: true }); L.dec('beacon', 685.5, S0 - .6, { col: '#ffe45e' }); L.dec('beacon', 694.5, S0 - .6, { col: '#ffe45e' });
+  L.hint(662, 14, S0 - 9, 12, 'ECHO', TX('Dein Fluchtwagen, Sam! Steig ein mit V. A und D geben Gas, LEERTASTE springt, SHIFT ist Turbo. Fahr die Fußtruppen um und spring über Sperren und Lücken.', 'Dein Fluchtwagen, Sam! Tipp auf REIN. Linker Stick gibt Gas, hoch springt, TURBO gibt Schub. Fahr die Fußtruppen um und spring über Sperren und Lücken.'));
+  L.en('grunt', 738, S0); L.en('grunt', 754, S0); L.en('grunt', 772, S0); L.pk('hp', 742, S0 - 2);
+  L.mass(800, S0 - 11, 36, ST.METAL, S0 - 9); lattice(L, 802, S0 - 9, S0 - 1, C.greyDD); lattice(L, 832, S0 - 9, S0 - 1, C.greyDD);
+  L.dec('sign', 808, S0 - 14, { text: 'FUSSGÄNGERBRÜCKE', col: '#ff2fb9', flick: true, frame: true });
+  L.en('turret', 812, S0 - 7, { dir: 'down' }); L.en('turret', 826, S0 - 7, { dir: 'down' }); L.en('grunt', 810, S0 - 11); L.en('grunt', 826, S0 - 11);
+  L.en('raider', 856, S0); L.en('raider', 876, S0);
+  barrier(894, ['▛▀▜▛▀▜', '▙▄▟▙▄▟'], C.rust); L.dec('sign', 892, S0 - 8, { text: 'SPERRE', col: '#ff3b4d', flick: true });
+  barrier(918, ['▛▀▀▀▜', '█▒▒▒█', '█▒▒▒█'], C.rustD);
+  L.pk('hp', 908, S0 - 2); chips(L, 700, S0 - 2, 790, S0 - 2, 10, 0); chips(L, 840, S0 - 2, 888, S0 - 2, 8, 0);
+  pit(940, 12); L.dec('sign', 924, S0 - 12, { text: 'BRÜCKE GESPERRT', col: '#ffb347', flick: true, frame: true });
+  chips(L, 934, S0 - 4, 958, S0 - 4, 7, 6);
+  L.en('gunship', 972, 64); L.en('raider', 968, S0); L.en('raider', 984, S0); L.pk('hp', 962, S0 - 2);
+  pit(1004, 18); L.dec('sign', 986, S0 - 12, { text: 'TURBO  NÖTIG', col: '#19f0ff', flick: true, frame: true });
+  chips(L, 998, S0 - 4, 1030, S0 - 4, 9, 8);
+  L.cp(1036, S0, 'KONTROLLPUNKT 07'); L.veh('car', 1048, S0, { face: 1, bounds: { x0: 662, x1: 1064 } });
+  L.dec('sign', 1030, S0 - 14, { text: 'WERKSTATT  //  ERSATZWAGEN', col: '#5dffb0', frame: true, flick: false }); L.pk('hp', 1040, S0 - 2); L.pk('hp', 1056, S0 - 2);
+  L.en('turret', 1022, S0); L.en('raider', 1030, S0); L.en('gunship', 1042, 66, { hp: 26, maxhp: 26 });
+  L.dec('sign', 1058, S0 - 12, { text: 'LASTENAUFZUG', col: '#19f0ff', flick: false, frame: true });
+  L.zone(1056, S0 - 8, 8, 12, { exit: true });
+  solid(L, 1066, S0 - 12, ['▛▀▀▀▀▀▀▀▀▀▀▀▀▜', '█            █', '█            █', '█            █', '█            █', '█            █', '█            █', '█            █', '█            █', '█            █', '█            █', '▙▄▄▄▄▄▄▄▄▄▄▄▄▟'], C.greyD);
+  for (let i = 0; i < 8; i++) L.dec('flyer', 0, S0 - 20 - (i * 5) % 16, { kind: 'car', x0: 0, x1: 300, sp: 8 + (i % 4) * 3, dir: i % 2 ? 1 : -1, ph: i / 8, col: NEON[i % NEON.length] });
+  for (let i = 0; i < 12; i++) L.dec('flyer', 0, S0 - 20 - (i * 5) % 18, { kind: 'car', x0: 524, x1: 1080, sp: 8 + (i % 4) * 3, dir: i % 2 ? 1 : -1, ph: i / 12, col: NEON[i % NEON.length] });
+  L.dec('flyer', 0, S0 - 34, { kind: 'heli', x0: 524, x1: 1080, sp: 6, dir: -1, ph: .2, dim: .4 }); L.dec('flyer', 0, S0 - 30, { kind: 'heli', x0: 0, x1: 300, sp: 5, dir: 1, ph: .5, dim: .4 });
+  L.camBox = { x0: 0, x1: 1080, y0: 0, y1: Hh };
   finalizeLevel(L);
   return L;
 }

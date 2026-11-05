@@ -286,6 +286,11 @@ function sfx(n, v) {
     case 'vent': nz(.5, .22 * v, 'bandpass', 700, 2500, 0, null, 1.5); break;
     case 'stomp': nz(.35, .8 * v, 'lowpass', 700, 50); tone('sine', 70, 25, .35, .8 * v); break;
     case 'blip': tone('square', 1200, 1200, .02, .04 * v); break;
+    case 'board': tone('square', 200, 120, .09, .22 * v); nz(.12, .3 * v, 'lowpass', 1200, 200); tone('sawtooth', 160, 520, .35, .12 * v, .05, null, { lp: 1500 }); break;
+    case 'rocket': nz(.5, .4 * v, 'bandpass', 1200, 5000, 0, null, 1.5); tone('sawtooth', 300, 90, .45, .18 * v, 0, null, { lp: 2000, lp2: 200 }); break;
+    case 'rocketHit': nz(.25, .3 * v, 'highpass', 3000, 800); break;
+    case 'rotor': nz(.07, .17 * v, 'lowpass', 320, 110); tone('triangle', 62, 52, .07, .1 * v); break;
+    case 'engine': tone('sawtooth', 50 + v * 55, 45 + v * 45, .13, .07 * v, 0, null, { lp: 520 }); nz(.05, .04 * v, 'lowpass', 600, 200); break;
   }
 }
 

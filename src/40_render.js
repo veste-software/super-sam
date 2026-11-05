@@ -224,6 +224,7 @@ function drawDecor(t, layer) {
         wgl(wk && f ? '▟' : '▐', x + .5, y + 3, '#5a6ab0', .55); wgl(wk && f ? '▙' : '▌', x + 1.5, y + 3, '#5a6ab0', .55);
         break;
       }
+      case 'flyer': if (layer === (d.front ? 1 : 0)) drawFlyer(d, t); break;
       case 'vent': break;
     }
   }
@@ -334,7 +335,8 @@ function drawEnemy(e, t) {
     const hp = e.hp / e.maxhp, bw = 12; txtPx('▐' + '█'.repeat(Math.round(bw * hp)) + '░'.repeat(bw - Math.round(bw * hp)) + '▌', Math.round((e.x - bw / 2 - 1) * CW - CXp), Math.round((e.y - 7.4) * CH - CYp), '#ff3b4d', .9);
   } else if (e.k === 'seeker') {
     const p = .6 + .4 * Math.sin(t * 14 + e.seed), c = fl ? '#fff' : '#ff3b4d'; wgl('▟', e.x - 1, e.y - 2, c, p); wgl('▙', e.x, e.y - 2, c, p); wgl('▜', e.x - 1, e.y - 1, c, p); wgl('▛', e.x, e.y - 1, c, p); glow(e.x, e.y - 1, 4, '#ff3b4d', .4 * p);
-  } else if (e.k === 'boss') drawBoss(e, t);
+  } else if (e.k === 'gunship' || e.k === 'raider') drawEnemyVeh(e, t);
+  else if (e.k === 'boss') drawBoss(e, t);
 }
 function drawBoss(e, t) {
   const cx = e.x, cy = e.y - 5, fl = e.flash > 0, ph = e.ph, P = S.P;
@@ -452,7 +454,7 @@ function drawWorld(t) {
   for (const e of S.en) { if (e.k !== 'boss' && !e.dead && onScr(e.x, e.y - e.h / 2, 12)) halo(e.x, e.y - e.h / 2, e.k === 'warden' ? 8 : 5, .55); drawEnemy(e, t); }
   drawLasers(t); drawBlades(t); drawZap(t);
   if (!S.P.dead && S.mode !== 'title') halo(S.P.x, S.P.y - 1.5, 6, .6);
-  drawHook(t); drawPlayer(t);
+  drawHook(t); drawVehicles(t); if (!S.P.veh) drawPlayer(t);
   drawBullets(t); drawFxParts(t);
   drawReflection(t);
   drawRain(t, S.cam.x, S.cam.y, th);
@@ -476,6 +478,7 @@ function drawHud(t) {
   const p = S.P, L = S.L; if (!p) return;
   // vitals
   const hpf = clamp(p.hp / 100, 0, 1), hcol = hpf > .55 ? '#5dffb0' : hpf > .28 ? '#ffb347' : '#ff3b4d';
+  if (p.veh) drawVehHud(p, t); else {
   panel(2, 1, 41, 6, '#19f0ff', 'SUPER SAM');
   { const bu = Math.max(2, Math.floor(CH * .25)); drawSamBadge(Math.round(3.4 * CW), Math.round(2 * CH + (4 * CH - 12 * bu) / 2), bu, S.t); }
   txtPx('LP', Math.round(11 * CW), Math.round(2 * CH), '#8a96c4'); const bw = 20, fill = Math.round(bw * hpf);
@@ -490,6 +493,7 @@ function drawHud(t) {
     for (let i = 0; i < n; i++) gl(i < on ? '▰' : '▱', Math.round((16 + i) * CW), Math.round(5 * CH), i < on ? (blink ? '#ffffff' : col) : '#2a3470');
     const fk = TC.on ? '' : '[F] '; txtPx(p.fly ? fk + 'LANDEN' : p.fuel > .06 ? fk + 'FLIEGEN' : 'TANKEN', Math.round(31 * CW), Math.round(5 * CH), p.fly ? '#ffe45e' : p.fuel > .06 ? '#5dffb0' : '#ff3b4d');
     if (p.flyHint > 0) txtC('TANK LEER  -  ZUM AUFTANKEN LANDEN', COLS / 2, 9, '#ff3b4d', Math.min(1, p.flyHint));
+  }
   }
   // top right
   const sc = 'PUNKTE ' + String(S.score).padStart(6, '0'); panel(COLS - 26, 1, 24, 4, '#ff2fb9', L.intro.title);

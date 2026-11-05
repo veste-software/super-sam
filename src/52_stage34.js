@@ -79,6 +79,16 @@ function buildStage3() {
   L.laser(590, 27, Y2, 3.2, 1.3, 0); L.laser(612, 27, Y2, 3.2, 1.3, 1.6); L.pk('w_rail', 601, Y2 - 1.5);
   L.hint(572, 10, 42, 10, 'ECHO', 'Zwischen diesen Strahlen liegt etwas. Dash hindurch. Es lohnt sich.');
   L.cp(392, Y2, 'KONTROLLPUNKT 05'); L.cp(626, Y2, 'KONTROLLPUNKT 06');
+  /* ---- GLEITER-HALLE: the vehicle section. A hover-car bay, the desks as barriers, hot floor strips, ambush raiders.
+         The pedestrian lock at x=566 is only 3 rows high: Sam fits, a car does not. ---- */
+  L.veh('hover', 406, Y2, { face: 1, bounds: { x0: 384, x1: 566, y0: 25, y1: Y2 } });
+  L.dec('sign', 396, 31, { text: 'GLEITER-BUCHT  //  FREI', col: '#5dffb0', frame: true, flick: true });
+  L.hint(398, 14, 40, 12, 'ECHO', TX('Ein Gleiter der Chefetage! Steig ein mit V. A und D fahren, LEERTASTE springt hoch, SHIFT ist Turbo, Maus und Klick feuern. Die Halle ist voller Feinde.', 'Ein Gleiter der Chefetage! Tipp auf REIN. Linker Stick fährt, hoch springt, rechter Stick zielt und feuert, TURBO gibt Schub.'));
+  L.haz(446, Y2 - 1, 9); L.haz(496, Y2 - 1, 9); L.dec('spark', 450, Y2 - 2, { rate: 1.2 }); L.dec('spark', 500, Y2 - 2, { rate: 1.2 });
+  L.en('raider', 502, Y2); L.en('raider', 546, Y2); L.en('raider', 556, Y2); L.pk('hp', 458, Y2 - 2); L.pk('hp', 508, Y2 - 2);
+  chips(L, 410, Y2 - 3, 440, Y2 - 3, 7, 5); chips(L, 458, Y2 - 3, 492, Y2 - 3, 7, 5); chips(L, 508, Y2 - 3, 540, Y2 - 3, 7, 5);
+  L.mass(566, 24, 3, ST.INT, Y2 - 3); L.dec('sign', 544, 38, { text: 'FUSSGÄNGERSCHLEUSE', col: '#ffb347', frame: true, flick: true, front: true });
+  L.hint(546, 14, 40, 12, 'ECHO', TX('Fußgängerschleuse. Hier kommt der Gleiter nicht durch. Steig mit V aus und geh zu Fuß weiter.', 'Fußgängerschleuse. Hier kommt der Gleiter nicht durch. Tipp auf RAUS und geh zu Fuß weiter.'));
   L.mass(636, 24, 2, ST.INT, 40); L.mass(722, 24, 2, ST.INT, 40);
   const dC = L.door(636, 40, 10, { mode: 'arena', open: 1, target: 1 }), dD = L.door(722, 40, 10, { mode: 'arena', open: 0, target: 0 });
   for (let x = 644; x < 716; x += 20) L.dec('lamp', x, 24, { w: 10, len: 26, col: '#ff3b4d' });
@@ -133,14 +143,22 @@ function buildStage4() {
   L.hint(112, 12, 158, 12, 'ECHO', 'Wartungsgondeln. Sie bewegen sich ständig. Du auch.');
   for (let y of [147, 137]) L.pk('chip', 151, y);
   hangSign(L, 151, 118, 6, hasGlyph('光') ? '光' : 'LUX', '#ff3b4d', 100);
-  /* D : storm scaffold */
-  const pl = [[108, 124], [91, 119], [74, 114], [57, 109], [74, 104], [91, 99], [108, 94], [125, 89], [108, 84], [91, 79], [74, 74], [62, 69]];
+  /* D : storm ascent. The vehicle section: a helicopter waits on the hangar pad and climbs through the storm.
+         Only a few rest pads are left, the rest is open sky, blades and gunships. Flying yourself still works. */
+  const pl = [[108, 124], [57, 104], [125, 88]];
   pl.forEach(([cx, y], i) => stage(cx - 5, y, 10, 2));
-  L.cp(57 - 2, 109, 'KONTROLLPUNKT 04'); L.pk('hp', 62, 107); L.pk('hp', 80, 72);
-  L.en('turret', 91, 119); L.en('turret', 125, 89); L.en('grunt', 76, 104); L.en('drone', 70, 98, { elite: true }); L.en('drone', 100, 78, { elite: true }); L.en('seeker', 90, 90); L.en('seeker', 70, 80);
-  L.blade(100, 97, 14, 0, 1.9, 0, 2.3); L.blade(84, 77, 12, 0, 2.1, 2, 2.3);
-  L.hint(50, 12, 100, 10, 'ECHO', 'Fast da. Die Kronentür ist über dir. Archon weiß, dass du kommst, also rechne mit einem Empfang.');
-  stage(67, 64, 10, 2);
+  L.cp(104, 124, 'KONTROLLPUNKT 04'); L.pk('hp', 112, 122); L.pk('hp', 60, 102); L.pk('hp', 128, 86); L.pk('hp', 74, 62);
+  const heli4 = L.veh('heli', 108, 124, { face: -1, bounds: { x0: 30, x1: 140, y0: 46, y1: 140, block: [{ x0: 78, x1: 98, y0: 0, y1: 62 }] } });
+  L.dec('sign', 100, 117, { text: 'HANGAR', col: '#ffe45e', frame: true, flick: true, front: true });
+  L.hint(100, 14, 114, 10, 'ECHO', TX('Der letzte Hubschrauber der Flotte. Steig ein mit V und flieg durch den Sturm nach oben. Der Wind drückt dich nach Westen, die Klingen und Kampfhubschrauber warten.', 'Der letzte Hubschrauber der Flotte. Tipp auf REIN und flieg durch den Sturm nach oben. Der Wind drückt dich nach Westen, die Klingen und Kampfhubschrauber warten.'));
+  L.en('turret', 60, 104); L.en('turret', 128, 88); L.en('drone', 84, 100, { elite: true }); L.en('drone', 100, 78, { elite: true }); L.en('seeker', 90, 90); L.en('seeker', 70, 80);
+  L.en('gunship', 84, 96); L.en('gunship', 112, 80, { hp: 26, maxhp: 26 }); L.en('gunship', 72, 72, { hp: 26, maxhp: 26 });
+  L.blade(100, 100, 14, 0, 1.9, 0, 2.3); L.blade(86, 82, 12, 0, 2.1, 2, 2.3);
+  chips(L, 104, 118, 66, 108, 8, 6); chips(L, 62, 98, 122, 90, 9, 4); chips(L, 124, 82, 78, 68, 9, 4);
+  for (let i = 0; i < 4; i++) L.dec('flyer', 0, 70 + i * 18, { kind: 'heli', x0: 0, x1: 250, sp: 4 + i, dir: i % 2 ? 1 : -1, ph: i * .27, dim: .3 });
+  L.hint(50, 12, 100, 10, 'ECHO', 'Weiter nach oben. Das Landedeck über dir ist der letzte Halt vor der Kronentür. Archon weiß, dass du kommst, also rechne mit einem Empfang.');
+  stage(67, 64, 10, 2); L.cp(70, 64, 'KONTROLLPUNKT 05');
+  L.hint(60, 18, 56, 10, 'ECHO', TX('Oberes Landedeck. Steig mit V aus, die Kronentür geht zu Fuß weiter.', 'Oberes Landedeck. Tipp auf RAUS, die Kronentür geht zu Fuß weiter.'));
   /* boss arena */
   hull(82, 59, 130, 6); strut(100, 65, 40); strut(190, 65, 40);
   L.mass(88, 20, 6, ST.HULL, 51); L.mass(210, 20, 6, ST.HULL, 59); L.mass(88, 51, 6, ST.HULL, 59); L.clear(88, 51, 6, 8);

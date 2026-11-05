@@ -18,6 +18,7 @@ function clearTransient() {
   S.banner = null; S.boss = null; S.zap = null; S.phase3 = false; S.bossBody = null; S.lightning = 0; S.lbolt = null; S.lightningT = undefined; S.flash = 0; S.freeze = 0; S.slow = 1;
   S.bossFinal = false; S.endTimer = 0; S.bossFx = 0; S.bossDeadT = 0;
   S.cam.lock = null; S.cam.shake = 0; S.respawn = null; MUS.inten = 0; MUS.inten_t = 0; glitchAmt = 0;
+  S.veh = []; S.rkt = []; S.near = null; S.vseen = {};
 }
 function loadStage(i, wpns) {
   const L = STAGES[i].build();
@@ -27,6 +28,7 @@ function loadStage(i, wpns) {
   buildSky(L.th, L.camRef);
   for (const e of L.ents) spawnEnemy(Object.assign({}, e));
   for (const k of L.pks) S.pks.push({ k: k.k, x: k.x, y: k.y, t: 0 });
+  resetVehicles();
   S.cam.x = 0; S.cam.y = 0; updCam(.016, true);
   G.base = { score: S.score, kills: S.kills, chips: S.chips, deaths: S.deaths };
   glitchAmt = 0;
@@ -206,10 +208,10 @@ function drawPause(t) {
     return;
   }
   const pw = 66, x = Math.round((COLS - pw) / 2), y = Math.max(1, Math.round(ROWS * .12));
-  panel(x, y, pw, 22, '#19f0ff', 'PAUSE', .92);
+  panel(x, y, pw, 24, '#19f0ff', 'PAUSE', .92);
   const items = ['WEITER', 'SEKTOR NEU STARTEN', 'ZUM TITEL', AU.muted ? 'TON: AUS' : 'TON: AN'];
   items.forEach((s, i) => { const on = i === G.pauseSel; txtC((on ? '► ' : '  ') + s + (on ? ' ◄' : '  '), COLS / 2, y + 2.5 + i * 1.5, on ? '#5dffb0' : '#8a96c4'); });
-  const cs = [['A D  /  ← →', 'LAUFEN'], ['LEERTASTE  /  W', 'SPRINGEN  (an Wänden abspringen)'], ['SHIFT', 'DASH  (dabei unverwundbar)'], ['F', 'FLIEGEN  (WASD lenkt, Boden tankt)'], ['MAUS', 'ZIELEN'], ['LINKSKLICK', 'SCHIESSEN'], ['RECHTSKLICK / E / K', 'HAKEN: halten = schwingen'], ['LEERTASTE (am Haken)', 'MIT SCHWUNG LOSLASSEN'], ['1 2 3  /  Q  /  RAD', 'WAFFE WECHSELN'], ['S  /  ↓', 'DURCH DÜNNE PLATTFORMEN'], ['R', 'NEUSTART AM KONTROLLPUNKT'], ['M  /  P  oder  ESC', 'TON  /  PAUSE']];
+  const cs = [['A D  /  ← →', 'LAUFEN'], ['LEERTASTE  /  W', 'SPRINGEN  (an Wänden abspringen)'], ['SHIFT', 'DASH  (dabei unverwundbar)'], ['F', 'FLIEGEN  (WASD lenkt, Boden tankt)'], ['V', 'FAHRZEUG EIN / AUS  (SHIFT TURBO)'], ['MAUS', 'ZIELEN'], ['LINKSKLICK', 'SCHIESSEN'], ['RECHTSKLICK / E / K', 'HAKEN: halten = schwingen'], ['LEERTASTE (am Haken)', 'MIT SCHWUNG LOSLASSEN'], ['1 2 3  /  Q  /  RAD', 'WAFFE WECHSELN'], ['S  /  ↓', 'DURCH DÜNNE PLATTFORMEN'], ['R', 'NEUSTART AM KONTROLLPUNKT'], ['M  /  P  oder  ESC', 'TON  /  PAUSE']];
   cs.forEach((r, i) => { txtPx(r[0], Math.round((x + 4) * CW), Math.round((y + 9.2 + i) * CH), '#7f8fd8'); txtPx(r[1], Math.round((x + 28) * CW), Math.round((y + 9.2 + i) * CH), '#5a6aa8'); });
 }
 

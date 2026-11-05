@@ -117,7 +117,8 @@ function aimWorld() {
 }
 
 function hurtPlayer(dmg, fromX, fromY) {
-  const p = S.P; if (p.dead || p.inv > 0 || p.dashT > 0 || S.mode !== 'play') return false;
+  const p = S.P; if (p.veh && !p.dead && S.mode === 'play') return hurtVeh(p.veh, dmg, fromX, fromY);   // the ride takes the hit
+  if (p.dead || p.inv > 0 || p.dashT > 0 || S.mode !== 'play') return false;
   p.hp -= dmg * EASY.dmg; p.inv = EASY.inv; p.hurtT = .35; p.hitT = 0; const dir = sign(p.x - fromX) || -p.face;
   p.vx = dir * 16; p.vy = Math.min(p.vy, -15); p.dashT = 0;
   if (p.hook.st === 2) detachHook(true);
@@ -127,7 +128,9 @@ function hurtPlayer(dmg, fromX, fromY) {
   return true;
 }
 function killPlayer() {
-  const p = S.P; if (p.dead) return; p.dead = true; p.deadT = 0; p.hp = 0; S.deaths++; detachHook(true); sfx('die');
+  const p = S.P; if (p.dead) return;
+  if (p.veh) { p.veh.driver = false; p.veh = null; p.w = 1.6; p.h = 2.9; }
+  p.dead = true; p.deadT = 0; p.hp = 0; S.deaths++; detachHook(true); sfx('die');
   S.slow = .25; glitchAmt = 1.2; shake(1.2);
   for (let i = 0; i < 46; i++) pt(p.x + rr(-1, 1), p.y - rr(.2, 2.8), rr(-10, 10), rr(-26, -4), rr(.8, 2), ['0', '1', '#', '$', '%', '▒', '░', '▪'], PAL[pick([C.cyan, C.mag, C.white, C.vio])], { g: -6, drag: .8, glow: 1 });
   ring(p.x, p.y - 1.5, 14, .9, PAL[C.cyan]); ring(p.x, p.y - 1.5, 22, 1.3, PAL[C.mag], ['.', '·']);
@@ -137,6 +140,7 @@ function respawnPlayer() {
   const np = newPlayer(r.x, r.y); np.wpns = w; np.wpn = wp; np.spawnT = 1.1; np.inv = 2; S.P = np; S.slow = 1; S.cam.lock && 0;
   S.cam.x = clamp(r.x - COLS / 2, 0, Math.max(0, S.L.W - COLS)); S.cam.y = clamp(r.y - ROWS * .6, 0, Math.max(0, S.L.H - ROWS));
   ring(r.x, r.y - 1.5, 10, .8, PAL[C.cyan]); sfx('boot', .7); glitchAmt = .8;
+  resetVehicles();   // every ride is back in its bay
 }
 
 function startFly(p) {
@@ -188,6 +192,7 @@ function hookStrike(e) {
 function updPlayer(dt) {
   const p = S.P, L = S.L, h = p.hook; if (!p || S.mode !== 'play' && S.mode !== 'boss') return;
   if (p.dead) { p.deadT += dt / (S.slow || 1); if (p.deadT > 1.5) { respawnPlayer(); } return; }
+  if (p.veh) return;   // driving: 46_vehicles.js moves Sam together with the vehicle
   const left = KEY.KeyA || KEY.ArrowLeft, right = KEY.KeyD || KEY.ArrowRight, up = KEY.KeyW || KEY.ArrowUp || KEY.Space, down = KEY.KeyS || KEY.ArrowDown;
   const jumpP = pressed('Space') || pressed('KeyW') || pressed('ArrowUp'), dashP = pressed('ShiftLeft') || pressed('ShiftRight') || pressed('KeyL');
   const dir = (right ? 1 : 0) - (left ? 1 : 0);
@@ -378,11 +383,11 @@ function killEnemy(e) {
   e.dead = true; S.kills++; S.score += e.score;
   const cx = e.x, cy = e.y - e.h / 2;
   if (e.k === 'boss') { bossDie(e); return; }
-  boom(cx, cy, e.k === 'warden' ? 2.2 : e.k === 'turret' ? 1.2 : 1); sfx(e.k === 'warden' ? 'bigboom' : 'boom'); S.freeze = e.k === 'warden' ? .12 : .045;
+  const big = e.k === 'warden' || e.k === 'gunship'; boom(cx, cy, big ? 2.2 : e.k === 'turret' || e.k === 'raider' ? 1.4 : 1); sfx(big ? 'bigboom' : 'boom'); S.freeze = big ? .12 : .045;
   if (e.k === 'seeker') blast(cx, cy, 4, 0);
   const letters = '01#$%&@'.split(''); for (let i = 0; i < 6; i++) pt(cx, cy, rr(-20, 20), rr(-20, 4), rr(.6, 1.2), letters, PAL[C.red], { g: 40, bounce: .4, col: true });
-  if (Math.random() < (e.k === 'grunt' ? .25 : e.k === 'warden' ? 1 : .12) * EASY.hpDrop) S.pks.push({ k: 'hp', x: cx, y: cy, t: 0, vy: -10, drop: true });
-  for (let i = 0; i < (e.k === 'warden' ? 8 : 2); i++) S.pks.push({ k: 'chip', x: cx + rr(-1, 1), y: cy, t: 0, vy: rr(-22, -8), vx: rr(-10, 10), drop: true });
+  if (Math.random() < (e.k === 'grunt' ? .25 : e.k === 'warden' || e.k === 'gunship' ? 1 : e.k === 'raider' ? .4 : .12) * EASY.hpDrop) S.pks.push({ k: 'hp', x: cx, y: cy, t: 0, vy: -10, drop: true });
+  for (let i = 0; i < (e.k === 'warden' || e.k === 'gunship' ? 8 : e.k === 'raider' ? 4 : 2); i++) S.pks.push({ k: 'chip', x: cx + rr(-1, 1), y: cy, t: 0, vy: rr(-22, -8), vx: rr(-10, 10), drop: true });
   if (e.arena) { e.arena.alive = Math.max(0, e.arena.alive - 1); }
 }
 function blast(x, y, r, dmgP) {
@@ -406,10 +411,12 @@ function updEnemies(dt) {
       case 'grunt': aiGrunt(e, dt, dxp, dyp, dist); break;
       case 'warden': aiWarden(e, dt, dxp, dyp, dist); break;
       case 'seeker': aiSeeker(e, dt, dxp, dyp, dist); break;
+      case 'gunship': aiGunship(e, dt, dxp, dyp, dist); break;
+      case 'raider': aiRaider(e, dt, dxp, dyp, dist); break;
       case 'boss': aiBoss(e, dt, dxp, dyp, dist); break;
     }
     /* touch damage */
-    if (!p.dead && e.k !== 'boss' && e.k !== 'turret' && Math.abs(dxp) < e.w / 2 + p.w / 2 - .2 && p.y > e.y - e.h && p.y - p.h < e.y && e.k !== 'drone') hurtPlayer(e.k === 'warden' ? 22 : 12, e.x, e.y);
+    if (!p.dead && e.k !== 'boss' && e.k !== 'turret' && e.k !== 'gunship' && Math.abs(dxp) < e.w / 2 + p.w / 2 - .2 && p.y > e.y - e.h && p.y - p.h < e.y && e.k !== 'drone') hurtPlayer(e.k === 'warden' ? 22 : 12, e.x, e.y);
   }
   S.en = S.en.filter(e => !e.dead);
 }
@@ -550,6 +557,12 @@ function updBullets(dt) {
   }
   S.bul = S.bul.filter(b => b.life > 0);
   for (const b of S.ebul) {
+    if (b.hom && !p.dead) {   // homing missile: turns toward the player, and can be shot down
+      const ca = Math.atan2(b.vy * 2, b.vx); let da = Math.atan2((p.y - 1.5 - b.y) * 2, p.x - b.x) - ca; da = ((da + PI * 3) % TAU) - PI;
+      const s = Math.hypot(b.vx, b.vy * 2), na = ca + clamp(da, -1.5 * dt, 1.5 * dt); b.vx = Math.cos(na) * s; b.vy = Math.sin(na) * s * .5;
+      if (Math.random() < .8) pt(b.x - b.vx * .02, b.y - b.vy * .02, 0, 0, .35, ['░', '·', '*'], PAL[pick([C.greyD, C.amber])], {});
+      for (const q of S.bul) if (q.life > 0 && Math.abs(q.x - b.x) < 1.5 && Math.abs(q.y - b.y) < 1.2) { q.life = 0; b.hp = (b.hp === undefined ? 2 : b.hp) - 1; if (b.hp <= 0) { b.life = 0; boom(b.x, b.y, .8); sfx('boom', .4); } }
+    }
     b.x += b.vx * dt; b.y += b.vy * dt; b.life -= dt;
     if (solidAt(b.x, b.y)) { b.life = 0; sparks(b.x, b.y, 3, -b.vx, -b.vy, PAL[C.red], 20); continue; }
     if (!p.dead && Math.abs(b.x - p.x) < p.w / 2 + .5 && b.y > p.y - p.h - .2 && b.y < p.y + .2) { if (hurtPlayer(b.dmg, b.x - b.vx * .1, b.y)) b.life = 0; }
@@ -585,8 +598,9 @@ function updPickups(dt) {
     if (p.dead) continue;
     const dx = p.x - k.x, dy = (p.y - 1.5) - k.y, d = Math.hypot(dx, dy);
     if (k.k === 'chip' && d < 6 && !k.drop || k.k === 'chip' && d < 3 && k.t > .5) { k.x += dx * 8 * dt; k.y += dy * 8 * dt; }
-    if (d < 2.2) {
-      if (k.k === 'hp') { if (p.hp >= 100) continue; p.hp = Math.min(100, p.hp + EASY.heal); sfx('heal'); ring(p.x, p.y - 1.5, 6, .5, PAL[C.mint]); for (let i = 0; i < 10; i++) pt(p.x + rr(-1, 1), p.y - rr(0, 3), 0, rr(-14, -4), rr(.4, .9), ['+'], PAL[C.mint], {}); k.got = true; }
+    if (d < (p.veh ? 4.4 : 2.2)) {
+      if (k.k === 'hp' && p.veh) { if (p.veh.hp >= p.veh.maxhp - .5) continue; healVeh(p.veh); k.got = true; }
+      else if (k.k === 'hp') { if (p.hp >= 100) continue; p.hp = Math.min(100, p.hp + EASY.heal); sfx('heal'); ring(p.x, p.y - 1.5, 6, .5, PAL[C.mint]); for (let i = 0; i < 10; i++) pt(p.x + rr(-1, 1), p.y - rr(0, 3), 0, rr(-14, -4), rr(.4, .9), ['+'], PAL[C.mint], {}); k.got = true; }
       else if (k.k === 'chip') { S.chips++; S.score += 25; sfx('chip'); k.got = true; sparks(k.x, k.y, 4, 0, -1, PAL[C.yel], 20); }
       else if (k.k === 'w_scatter') { p.wpns[1] = true; p.wpn = 1; sfx('pick'); k.got = true; banner('SCATTER-9 ERHALTEN', TX('TASTE 2  //  KURZE REICHWEITE, HARTER AUFPRALL', 'WAFFE-KNOPF  //  KURZE REICHWEITE, HARTER AUFPRALL'), C.amber); say('ECHO', 'Streumunition. Kurze Reichweite, breite Streuung. Der Rückstoß schleudert dich weg. Nutz das.'); ring(p.x, p.y - 1.5, 12, .7, PAL[C.amber]); }
       else if (k.k === 'w_rail') { p.wpns[2] = true; p.wpn = 2; sfx('pick'); k.got = true; banner('RAILCASTER ERHALTEN', TX('TASTE 3  //  DURCHSCHLÄGT ALLES IN DER LINIE', 'WAFFE-KNOPF  //  DURCHSCHLÄGT ALLES IN DER LINIE'), C.mag); say('ECHO', 'Railcaster. Ein Schuss, mitten durch Panzerung und alles dahinter.'); ring(p.x, p.y - 1.5, 12, .7, PAL[C.mag]); }
@@ -595,7 +609,7 @@ function updPickups(dt) {
   S.pks = S.pks.filter(k => !k.got);
   for (const c of S.L.cps) {
     if (!c.on && !p.dead && Math.abs(p.x - c.x) < 3 && Math.abs(p.y - c.y) < 5) {
-      c.on = true; S.respawn = { x: c.x, y: c.y }; p.hp = 100; sfx('cp'); banner(c.label, 'SIGNAL SYNCHRON // INTEGRITÄT RESTAURIERT', C.mint); ring(c.x, c.y - 1, 14, .9, PAL[C.mint]); ring(c.x, c.y - 1, 8, .6, PAL[C.white]);
+      c.on = true; S.respawn = { x: c.x, y: c.y }; p.hp = 100; if (p.veh) p.veh.hp = p.veh.maxhp; sfx('cp'); banner(c.label, 'SIGNAL SYNCHRON // INTEGRITÄT RESTAURIERT', C.mint); ring(c.x, c.y - 1, 14, .9, PAL[C.mint]); ring(c.x, c.y - 1, 8, .6, PAL[C.white]);
       for (let i = 0; i < 24; i++) pt(c.x + rr(-2, 2), c.y - rr(0, 3), rr(-4, 4), rr(-20, -6), rr(.6, 1.4), ['0', '1', '+'], PAL[C.mint], { g: -4 });
     }
   }
@@ -691,6 +705,7 @@ function updWorld(dt) {
   const L = S.L;
   updMovers(dt);
   updPlayer(dt);
+  updVehicles(dt);
   // hook flight / retract
   const p = S.P, h = p.hook;
   if (h.st === 1) {

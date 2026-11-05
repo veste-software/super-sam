@@ -58,7 +58,7 @@ function rack(L, x, y, h) { const rows = ['┌──┐']; for (let i = 0; i < h
    STAGE 1
    ========================================================================= */
 function buildStage1() {
-  const th = THEMES.rain, R = RNG(101), Hh = 126, L = new Level(1, 1060, Hh, th); L.deathY = 114; L.camRef = 54;
+  const th = THEMES.rain, R = RNG(101), Hh = 126, L = new Level(1, 1300, Hh, th); L.deathY = 114; L.camRef = 54;
   L.intro = { title: 'RAINLINE', sub: 'SPRAWL-BEZIRK 7 // 02:47 UHR // REGEN 94%', lines: ['ECHO: Meridian bezahlt die ganze Skyline, Sam. Hol sie dir zurück, Dach für Dach.', TX('ECHO: Und du kannst FLIEGEN, Super Sam! Drück F zum Abheben, lenke mit A D W S. Der Tank füllt sich, wenn du landest.', 'ECHO: Und du kannst FLIEGEN, Super Sam! Tipp auf FLUG zum Abheben, lenke mit dem linken Stick. Der Tank füllt sich, wenn du landest.')] };
   let X = 0; const roof = (w, top, sty) => { const x0 = X; L.mass(x0, top, w, sty || ST.ROOF); X += w; return { x0, x1: x0 + w, top, w }; }, gap = g => { X += g; };
   const link = (a, b, sag) => { if (b.x0 - a.x1 <= 16) cable(L, a.x1 - 2, a.top - 7, b.x0 + 2, b.top - 7, sag === undefined ? 3 : sag); };
@@ -142,8 +142,30 @@ function buildStage1() {
   decorRoof(L, R, M1.x0, M1.w, 40, { dens: .4, padL: 8 }); L.en('turret', M1.x0 + 16, 40); L.en('drone', M1.x0 + 22, 28);
   gap(12); const M2 = roof(26, 44); link(M1, M2); decorRoof(L, R, M2.x0, M2.w, 44, { dens: .5 }); L.en('grunt', M2.x0 + 12, 44); L.en('grunt', M2.x0 + 18, 44); L.en('drone', M2.x0 + 12, 30, { elite: true });
   chips(L, M1.x1 - 2, 38, M2.x0 + 3, 42, 5, 5);
-  gap(10); const M3 = roof(24, 40); link(M2, M3); L.cp(M3.x0 + 8, 40, 'KONTROLLPUNKT 05'); L.pk('hp', M3.x0 + 14, 38);
+  gap(10); const M3 = roof(24, 40); link(M2, M3); L.cp(M3.x0 + 8, 40, 'KONTROLLPUNKT 05'); L.pk('hp', M3.x0 + 3, 38);
   chips(L, M2.x1 - 2, 42, M3.x0 + 3, 38, 5, 5);
+  /* HELI-RAID: the vehicle section. A parked helicopter, a slalom between towers and hanging pylons, gunships overhead.
+     The heli is back in its bay after every respawn, so there is no checkpoint inside the section. */
+  const HR = M3.x1, hang = (cx, w, y0, y1) => { L.mass(cx, y0, w, ST.METAL, y1); for (let y = 0; y < y0; y++) { L.bset(cx + 1, y, y % 4 === 0 ? '╫' : '║', C.greyD); L.bset(cx + w - 2, y, y % 4 === 0 ? '╫' : '║', C.greyD); } L.dec('beacon', cx + w / 2, y1 + 1.4, { col: '#ff3b4d' }); L.dec('beacon', cx + .5, y1 + .5, { col: '#ffb347' }); };
+  const pylon = (cx, w, y0, y1) => { L.mass(cx, y0, w, ST.METAL, y1); L.dec('beacon', cx + w / 2, y0 - .4, { col: '#ff3b4d' }); L.dec('beacon', cx + w / 2, y1 + 1.4, { col: '#ff3b4d' }); };
+  const heli1 = L.veh('heli', M3.x0 + 17, 40, { face: 1, bounds: { x0: M3.x0 - 4, x1: 99999, y0: 4, y1: 94 } });
+  L.dec('sign', M3.x0 + 2, 31, { text: 'HELIPORT', col: '#ffe45e', frame: true, flick: true }); L.dec('beacon', M3.x0 + 12.5, 39.4, { col: '#ffe45e' }); L.dec('beacon', M3.x0 + 21.5, 39.4, { col: '#ffe45e' });
+  L.hint(M3.x0 + 1, 12, 30, 12, 'ECHO', TX('Ein Hubschrauber der Konzernflotte! Steig ein mit V und flieg über die Skyline. Die Gegner da draußen sind schwer bewaffnet.', 'Ein Hubschrauber der Konzernflotte! Tipp auf REIN und flieg über die Skyline. Die Gegner da draußen sind schwer bewaffnet.'));
+  L.en('gunship', HR + 34, 32);
+  X = HR + 46; const Ta = roof(18, 52); L.pk('hp', Ta.x0 + 9, 50); L.en('turret', Ta.x0 + 14, 52); L.dec('beacon', Ta.x0 + 1, 51, { col: '#ffb347' });
+  hang(HR + 78, 5, 4, 37); L.en('drone', HR + 94, 42, { elite: true });
+  X = HR + 104; const Tb = roof(20, 46); L.en('turret', Tb.x0 + 4, 46); L.en('turret', Tb.x0 + 16, 46); L.pk('hp', Tb.x0 + 10, 44);
+  pylon(HR + 138, 4, 28, 60); L.en('gunship', HR + 152, 36);
+  hang(HR + 168, 5, 4, 38);
+  X = HR + 178; const Tc = roof(22, 50); L.en('turret', Tc.x0 + 4, 50); L.en('turret', Tc.x0 + 17, 50); L.pk('hp', Tc.x0 + 11, 48);
+  pylon(HR + 216, 4, 26, 58); L.en('gunship', HR + 230, 30, { hp: 26, maxhp: 26 }); L.en('gunship', HR + 244, 40, { hp: 26, maxhp: 26 });
+  chips(L, HR + 6, 40, HR + 40, 38, 8, 4); chips(L, HR + 62, 44, HR + 100, 43, 8, 3); chips(L, HR + 126, 44, HR + 160, 22, 8, 5); chips(L, HR + 146, 66, HR + 164, 66, 5, 0);
+  chips(L, HR + 186, 44, HR + 214, 44, 7, 2); chips(L, HR + 224, 22, HR + 250, 44, 8, 3);
+  for (let i = 0; i < 9; i++) L.dec('flyer', 0, 14 + (i * 7) % 26, { kind: 'car', x0: HR, x1: HR + 300, sp: 9 + (i % 4) * 3, dir: i % 2 ? 1 : -1, ph: i / 9, col: NEON[i % NEON.length] });
+  for (let i = 0; i < 3; i++) L.dec('flyer', 0, 10 + i * 9, { kind: 'heli', x0: HR, x1: HR + 300, sp: 5 + i, dir: i % 2 ? 1 : -1, ph: i * .31, dim: .32 });
+  X = HR + 262; const Lp = roof(34, 40); L.cp(Lp.x0 + 8, 40, 'KONTROLLPUNKT 06'); L.pk('hp', Lp.x0 + 22, 38); heli1.bounds.x1 = Lp.x1 - 3;
+  L.dec('sign', Lp.x0 + 4, 31, { text: 'LANDEPLATTFORM  >>>  SKYBRIDGE', col: '#19f0ff', frame: true, flick: false });
+  L.hint(Lp.x0 - 6, 14, 30, 12, 'ECHO', TX('Landeplattform. Steig mit V aus, die Skybridge geht zu Fuß weiter. Der Hubschrauber wartet nicht auf dich.', 'Landeplattform. Tipp auf RAUS, die Skybridge geht zu Fuß weiter. Der Hubschrauber wartet nicht auf dich.'));
   /* skybridge: glass tube */
   const bx0 = X, bl = 44; L.mass(bx0, 40, bl, ST.GLASS, 43); L.mass(bx0, 31, bl, ST.GLASS, 33); X += bl;
   for (let x = bx0; x < bx0 + bl; x += 6) for (let y = 33; y < 40; y++) L.bset(x, y, '│', C.cyanDD);

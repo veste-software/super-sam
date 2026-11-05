@@ -16,7 +16,7 @@ class Level {
     this.ents = []; this.pks = []; this.cps = []; this.zones = []; this.movers = []; this.doors = []; this.decor = []; this.arenas = [];
     this.start = { x: 8, y: 20 }; this.exit = null; this.deathY = H + 6; this.nb = 1;
     this.camBox = null; this.intro = { title: 'SEKTOR', sub: '', lines: [] };
-    this.wet = null; this.wind = 0; this.lasers = []; this.blades = []; this.camRef = 50;
+    this.wet = null; this.wind = 0; this.lasers = []; this.blades = []; this.camRef = 50; this.vehs = [];
   }
   idx(x, y) { return y * this.W + x; }
   inb(x, y) { return x >= 0 && y >= 0 && x < this.W && y < this.H; }
@@ -61,6 +61,7 @@ class Level {
   /* entities */
   en(k, x, y, o) { this.ents.push(Object.assign({ k, x, y }, o || {})); }
   pk(k, x, y) { this.pks.push({ k, x, y }); }
+  veh(k, x, y, o) { const v = Object.assign({ k, x, y }, o || {}); this.vehs.push(v); return v; }
   cp(x, y, label) { this.cps.push({ x, y, label: label || 'KONTROLLPUNKT', on: false }); }
   zone(x, y, w, h, o) { this.zones.push(Object.assign({ x, y, w, h, done: false }, o)); }
   dec(k, x, y, o) { const d = Object.assign({ k, x, y }, o || {}); this.decor.push(d); return d; }

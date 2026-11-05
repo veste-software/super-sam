@@ -35,14 +35,14 @@ function touchLayout() {
   const play = G.scene === 'play' || G.scene === 'clearing';
   const jx = W - sr - 1.7 * u, jy = H - sb - 1.8 * u;
   const B = {};
-  const vehOn = !!(S.P && S.P.veh) || (S.near && S.near.v);
+  const riding = !!(S.P && S.P.veh), vehOn = riding || !!S.near;
   if (play) {
-    B.jump = { x: jx, y: jy, r: 1.15 * u, label: 'SPRUNG' };
-    B.dash = { x: jx - 2.6 * u, y: jy + .4 * u, r: .88 * u, label: 'DASH' };
-    B.hook = { x: jx - 2.2 * u, y: jy - 2.15 * u, r: .88 * u, label: 'HAKEN' };
-    B.fly = { x: jx + .05 * u, y: jy - 2.7 * u, r: .88 * u, label: 'FLUG' };
-    if (S.P && S.P.wpns && (S.P.wpns[1] || S.P.wpns[2])) B.wpn = { x: W - sr - 1.5 * u, y: Math.max(CH * 6.4, H * .3), r: .72 * u, label: 'WAFFE' };
-    if (vehOn) B.veh = { x: jx - 4.3 * u, y: jy - .3 * u, r: .95 * u, label: S.P && S.P.veh ? 'AUSSTEIGEN' : 'EINSTEIGEN' };
+    B.jump = { x: jx, y: jy, r: 1.15 * u, label: riding && S.P.veh.k === 'heli' ? 'HOCH' : 'SPRUNG' };
+    B.dash = { x: jx - 2.6 * u, y: jy + .4 * u, r: .88 * u, label: riding ? 'TURBO' : 'DASH' };
+    B.hook = { x: jx - 2.2 * u, y: jy - 2.15 * u, r: .88 * u, label: riding ? 'RAKETE' : 'HAKEN' };
+    if (!riding) B.fly = { x: jx + .05 * u, y: jy - 2.7 * u, r: .88 * u, label: 'FLUG' };
+    if (!riding && S.P && S.P.wpns && (S.P.wpns[1] || S.P.wpns[2])) B.wpn = { x: W - sr - 1.5 * u, y: Math.max(CH * 6.4, H * .3), r: .72 * u, label: 'WAFFE' };
+    if (vehOn) B.veh = riding ? { x: jx + .05 * u, y: jy - 2.7 * u, r: .88 * u, label: 'RAUS' } : { x: jx - 4.3 * u, y: jy - .3 * u, r: .95 * u, label: 'REIN' };
     const cy = CH * 8.8, cx = sl + 1.1 * u;
     B.pause = { x: cx, y: cy, r: .7 * u, label: 'II' };
     B.fs = { x: cx + 1.75 * u, y: cy, r: .7 * u, label: fsEl() ? '><' : '<>', off: !fsCan() };
@@ -89,7 +89,7 @@ function tcMenu(px, py) {
 function tcBtnDown(k) {
   const b = TC.btn[k]; if (b) b.down = true;
   if (k === 'jump') TC.jumpHeld = true;
-  else if (k === 'dash') KP.ShiftLeft = true;
+  else if (k === 'dash') { KP.ShiftLeft = true; TC.dashHeld = true; }
   else if (k === 'fly') KP.KeyF = true;
   else if (k === 'hook') TC.hookReq = true;
   else if (k === 'wpn') KP.KeyQ = true;
@@ -99,6 +99,7 @@ function tcBtnDown(k) {
 function tcBtnUp(k) {
   const b = TC.btn[k]; if (b) b.down = false;
   if (k === 'jump') TC.jumpHeld = false;
+  else if (k === 'dash') TC.dashHeld = false;
   else if (k === 'fs') toggleFS();
   else if (k === 'mute') { auMute(!AU.muted); }
 }
@@ -151,15 +152,16 @@ function touchApply(dt) {
   const p = S.P, playing = G.scene === 'play' || G.scene === 'clearing';
   if (!playing || !p) {
     for (const k in TC.keys) tkey(k, false);
-    TC.hookHold = false; TC.hookSeen = false; TC.hookReq = false; TC.jumpHeld = false; if (TC.firing) { MOUSE.l = false; TC.firing = false; }
+    TC.hookHold = false; TC.hookSeen = false; TC.hookReq = false; TC.jumpHeld = false; TC.dashHeld = false; if (TC.firing) { MOUSE.l = false; TC.firing = false; }
     return;
   }
   const m = TC.mv, mx = m ? m.vx : 0, my = m ? m.vy : 0;
   tkey('KeyA', mx < -.28); tkey('KeyD', mx > .28); tkey('KeyW', my < -.5); tkey('KeyS', my > .5);
-  tkey('Space', TC.jumpHeld);
+  tkey('Space', TC.jumpHeld); tkey('ShiftLeft', !!p.veh && TC.dashHeld);   // turbo is a hold; the on-foot dash stays a tap
   // grapple: tap to throw (own anchor search unless the aim stick is in use), tap again to let go
   const h = p.hook;
-  if (TC.hookReq) {
+  if (p.veh) { if (TC.hookReq) { TC.hookReq = false; KP.KeyK = true; } TC.hookHold = false; TC.hookSeen = false; KEY.KeyE = false; }   // in a vehicle the button fires a rocket
+  else if (TC.hookReq) {
     TC.hookReq = false;
     if (h.st === 1 || h.st === 2) { TC.hookHold = false; TC.hookSeen = false; }
     else { TC.hookHold = true; TC.hookSeen = false; TC.hookAuto = !(TC.aim || TC.aimAge < .9); KP.KeyE = true; }
