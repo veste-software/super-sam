@@ -49,7 +49,7 @@ const ROWS_TARGET = 30;
 const FONT_FAMILY = '"JetBrains Mono","DejaVu Sans Mono","Cascadia Mono","SF Mono",Menlo,Consolas,monospace';
 const resizeHooks = [];
 function resize() {
-  DPR = Math.min(window.devicePixelRatio || 1, 1.6);
+  DPR = Math.min(window.devicePixelRatio || 1, TC.coarse ? 1.4 : 1.6);
   const cw = Math.max(320, innerWidth), ch = Math.max(240, innerHeight);
   W = Math.floor(cw * DPR); H = Math.floor(ch * DPR);
   cv.width = W; cv.height = H; cv.style.width = cw + 'px'; cv.style.height = ch + 'px';
@@ -185,6 +185,9 @@ function present(bloomK) {
 
 /* ---------- input ---------- */
 const KEY = {}, KP = {};
+/* touch state (filled in by 45_touch.js) and a tiny helper to word text differently for touch players */
+const TC = { on: false, coarse: false, lastT: -1e9, keys: {}, ptrs: new Map(), mv: null, aim: null, firing: false, latched: false, aimDX: 1, aimDY: -1, aimAge: 99, jumpHeld: false, hookHold: false, hookSeen: false, hookReq: false, hookAuto: false, btn: {}, safe: { t: 0, r: 0, b: 0, l: 0 }, u: 46, fsDone: false };
+const TX = (pc, touch) => TC.on ? touch : pc;
 const MOUSE = { x: COLS / 2, y: ROWS / 2, l: false, r: false, lp: false, rp: false, moved: -99, touch: false };
 const BLOCKKEYS = new Set(['Space', 'ArrowUp', 'ArrowDown', 'ArrowLeft', 'ArrowRight', 'Tab', 'ShiftLeft', 'ShiftRight']);
 addEventListener('keydown', e => {
@@ -195,9 +198,9 @@ addEventListener('keydown', e => {
 addEventListener('keyup', e => { KEY[e.code] = false; });
 addEventListener('blur', () => { for (const k in KEY) KEY[k] = false; MOUSE.l = MOUSE.r = false; if (window.onGameBlur) window.onGameBlur(); });
 cv.addEventListener('contextmenu', e => e.preventDefault());
-function mpos(e) { const r = cv.getBoundingClientRect(); MOUSE.x = (e.clientX - r.left) / r.width * W / CW; MOUSE.y = (e.clientY - r.top) / r.height * H / CH; MOUSE.moved = performance.now() / 1000; }
+function mpos(e) { if (performance.now() - TC.lastT < 700) return; const r = cv.getBoundingClientRect(); MOUSE.x = (e.clientX - r.left) / r.width * W / CW; MOUSE.y = (e.clientY - r.top) / r.height * H / CH; MOUSE.moved = performance.now() / 1000; }
 cv.addEventListener('mousemove', mpos);
-cv.addEventListener('mousedown', e => { mpos(e); if (e.button === 0) { MOUSE.l = true; MOUSE.lp = true; } if (e.button === 2) { MOUSE.r = true; MOUSE.rp = true; } e.preventDefault(); });
+cv.addEventListener('mousedown', e => { if (performance.now() - TC.lastT < 700) { e.preventDefault(); return; } TC.on = TC.coarse && TC.on; mpos(e); if (e.button === 0) { MOUSE.l = true; MOUSE.lp = true; } if (e.button === 2) { MOUSE.r = true; MOUSE.rp = true; } e.preventDefault(); });
 addEventListener('mouseup', e => { if (e.button === 0) MOUSE.l = false; if (e.button === 2) MOUSE.r = false; });
 cv.addEventListener('wheel', e => { MOUSE.wheel = (MOUSE.wheel || 0) + sign(e.deltaY); e.preventDefault(); }, { passive: false });
 addEventListener('touchstart', () => { MOUSE.touch = true; }, { passive: true });

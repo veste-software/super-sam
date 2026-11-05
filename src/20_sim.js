@@ -111,7 +111,7 @@ function aimWorld() {
   const p = S.P, c = chest(p);
   let ax, ay;
   if (MOUSE.moved > 0) { ax = MOUSE.x + S.cam.x - c.x; ay = MOUSE.y + S.cam.y - c.y; }
-  else { ax = p.face * 6; ay = -2; }
+  else { ax = p.face * 6; ay = TC.on ? -5 : -2; }
   const d = Math.hypot(ax, ay) || 1, a = vang(ax, ay);
   return { x: ax / d, y: ay / d, a, cx: Math.cos(a), cy: Math.sin(a) * .5, d, wx: c.x + ax, wy: c.y + ay };
 }
@@ -149,9 +149,23 @@ function detachHook(silent) {
   if (h.st === 2 && !silent) sfx('release');
   h.st = 3; h.rt = 0; h.tgt = null; h.sx = h.x; h.sy = h.y;
 }
+/* touch: the HAKEN button finds its own anchor, a solid spot up and ahead of Sam (unless the aim stick is in use) */
+function autoHookAim(c) {
+  const p = S.P, dirX = Math.abs(p.vx) > 4 ? sign(p.vx) : p.face; let best = null, bs = -1e9;
+  for (let deg = 20; deg <= 85; deg += 5) {
+    const th = deg * Math.PI / 180, ax = Math.cos(th) * dirX, ay = -Math.sin(th) * .5, d = Math.hypot(ax, ay), nx = ax / d, ny = ay / d;
+    const hit = rayTile(c.x, c.y, nx, ny, PH.hook - 2); if (!hit || hit.d < 6) continue;
+    const ahead = (hit.x - c.x) * dirX, up = c.y - hit.y; if (up < 5) continue;
+    const sc = -Math.abs(ahead - 14) - Math.abs(up - 17) * .6 - Math.abs(hit.d - 24) * .15;
+    if (sc > bs) { bs = sc; const a = vang(ax, ay); best = { x: nx, y: ny, a, cx: Math.cos(a), cy: Math.sin(a) * .5, d: hit.d, wx: hit.x, wy: hit.y }; }
+  }
+  return best;
+}
+function hookAim(c) { if (TC.on && TC.hookAuto) { TC.hookAuto = false; const a = autoHookAim(c); if (a) return a; } return aimWorld(); }
 function fireHook() {
-  const p = S.P, h = p.hook, c = chest(p), aim = aimWorld();
+  const p = S.P, h = p.hook, c = chest(p);
   if (h.st === 1 || h.st === 2) return;
+  const aim = hookAim(c);
   let tx = c.x + aim.x * PH.hook, ty = c.y + aim.y * PH.hook, dist = PH.hook, tgt = null, miss = true;
   const hit = rayTile(c.x, c.y, aim.x, aim.y, PH.hook);
   if (hit) { tx = hit.x; ty = hit.y; dist = hit.d; miss = false; }
@@ -574,8 +588,8 @@ function updPickups(dt) {
     if (d < 2.2) {
       if (k.k === 'hp') { if (p.hp >= 100) continue; p.hp = Math.min(100, p.hp + EASY.heal); sfx('heal'); ring(p.x, p.y - 1.5, 6, .5, PAL[C.mint]); for (let i = 0; i < 10; i++) pt(p.x + rr(-1, 1), p.y - rr(0, 3), 0, rr(-14, -4), rr(.4, .9), ['+'], PAL[C.mint], {}); k.got = true; }
       else if (k.k === 'chip') { S.chips++; S.score += 25; sfx('chip'); k.got = true; sparks(k.x, k.y, 4, 0, -1, PAL[C.yel], 20); }
-      else if (k.k === 'w_scatter') { p.wpns[1] = true; p.wpn = 1; sfx('pick'); k.got = true; banner('SCATTER-9 ERHALTEN', 'TASTE 2  //  KURZE REICHWEITE, HARTER AUFPRALL', C.amber); say('ECHO', 'Streumunition. Kurze Reichweite, breite Streuung. Der Rückstoß schleudert dich weg. Nutz das.'); ring(p.x, p.y - 1.5, 12, .7, PAL[C.amber]); }
-      else if (k.k === 'w_rail') { p.wpns[2] = true; p.wpn = 2; sfx('pick'); k.got = true; banner('RAILCASTER ERHALTEN', 'TASTE 3  //  DURCHSCHLÄGT ALLES IN DER LINIE', C.mag); say('ECHO', 'Railcaster. Ein Schuss, mitten durch Panzerung und alles dahinter.'); ring(p.x, p.y - 1.5, 12, .7, PAL[C.mag]); }
+      else if (k.k === 'w_scatter') { p.wpns[1] = true; p.wpn = 1; sfx('pick'); k.got = true; banner('SCATTER-9 ERHALTEN', TX('TASTE 2  //  KURZE REICHWEITE, HARTER AUFPRALL', 'WAFFE-KNOPF  //  KURZE REICHWEITE, HARTER AUFPRALL'), C.amber); say('ECHO', 'Streumunition. Kurze Reichweite, breite Streuung. Der Rückstoß schleudert dich weg. Nutz das.'); ring(p.x, p.y - 1.5, 12, .7, PAL[C.amber]); }
+      else if (k.k === 'w_rail') { p.wpns[2] = true; p.wpn = 2; sfx('pick'); k.got = true; banner('RAILCASTER ERHALTEN', TX('TASTE 3  //  DURCHSCHLÄGT ALLES IN DER LINIE', 'WAFFE-KNOPF  //  DURCHSCHLÄGT ALLES IN DER LINIE'), C.mag); say('ECHO', 'Railcaster. Ein Schuss, mitten durch Panzerung und alles dahinter.'); ring(p.x, p.y - 1.5, 12, .7, PAL[C.mag]); }
     }
   }
   S.pks = S.pks.filter(k => !k.got);

@@ -123,19 +123,27 @@ function drawTitle(t) {
   // stage select
   const sy = Math.max(top + 17, ROWS - 12), st = STAGES[G.sel], bw = 54;
   panel(Math.round((COLS - bw) / 2), sy - 1, bw, 6, '#19f0ff', 'SEKTOR WÄHLEN', .66);
+  G.titleHit = { x: Math.round((COLS - bw) / 2) * CW, y: (sy - 1) * CH, w: bw * CW, h: 6 * CH };
   const wob = Math.floor(t * 2.5) % 2;
   txtC('◄', COLS / 2 - bw / 2 + 4 - wob * .4, sy + 1.3, '#19f0ff'); txtC('►', COLS / 2 + bw / 2 - 4 + wob * .4, sy + 1.3, '#19f0ff');
   txtC('S E K T O R   0' + (G.sel + 1), COLS / 2, sy + .2, '#8a96c4');
   txtC(st.name.split('').join(' '), COLS / 2, sy + 1.3, '#eaf6ff'); txtC(st.sub, COLS / 2, sy + 2.4, '#ff2fb9');
   for (let i = 0; i < STAGES.length; i++) gl(i === G.sel ? '◆' : '◇', Math.round((COLS / 2 - STAGES.length * 1.5 + i * 3 + .5) * CW), Math.round((sy + 3.6) * CH), i === G.sel ? '#ffe45e' : '#3d4676');
   const bl = Math.floor(t * 1.8) % 2 === 0;
-  if (bl) txtC('[ ENTER DRÜCKEN ODER KLICKEN ZUM EINSTEIGEN ]', COLS / 2, sy + 6.2, '#5dffb0');
+  if (bl) txtC(TC.on ? '[ TIPPEN ZUM EINSTEIGEN ]' : '[ ENTER DRÜCKEN ODER KLICKEN ZUM EINSTEIGEN ]', COLS / 2, sy + 6.2, '#5dffb0');
   // controls
-  const cy = ROWS - 4.1;
-  txtC('A D  LAUFEN     LEERTASTE  SPRINGEN     F  FLIEGEN     SHIFT  DASH', COLS / 2, cy, '#7384c8');
-  txtC('MAUS  ZIELEN     LINKSKLICK  SCHIESSEN     RECHTSKLICK  ENTERHAKEN     1 2 3  WAFFE', COLS / 2, cy + 1.3, '#7384c8');
-  txtC('M  TON     P  PAUSE     R  NEUSTART          häng dich an alles. schwing. lass los. flieg.', COLS / 2, cy + 2.6, '#4d5a96');
-  if (MOUSE.touch) txtC('TASTATUR + MAUS ERFORDERLICH', COLS / 2, 1, '#ff3b4d');
+  const cy = Math.min(ROWS, Math.floor(H / CH)) - 4.4;
+  if (TC.on) {
+    txtC('LINKER STICK  LAUFEN, HOCH = SPRINGEN        RECHTER STICK  ZIELEN + FEUER', COLS / 2, cy, '#7384c8');
+    txtC('HAKEN  SEILSCHWUNG     FLUG  FLIEGEN     DASH  SPRINT     SPRUNG  SPRINGEN', COLS / 2, cy + 1.3, '#7384c8');
+    txtC('häng dich an alles. schwing. lass los. flieg.', COLS / 2, cy + 2.6, '#4d5a96');
+    if (IS_IOS && !isStandalone()) txtC('TIPP: TEILEN > ZUM HOME-BILDSCHIRM = VOLLBILD', COLS / 2, 1.6, '#ffb347');
+    else if (!fsEl() && fsCan() && TC.fsDone) txtC('TIPP: AUF <> TIPPEN FÜR VOLLBILD', COLS / 2, 1.6, '#ffb347');
+  } else {
+    txtC('A D  LAUFEN     LEERTASTE  SPRINGEN     F  FLIEGEN     SHIFT  DASH', COLS / 2, cy, '#7384c8');
+    txtC('MAUS  ZIELEN     LINKSKLICK  SCHIESSEN     RECHTSKLICK  ENTERHAKEN     1 2 3  WAFFE', COLS / 2, cy + 1.3, '#7384c8');
+    txtC('M  TON     P  PAUSE     R  NEUSTART          häng dich an alles. schwing. lass los. flieg.', COLS / 2, cy + 2.6, '#4d5a96');
+  }
 }
 
 /* ---------------- intro / clear / ending / pause ---------------- */
@@ -159,7 +167,7 @@ function drawClear(t) {
   const rows = [['ZEIT', String(s.t / 60 | 0).padStart(2, '0') + ':' + String(Math.floor(s.t % 60)).padStart(2, '0') + '   (SOLL ' + String(STAGES[G.stage].par / 60 | 0) + ':' + String(STAGES[G.stage].par % 60).padStart(2, '0') + ')'], ['GEGNER', String(s.k)], ['DATENCHIPS', '◊ ' + String(s.c)], ['TODE', String(s.d)], ['BONUS', '+' + s.bonus], ['GESAMTPUNKTE', String(s.score).padStart(6, '0')]];
   rows.forEach((r, i) => { const on = clamp((k - .3 - i * .28) * 4, 0, 1); if (on <= 0) return; g.globalAlpha = on; txtPx(r[0], Math.round((x + 8) * CW), Math.round((y + 5 + i * 1.5) * CH), '#8a96c4'); txtPx(r[1], Math.round((x + 30) * CW), Math.round((y + 5 + i * 1.5) * CH), i === 5 ? '#ffe45e' : '#eaf6ff'); g.globalAlpha = 1; });
   const rk = clamp((k - 2.2) * 3, 0, 1); if (rk > 0) { g.globalAlpha = rk; const col = { S: '#ffe45e', A: '#5dffb0', B: '#19f0ff', C: '#8a96c4' }[s.rank]; txtC('R A N G', COLS / 2, y + 15.2, '#8a96c4'); const gx = Math.round(COLS / 2 - 3); bigText(s.rank, gx, y + 16.4, 1, [col, col, col, col, col], '#0a0a20', rk, 0); g.globalAlpha = 1; }
-  if (k > 3 && Math.floor(k * 1.8) % 2 === 0) txtC(G.stage < STAGES.length - 1 ? '[ ENTER :: NÄCHSTER SEKTOR ]' : '[ ENTER ]', COLS / 2, y + 24.2, '#5dffb0');
+  if (k > 3 && Math.floor(k * 1.8) % 2 === 0) txtC(G.stage < STAGES.length - 1 ? (TC.on ? '[ TIPPEN :: NÄCHSTER SEKTOR ]' : '[ ENTER :: NÄCHSTER SEKTOR ]') : (TC.on ? '[ TIPPEN ]' : '[ ENTER ]'), COLS / 2, y + 24.2, '#5dffb0');
 }
 const END_LINES = [
   ['ECHO', 'Archon ist erledigt. Das ganze Netz hat gerade ausgeatmet.'],
@@ -183,11 +191,20 @@ function drawEnding(t) {
   const st = G.stats, sy = ly + 7.6; if (k > 11) {
     const aa = clamp((k - 11) * 2, 0, 1); g.globalAlpha = aa;
     const t0 = S.stageT | 0; txtC('PUNKTE ' + String(st.score).padStart(6, '0') + '     TODE ' + S.deaths + '     CHIPS ◊ ' + S.chips + '     GEGNER ' + S.kills, COLS / 2, sy, '#ffe45e');
-    if (Math.floor(k * 1.8) % 2 === 0) txtC('[ ENTER :: ZUM TITEL ]', COLS / 2, sy + 2.4, '#5dffb0'); g.globalAlpha = 1;
+    if (Math.floor(k * 1.8) % 2 === 0) txtC(TC.on ? '[ TIPPEN :: ZUM TITEL ]' : '[ ENTER :: ZUM TITEL ]', COLS / 2, sy + 2.4, '#5dffb0'); g.globalAlpha = 1;
   }
 }
 function drawPause(t) {
   drawWorld(t); drawBand(0, ROWS, .82);
+  if (TC.on) {   // touch: big tap rows instead of the key list
+    const pw = 50, x = Math.round((COLS - pw) / 2), y = Math.max(1, Math.round(ROWS * .1)), ph = 20, sp = 2.9;
+    panel(x, y, pw, ph, '#19f0ff', 'PAUSE', .92);
+    const items = ['WEITER', 'SEKTOR NEU STARTEN', 'ZUM TITEL', AU.muted ? 'TON: AUS' : 'TON: AN'];
+    G.pauseRows = []; G.pauseRect = { x: x * CW, y: y * CH, w: pw * CW, h: ph * CH };
+    items.forEach((s, i) => { const on = i === G.pauseSel, ry = y + 2.6 + i * sp; if (on) rectPx((x + 3) * CW, Math.round((ry - .75) * CH), (pw - 6) * CW, Math.round(2.4 * CH), '#19f0ff', .12); txtC((on ? '► ' : '  ') + s + (on ? ' ◄' : '  '), COLS / 2, ry, on ? '#5dffb0' : '#c8d4ff'); G.pauseRows.push([Math.round((ry - .8) * CH), Math.round((ry + 1.6) * CH)]); });
+    txtC('LINKS: LAUFEN, HOCH = SPRINGEN', COLS / 2, y + 15.4, '#5a6aa8'); txtC('RECHTS: ZIELEN + FEUER', COLS / 2, y + 16.6, '#5a6aa8');
+    return;
+  }
   const pw = 66, x = Math.round((COLS - pw) / 2), y = Math.max(1, Math.round(ROWS * .12));
   panel(x, y, pw, 22, '#19f0ff', 'PAUSE', .92);
   const items = ['WEITER', 'SEKTOR NEU STARTEN', 'ZUM TITEL', AU.muted ? 'TON: AUS' : 'TON: AN'];
@@ -257,11 +274,15 @@ function render(t) {
     case 'boot': break;
     default: drawWorld(t); drawHud(t);
   }
+  if (TC.on) drawTouch(t);
   if (G.fade > 0) { rectPx(0, 0, W, H, '#02030a', G.fade); }
+  if (portraitNow()) drawRotate(t);
   present(G.scene === 'title' ? 1.05 : 1);
 }
 function tick(dt) {
   if (G.scene === 'boot') return;
+  if (portraitNow()) { acc = 0; return; }   // phone held upright: wait for landscape
+  touchApply(dt);
   if (G.scene === 'play' || G.scene === 'clearing') {
     acc += dt; let n = 0;
     if (pressed('KeyM')) { auMute(!AU.muted); KP.KeyM = false; }

@@ -59,7 +59,7 @@ function rack(L, x, y, h) { const rows = ['┌──┐']; for (let i = 0; i < h
    ========================================================================= */
 function buildStage1() {
   const th = THEMES.rain, R = RNG(101), Hh = 126, L = new Level(1, 1060, Hh, th); L.deathY = 114; L.camRef = 54;
-  L.intro = { title: 'RAINLINE', sub: 'SPRAWL-BEZIRK 7 // 02:47 UHR // REGEN 94%', lines: ['ECHO: Meridian bezahlt die ganze Skyline, Sam. Hol sie dir zurück, Dach für Dach.', 'ECHO: Und du kannst FLIEGEN, Super Sam! Drück F zum Abheben, lenke mit A D W S. Der Tank füllt sich, wenn du landest.'] };
+  L.intro = { title: 'RAINLINE', sub: 'SPRAWL-BEZIRK 7 // 02:47 UHR // REGEN 94%', lines: ['ECHO: Meridian bezahlt die ganze Skyline, Sam. Hol sie dir zurück, Dach für Dach.', TX('ECHO: Und du kannst FLIEGEN, Super Sam! Drück F zum Abheben, lenke mit A D W S. Der Tank füllt sich, wenn du landest.', 'ECHO: Und du kannst FLIEGEN, Super Sam! Tipp auf FLUG zum Abheben, lenke mit dem linken Stick. Der Tank füllt sich, wenn du landest.')] };
   let X = 0; const roof = (w, top, sty) => { const x0 = X; L.mass(x0, top, w, sty || ST.ROOF); X += w; return { x0, x1: x0 + w, top, w }; }, gap = g => { X += g; };
   const link = (a, b, sag) => { if (b.x0 - a.x1 <= 16) cable(L, a.x1 - 2, a.top - 7, b.x0 + 2, b.top - 7, sag === undefined ? 3 : sag); };
   const arrows = (r) => L.dec('sign', r.x1 - 8, r.top - 5, { text: '>>>', col: '#ffb347', flick: false });
@@ -68,27 +68,27 @@ function buildStage1() {
   const A = roof(60, 70); L.start = { x: 10, y: 70 };
   decorRoof(L, R, A.x0, A.w, A.top, { skip: [[0, 18]], dens: .9 });
   L.dec('sign', 22, 58, { text: 'RAINLINE', col: '#19f0ff', frame: true, flick: false });
-  L.hint(A.x0 + 3, 8, 62, 10, 'ECHO', 'Sam, du bist live über dem Sprawl. A und D zum Laufen, LEERTASTE zum Springen. Halt sie gedrückt für mehr Höhe.');
-  L.hint(A.x0 + 32, 8, 62, 10, 'ECHO', 'Die Maus zielt. Linksklick feuert. Rechtsklick wirft das Greifseil. Halte die Taste, um dich festzuhalten.');
+  L.hint(A.x0 + 3, 8, 62, 10, 'ECHO', TX('Sam, du bist live über dem Sprawl. A und D zum Laufen, LEERTASTE zum Springen. Halt sie gedrückt für mehr Höhe.', 'Sam, du bist live über dem Sprawl. Linker Stick zum Laufen, Stick hoch oder SPRUNG zum Springen. Halt ihn für mehr Höhe.'));
+  L.hint(A.x0 + 32, 8, 62, 10, 'ECHO', TX('Die Maus zielt. Linksklick feuert. Rechtsklick wirft das Greifseil. Halte die Taste, um dich festzuhalten.', 'Der rechte Stick zielt und feuert. HAKEN wirft das Greifseil. Tipp noch einmal, um loszulassen.'));
   L.hint(A.x0 + 50, 6, 62, 10, 'ECHO', 'Lücke voraus. Anlauf und Sprung. Schau nicht nach unten.');
   arrows(A);
   gap(8); const B = roof(30, 70); link(A, B);
   L.en('drone', B.x0 + 20, 57); decorRoof(L, R, B.x0, B.w, B.top, { dens: .6 });
-  L.hint(B.x0, 8, 62, 10, 'ECHO', 'Konzerndrohne voraus. Ziel mit der Maus, Linksklick schießt sie ab.');
+  L.hint(B.x0, 8, 62, 10, 'ECHO', TX('Konzerndrohne voraus. Ziel mit der Maus, Linksklick schießt sie ab.', 'Konzerndrohne voraus. Ziel mit dem rechten Stick, er schießt von selbst.'));
   chips(L, A.x1 - 3, 66, B.x0 + 4, 66, 6, 6);
   gap(10); const C1 = roof(26, 66); link(B, C1);
   L.en('grunt', C1.x0 + 16, 66); L.pk('hp', C1.x0 + 8, 64); decorRoof(L, R, C1.x0, C1.w, C1.top, { dens: .5, padL: 10 });
   L.hint(C1.x0, 6, 58, 10, 'ECHO', 'Bewaffnete Patrouille. Die schießen zurück. Bleib in Bewegung, weich aus und schieß.');
   chips(L, B.x1 - 3, 66, C1.x0 + 4, 62, 5, 6);
   gap(22); const D = roof(32, 70); L.cp(D.x0 + 5, 70, 'KONTROLLPUNKT 01');
-  L.hint(C1.x1 - 14, 12, 58, 12, 'ECHO', 'Zu breit für einen sauberen Sprung. Spring und drück in der Luft SHIFT, um hinüberzudashen.');
+  L.hint(C1.x1 - 14, 12, 58, 12, 'ECHO', TX('Zu breit für einen sauberen Sprung. Spring und drück in der Luft SHIFT, um hinüberzudashen.', 'Zu breit für einen sauberen Sprung. Spring und tipp in der Luft DASH, um hinüberzudashen.'));
   chips(L, C1.x1 - 2, 62, D.x0 + 3, 66, 7, 5); arrows(C1);
   L.en('drone', D.x0 - 10, 56, { home: { x: D.x0 - 10, y: 56 } });
   decorRoof(L, R, D.x0, D.w, D.top, { dens: .7, padL: 12 });
   /* gantry gap */
   gap(38); const E = roof(36, 68);
   gantry(L, D.x1 - 5, E.x0 + 5, D.top - 17, [D.x1 - 9, E.x0 + 8], D.top);
-  L.hint(D.x1 - 22, 16, 60, 12, 'ECHO', 'Schiene über dir. Ziel auf den Träger, halte Rechtsklick für das Seil und schwing. Mit einem Sprung lässt du mit Schwung los.');
+  L.hint(D.x1 - 22, 16, 60, 12, 'ECHO', TX('Schiene über dir. Ziel auf den Träger, halte Rechtsklick für das Seil und schwing. Mit einem Sprung lässt du mit Schwung los.', 'Schiene über dir. Tipp HAKEN, das Seil sucht sich den Träger. Schwing, mit einem Sprung lässt du mit Schwung los.'));
   chips(L, D.x1 + 1, D.top - 8, E.x0 + 3, E.top - 10, 8, 8);
   decorRoof(L, R, E.x0, E.w, E.top, { dens: .6, padL: 10 }); L.en('grunt', E.x0 + 22, 68);
   /* tower shaft */

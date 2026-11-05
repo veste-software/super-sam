@@ -21,7 +21,27 @@ Sprünge über Hochhausdächer, ein Enterhaken und ein Held, der wie Superman fl
 | `R` | Neustart am letzten Kontrollpunkt |
 | `P` / `Esc` | Pause. `M` schaltet den Ton aus |
 
-Tastatur und Maus sind nötig.
+## Handy und Tablet
+
+Das Spiel läuft auch auf dem Smartphone (im Querformat) und geht beim ersten Antippen von selbst in den
+Vollbildmodus. Über den Knopf `<>` (oben links unter der Anzeige, auf dem Titelbild oben rechts) kannst du den
+Vollbildmodus jederzeit ein- und ausschalten. Am Computer gibt es dafür unten rechts einen kleinen Knopf.
+
+| Bedienelement | Aktion |
+| --- | --- |
+| Linker Stick (links auf dem Bildschirm) | laufen. Stick nach oben = springen (beim Fliegen: steigen), nach unten = fallen lassen |
+| Rechter Stick (rechte Bildschirmhälfte) | zielen und dabei automatisch feuern |
+| `SPRUNG` | springen |
+| `DASH` | Dash (währenddessen unverwundbar) |
+| `HAKEN` | Enterhaken: antippen wirft ihn (er sucht sich selbst einen Ankerpunkt, oder du zielst vorher mit dem rechten Stick), noch einmal antippen lässt los |
+| `FLUG` | fliegen an/aus (der Ring zeigt den Tank) |
+| `WAFFE` | Waffe wechseln (erscheint, sobald du mehr als eine hast) |
+| `II` | Pause |
+
+Hält man das Handy hochkant, bittet das Spiel darum, es zu drehen. Auf dem iPhone gibt es keinen echten
+Vollbildmodus im Browser: Teilen > "Zum Home-Bildschirm" legt das Spiel als App ab, dann startet es im Vollbild.
+
+Am Computer sind Tastatur und Maus nötig.
 
 ## Bauen
 
@@ -45,4 +65,5 @@ Der Branch `gh-pages` enthält genau diese Datei.
 | `src/40_render.js` | Welt, Gegner, Anzeige (HUD) |
 | `src/41_sam.js` | Super Sam: Pixel-Art-Held, Flugpose, Porträt |
 | `src/50_*.js`, `51_*.js`, `52_*.js` | die vier Sektoren |
+| `src/45_touch.js` | Touch-Steuerung (Sticks, Knöpfe, Menüs per Tippen), Vollbild |
 | `src/60_main.js` | Titel, Intro, Abschluss- und Endbildschirm, Hauptschleife |

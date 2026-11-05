@@ -488,7 +488,7 @@ function drawHud(t) {
     const low = p.fuel < .2, blink = low && Math.floor(S.t * 6) % 2, col = p.fly ? '#ffe45e' : low ? '#ff3b4d' : '#19f0ff', n = 14, on = Math.round(n * p.fuel);
     txtPx('FLUG', Math.round(11 * CW), Math.round(5 * CH), p.fly ? '#ffe45e' : '#8a96c4');
     for (let i = 0; i < n; i++) gl(i < on ? '▰' : '▱', Math.round((16 + i) * CW), Math.round(5 * CH), i < on ? (blink ? '#ffffff' : col) : '#2a3470');
-    txtPx(p.fly ? '[F] LANDEN' : p.fuel > .06 ? '[F] FLIEGEN' : 'TANKEN', Math.round(31 * CW), Math.round(5 * CH), p.fly ? '#ffe45e' : p.fuel > .06 ? '#5dffb0' : '#ff3b4d');
+    const fk = TC.on ? '' : '[F] '; txtPx(p.fly ? fk + 'LANDEN' : p.fuel > .06 ? fk + 'FLIEGEN' : 'TANKEN', Math.round(31 * CW), Math.round(5 * CH), p.fly ? '#ffe45e' : p.fuel > .06 ? '#5dffb0' : '#ff3b4d');
     if (p.flyHint > 0) txtC('TANK LEER  -  ZUM AUFTANKEN LANDEN', COLS / 2, 9, '#ff3b4d', Math.min(1, p.flyHint));
   }
   // top right
@@ -503,7 +503,7 @@ function drawHud(t) {
   }
   // comms
   if (S.comms.length) {
-    const c = S.comms[0], bwid = Math.min(78, COLS - 8), lines = wrapText(c.text, bwid - 10), shown = Math.floor(c.t * 62), x0 = Math.round((COLS - bwid) / 2), y0 = ROWS - 4 - lines.length - 1;
+    const c = S.comms[0], bwid = TC.on ? Math.min(72, COLS - 44) : Math.min(78, COLS - 8), lines = wrapText(c.text, bwid - 10), shown = Math.floor(c.t * 62), x0 = Math.round((COLS - bwid) / 2), y0 = ROWS - 4 - lines.length - 1;
     const slide = Math.min(1, c.t * 5, (c.dur - c.t) * 5); g.globalAlpha = Math.max(0, slide);
     panel(x0, y0, bwid, lines.length + 3, '#5dffb0', c.who + ' // SICHERE LEITUNG', .82);
     // portrait
