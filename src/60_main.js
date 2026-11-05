@@ -8,6 +8,10 @@ const STAGES = [
   { build: buildStage2, name: 'NEON BASAR', sub: 'STRASSENEBENE // KOWLOON-TÜRME', par: 230 },
   { build: buildStage3, name: 'MERIDIAN TURM', sub: 'KONZERNINNERES // EBENEN 01-88', par: 300 },
   { build: buildStage4, name: 'DIE SPITZE', sub: 'GIPFELAUFSTIEG // ARCHON', par: 240 },
+  { build: buildStage5, name: 'NEON GRAND PRIX', sub: 'DAS RENNEN // ORBITAL-RING', par: 200 },
+  { build: buildStage6, name: 'KRONOS-TURM', sub: 'FASSADENAUFSTIEG // EBENE 0-300', par: 330 },
+  { build: buildStage7, name: 'ARCADE ORBIT', sub: 'LIFTSTATION // SPIEL ODER STIRB', par: 300 },
+  { build: buildStage8, name: 'ZENITH', sub: 'ORBITALSTATION // SCHWERELOS', par: 330 },
 ];
 const G = { scene: 'boot', t: 0, sel: 0, stage: 0, introT: 0, clearT: 0, endT: 0, pauseSel: 0, base: null, stats: null, fade: 1, started: false, titleL: null, camGY: 40 };
 const STEP = 1 / 60;
@@ -18,7 +22,7 @@ function clearTransient() {
   S.banner = null; S.boss = null; S.zap = null; S.phase3 = false; S.bossBody = null; S.lightning = 0; S.lbolt = null; S.lightningT = undefined; S.flash = 0; S.freeze = 0; S.slow = 1;
   S.bossFinal = false; S.endTimer = 0; S.bossFx = 0; S.bossDeadT = 0;
   S.cam.lock = null; S.cam.shake = 0; S.respawn = null; MUS.inten = 0; MUS.inten_t = 0; glitchAmt = 0;
-  S.veh = []; S.rkt = []; S.near = null; S.vseen = {};
+  S.veh = []; S.rkt = []; S.near = null; S.vseen = {}; S.race = null; S.inv = null;
 }
 function loadStage(i, wpns) {
   const L = STAGES[i].build();
@@ -28,7 +32,7 @@ function loadStage(i, wpns) {
   buildSky(L.th, L.camRef);
   for (const e of L.ents) spawnEnemy(Object.assign({}, e));
   for (const k of L.pks) S.pks.push({ k: k.k, x: k.x, y: k.y, t: 0 });
-  resetVehicles();
+  resetVehicles(); initRace(); initInvaders();
   S.cam.x = 0; S.cam.y = 0; updCam(.016, true);
   G.base = { score: S.score, kills: S.kills, chips: S.chips, deaths: S.deaths };
   glitchAmt = 0;
@@ -67,7 +71,7 @@ function bossDieStep(dt) {
     sfx('bigboom'); sfx('bigboom', .6); musStop();
   } else if (bd > 3.4 && S.mode === 'bossdie') {
     S.mode = 'play'; S.cam.lock = null; S.L.doors.forEach(d => { if (d.mode === 'arena') d.target = 1; }); MUS.inten_t = 0;
-    banner('ARCHON OFFLINE', 'DIE SPITZE IST DUNKEL', C.mint); S.pks.push({ k: 'hp', x: b.x, y: S.L.bossArena.floor - 2, t: 0 }); sfx('cp');
+    { const bo = S.L.bossOff || ['ARCHON OFFLINE', 'DIE SPITZE IST DUNKEL']; banner(bo[0], bo[1], C.mint); } S.pks.push({ k: 'hp', x: b.x, y: S.L.bossArena.floor - 2, t: 0 }); sfx('cp');
     S.endTimer = 0;
   }
 }
@@ -78,7 +82,7 @@ function stepPlay(dt) {
   if (S.mode === 'bossdie') bossDieStep(dt);
   const sdt = dt * (S.slow || 1);
   updWorld(sdt); updCam(sdt);
-  if (S.mode === 'play' && S.bossFinal) { S.endTimer = (S.endTimer || 0) + dt; if (S.endTimer > 3.2) { G.scene = 'ending'; G.endT = 0; S.bossFinal = false; computeStats(); musPlay('title'); } }
+  if (S.mode === 'play' && S.bossFinal) { S.endTimer = (S.endTimer || 0) + dt; if (S.endTimer > 3.2) { S.bossFinal = false; if (G.stage < STAGES.length - 1) stageClear(); else { G.scene = 'ending'; G.endT = 0; computeStats(); musPlay('title'); } } }
 }
 
 /* ---------------- title ---------------- */
@@ -172,10 +176,10 @@ function drawClear(t) {
   if (k > 3 && Math.floor(k * 1.8) % 2 === 0) txtC(G.stage < STAGES.length - 1 ? (TC.on ? '[ TIPPEN :: NÄCHSTER SEKTOR ]' : '[ ENTER :: NÄCHSTER SEKTOR ]') : (TC.on ? '[ TIPPEN ]' : '[ ENTER ]'), COLS / 2, y + 24.2, '#5dffb0');
 }
 const END_LINES = [
-  ['ECHO', 'Archon ist erledigt. Das ganze Netz hat gerade ausgeatmet.'],
-  ['ECHO', 'Auf jedem Bildschirm in Meridian blinkt es. Niemand gibt mehr Befehle.'],
-  ['ECHO', 'Sieh dir die Skyline an, Sam. Zum ersten Mal gehört sie denen, die darunter leben.'],
-  ['ECHO', 'Gut gemacht, Samuel Aumann. Die Stadt hat einen neuen Helden: Super Sam.'],
+  ['ECHO', 'ZENITH ist offline. Das Signal, dem wir gefolgt sind, ist verstummt.'],
+  ['ECHO', 'Zum ersten Mal sind Sprawl, Turm und Station getrennt. Niemand gibt mehr Befehle.'],
+  ['ECHO', 'Sieh nach unten, Sam. Das ist die Erde, und sie gehört denen, die darauf leben.'],
+  ['ECHO', 'Gut gemacht, Samuel Aumann. Die Stadt hat einen Helden, und der Himmel auch.'],
 ];
 function drawEnding(t) {
   drawWorld(t); const k = G.endT; drawBand(0, ROWS, clamp(k * .3, 0, .78));
@@ -239,7 +243,7 @@ function update(dt) {
   if (G.scene === 'title') {
     if (pressed('ArrowRight') || pressed('KeyD')) { G.sel = (G.sel + 1) % STAGES.length; sfx('select'); }
     if (pressed('ArrowLeft') || pressed('KeyA')) { G.sel = (G.sel + STAGES.length - 1) % STAGES.length; sfx('select'); }
-    if (pressed('Digit1') || pressed('Digit2') || pressed('Digit3') || pressed('Digit4')) { for (let i = 1; i <= 4; i++) if (pressed('Digit' + i)) G.sel = i - 1; sfx('select'); }
+    if ([1, 2, 3, 4, 5, 6, 7, 8].some(i => pressed('Digit' + i))) { for (let i = 1; i <= 8; i++) if (pressed('Digit' + i)) G.sel = i - 1; sfx('select'); }
     if (pressed('Enter') || pressed('Space') || pressed('NumpadEnter') || MOUSE.lp) { activateAudio(); resetRun(); G.carry = null; sfx('pick'); beginStage(G.sel); endFrameInput(); return; }
     updTitle(dt); musPlay('title'); endFrameInput(); return;
   }

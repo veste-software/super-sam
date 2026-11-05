@@ -1,7 +1,8 @@
 # Super Sam
 
-Ein Cyberpunk-Jump-and-Run mit Ballerei im ASCII-Stil, direkt im Browser. Vier Sektoren, ein Endgegner,
-Sprünge über Hochhausdächer, ein Enterhaken, Fahrzeuge zum Kapern und ein Held, der wie Superman fliegen kann.
+Ein Cyberpunk-Jump-and-Run mit Ballerei im ASCII-Stil, direkt im Browser. Acht Sektoren, zwei Endgegner,
+Sprünge über Hochhausdächer, ein Enterhaken, Fahrzeuge zum Kapern, ein Rennen, ein Wolkenkratzer, ein
+Space-Invaders-Minispiel und ein Held, der wie Superman fliegen kann.
 
 **Spielen:** https://veste-software.github.io/super-sam/
 
@@ -22,10 +23,26 @@ Sprünge über Hochhausdächer, ein Enterhaken, Fahrzeuge zum Kapern und ein Hel
 | `R` | Neustart am letzten Kontrollpunkt |
 | `P` / `Esc` | Pause. `M` schaltet den Ton aus |
 
+## Sektoren
+
+| Sektor | Ort | Besonderes |
+| --- | --- | --- |
+| 1 | Rainline | Dachlauf, Hubschrauber-Abschnitt |
+| 2 | Neon-Basar | Straßenebene, Fluchtwagen |
+| 3 | Meridian-Turm | Konzerninneres, Hover-Wagen |
+| 4 | Die Spitze | Aufstieg im Sturm, Kampf gegen **Archon** |
+| 5 | Neon Grand Prix | **Rennen** über den Orbital-Ring: Rennwagen, drei Rivalen, Boost-Pads, Sprungschanzen und eine Dampfwalze, die dich jagt |
+| 6 | Kronos-Turm | **Wolkenkratzer**: 300 Meter senkrecht durch Büros, Serverraum und Aufzüge, dann an der Fassade hoch zum Dach. Neu: Scharfschützen (roter Laser) und der Mech, oben der **Fassadenwächter** |
+| 7 | Arcade Orbit | Die Wartehalle als Spielautomat: Pixelhüpfer, Pong, Pac-Man-Gang mit Geistern und zuletzt **Space Invaders** mit Laserkanone, Bunkern, UFO und dem Mutterschiff |
+| 8 | Zenit | Orbitalstation bei 45 Prozent Schwerkraft: Orbs, der **Koloss** als Torwächter und der Endgegner **ZENITH** |
+
+Auf dem Titelbild wählst du den Sektor mit den Pfeiltasten, die Ziffern `1` bis `8` springen direkt hin.
+
 ## Fahrzeuge
 
-In jedem der vier Sektoren wartet ein eigener Fahrzeugabschnitt. Die Fahrzeuge sind ein Angebot, kein Zwang: Sam
-kann dieselben Strecken auch zu Fuß oder fliegend schaffen.
+In fast jedem Sektor wartet ein eigener Fahrzeugabschnitt. Die Fahrzeuge sind ein Angebot, kein Zwang: Sam
+kann dieselben Strecken auch zu Fuß oder fliegend schaffen. Ausnahmen: Im Rennen (Sektor 5) ist der Rennwagen
+Pflicht, und im Space-Invaders-Spiel (Sektor 7) steigt Sam automatisch in die Laserkanone, die nur nach oben schießt.
 
 | Sektor | Fahrzeug | Abschnitt |
 | --- | --- | --- |
@@ -33,6 +50,9 @@ kann dieselben Strecken auch zu Fuß oder fliegend schaffen.
 | 2 | Auto | Fluchtwagen auf der Straße: Barrikaden, Überführung, Gruben, Raider-Autos und eine Werkstatt mit Ersatzwagen |
 | 3 | Hover-Wagen | Wartungshalle mit Stromschienen und Raidern. Am Ausgang ist der Durchgang zu eng, dort geht es zu Fuß weiter |
 | 4 | Hubschrauber | letzter Hangar der Flotte und der Aufstieg durch den Sturm bis zum oberen Landedeck |
+| 5 | Rennwagen | das Rennen: Gas, Sprung, Turbo, Aussteigen gesperrt |
+| 7 | Laserkanone | nur im Invaders-Raum: `A` `D` fahren, `J` / `Leertaste` / Linksklick feuert senkrecht nach oben |
+| 8 | Hover-Wagen | über das Solarfeld und vor der Kernkammer |
 
 | Taste | Aktion im Fahrzeug |
 | --- | --- |
@@ -64,6 +84,7 @@ Vollbildmodus jederzeit ein- und ausschalten. Am Computer gibt es dafür unten r
 | `WAFFE` | Waffe wechseln (erscheint, sobald du mehr als eine hast) |
 | `REIN` | erscheint neben einem Fahrzeug: einsteigen |
 | `HOCH` / `TURBO` / `RAKETE` / `RAUS` | im Fahrzeug: steigen bzw. springen, Turbo (halten), Rakete, aussteigen. Der rechte Stick bedient die Bordkanone |
+| `FEUER` | in der Laserkanone (Space Invaders): feuert nach oben |
 | `II` | Pause |
 
 Hält man das Handy hochkant, bittet das Spiel darum, es zu drehen. Auf dem iPhone gibt es keinen echten
@@ -92,7 +113,11 @@ Der Branch `gh-pages` enthält genau diese Datei.
 | `src/30_sky.js` | Skyline, Parallaxe, große Blockschrift |
 | `src/40_render.js` | Welt, Gegner, Anzeige (HUD) |
 | `src/41_sam.js` | Super Sam: Pixel-Art-Held, Flugpose, Porträt |
-| `src/50_*.js`, `51_*.js`, `52_*.js` | die vier Sektoren |
+| `src/50_*.js` bis `56_*.js` | die acht Sektoren |
+| `src/47_foes.js` | neue Gegner: Scharfschütze, Mech und Titan, Orb, Koloss |
+| `src/48_race.js` | das Rennen: Rivalen, Boost-Pads, Dampfwalze, Start und Ziel |
+| `src/49_arcade.js` | Pixelhüpfer, Geister und das Space-Invaders-Minispiel mit Laserkanone und Mutterschiff |
+| `src/4a_zenith.js` | Endgegner ZENITH: Orb-Schild, Kern, Laser-Säulen, schwankende Schwerkraft |
 | `src/45_touch.js` | Touch-Steuerung (Sticks, Knöpfe, Menüs per Tippen), Vollbild |
 | `src/46_vehicles.js` | Fahrzeuge: Hubschrauber, Auto, Hover-Wagen, Bordwaffen, Raketen, Gegner-Fahrzeuge |
 | `src/60_main.js` | Titel, Intro, Abschluss- und Endbildschirm, Hauptschleife |
